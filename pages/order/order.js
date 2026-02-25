@@ -12,12 +12,13 @@ const { ORDER_STATUS, getOrderStatusByCode } = require('../../utils/constants');
 
 Page({
   data: {
-    // 订单状态标签 - 匹配云函数状态码: 0待支付, 1已支付, 2备餐中, 3配送中, 4已完成
+    // 订单状态标签 - 匹配云函数状态码: 0待支付, 1已支付, 2备餐中, 3配送中, 4已完成, -1已取消
     tabs: [
       { code: 'all', name: 'all', label: '全部' },
       { code: 0, name: 'pending_payment', label: '待付款' },
       { code: 2, name: 'preparing', label: '备货中' },
-      { code: 4, name: 'completed', label: '已完成' }
+      { code: 4, name: 'completed', label: '已完成' },
+      { code: -1, name: 'cancelled', label: '已取消' }
     ],
 
     // 当前选中标签
@@ -168,10 +169,14 @@ Page({
         let statusText = statusInfo.label;
         let statusColor = '#B08860';
 
-        // 云函数状态码: 0待支付, 1已支付, 2备餐中, 3配送中, 4已完成, -1已取消
+        // 云函数状态码: 0待支付, 1已支付, 2备餐中, 3配送中, 4已完成, -1已取消, 5线下支付
         switch(order.status) {
           case 0: // pending payment
             statusText = '待付款';
+            statusColor = '#D4A96A';
+            break;
+          case 5: // offline pay
+            statusText = '线下支付';
             statusColor = '#D4A96A';
             break;
           case 1: // paid

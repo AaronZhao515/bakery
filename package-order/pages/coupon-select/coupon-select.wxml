@@ -1,0 +1,123 @@
+<!-- 优惠券选择页面 -->
+<view class="coupon-select-container">
+  <!-- 顶部导航栏 -->
+  <view class="header-bar">
+    <view class="header-content">
+      <view class="back-btn" bindtap="onBackTap">
+        <image class="back-icon" src="{{icons.chevronLeft}}" mode="aspectFit"/>
+      </view>
+      <text class="header-title">选择优惠券</text>
+      <view class="header-right" bindtap="onConfirm">
+        <text class="confirm-text">完成</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单金额提示 -->
+  <view class="amount-bar">
+    <text class="amount-label">订单金额</text>
+    <text class="amount-value">¥{{orderAmount}}</text>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading-state" wx:if="{{isLoading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 优惠券列表 -->
+  <scroll-view class="coupon-list" scroll-y wx:if="{{!isLoading}}">
+    <!-- 不使用优惠券 -->
+    <view class="no-coupon-option {{!selectedCoupon ? 'active' : ''}}" bindtap="onNotUseCoupon">
+      <view class="option-info">
+        <text class="option-text">不使用优惠券</text>
+        <text class="option-subtext">原价支付，不享受优惠</text>
+      </view>
+      <view class="option-radio {{!selectedCoupon ? 'checked' : ''}}">
+        <view class="radio-inner"></view>
+      </view>
+    </view>
+
+    <!-- 可用优惠券 -->
+    <view class="coupon-section" wx:if="{{availableCoupons.length > 0}}">
+      <view class="section-header">
+        <text class="section-title">💰 可用优惠券（{{availableCoupons.length}}张）</text>
+      </view>
+      <view class="coupon-option-list">
+        <view class="coupon-option {{selectedCoupon.id === item.id ? 'selected' : ''}}"
+               wx:for="{{availableCoupons}}"
+               wx:key="id"
+               data-id="{{item.id}}"
+               bindtap="onSelectCoupon">
+          <view class="option-left">
+            <text class="option-value {{item.displayType}}">{{item.displayValue}}</text>
+            <text class="option-condition">满{{item.minAmount}}可用</text>
+          </view>
+          <view class="option-right">
+            <text class="option-title">{{item.title}}</text>
+            <text class="option-desc">{{item.desc}}</text>
+            <view class="option-tags">
+              <text class="tag time">⏱ {{item.endTimeStr}}到期</text>
+              <text class="tag discount" wx:if="{{selectedCoupon.id === item.id}}">省¥{{item.amount}}</text>
+            </view>
+          </view>
+          <view class="option-radio {{selectedCoupon.id === item.id ? 'checked' : ''}}">
+            <view class="radio-inner"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 不可用优惠券 -->
+    <view class="coupon-section unavailable-section" wx:if="{{unavailableCoupons.length > 0}}">
+      <view class="section-header">
+        <text class="section-title">🚫 不可用优惠券（{{unavailableCoupons.length}}张）</text>
+        <text class="section-subtitle">未达到使用条件</text>
+      </view>
+      <view class="coupon-option-list">
+        <view class="coupon-option disabled"
+               wx:for="{{unavailableCoupons}}"
+               wx:key="id"
+               data-id="{{item.id}}"
+               bindtap="goToCouponCenter">
+          <view class="option-left gray">
+            <text class="option-value {{item.displayType}}">{{item.displayValue}}</text>
+            <text class="option-condition">满{{item.minAmount}}可用</text>
+          </view>
+          <view class="option-right">
+            <text class="option-title">{{item.title}}</text>
+            <text class="option-desc">{{item.desc}}</text>
+            <view class="option-tags">
+              <text class="tag time">⏱ {{item.endTimeStr}}到期</text>
+              <text class="tag reason" wx:if="{{item.reason}}">⚠ {{item.reason}}</text>
+            </view>
+          </view>
+          <view class="option-arrow">></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 无优惠券提示 -->
+    <view class="empty-coupon" wx:if="{{availableCoupons.length === 0 && unavailableCoupons.length === 0}}">
+      <view class="empty-icon-wrap">
+        <text class="empty-icon">🎫</text>
+      </view>
+      <text class="empty-text">暂无优惠券</text>
+      <text class="empty-tip">去优惠券中心领取更多优惠</text>
+      <view class="empty-btn" bindtap="goToCouponCenter">去领取</view>
+    </view>
+
+    <!-- 底部间距 -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
+
+  <!-- 底部确认栏 -->
+  <view class="confirm-bar" wx:if="{{!isLoading}}">
+    <view class="confirm-info">
+      <text class="confirm-label" wx:if="{{selectedCoupon}}">已选：{{selectedCoupon.title}}</text>
+      <text class="confirm-label" wx:else>未使用优惠券</text>
+      <text class="confirm-discount" wx:if="{{selectedCoupon}}">-¥{{selectedCoupon.amount}}</text>
+    </view>
+    <view class="confirm-btn" bindtap="onConfirm">确定</view>
+  </view>
+</view>

@@ -137,6 +137,35 @@ Page({
   },
 
   /**
+   * 点击积分 - 跳转到积分明细
+   */
+  onPointsTap() {
+    if (!this.data.isLogin) {
+      util.showToast('请先登录', 'none');
+      return;
+    }
+    const points = this.data.userInfo.points || 0;
+    wx.navigateTo({
+      url: `/package-user/pages/points-history/points-history?points=${points}`
+    });
+  },
+
+  /**
+   * 点击优惠券 - 跳转到优惠券中心
+   */
+  onCouponTap() {
+    if (!this.data.isLogin) {
+      util.showToast('请先登录', 'none');
+      return;
+    }
+    const couponCount = this.data.stats.couponCount || 0;
+    const tab = couponCount > 0 ? 'unused' : 'available';
+    wx.navigateTo({
+      url: `/package-user/pages/coupon/coupon?tab=${tab}`
+    });
+  },
+
+  /**
    * 从服务器加载用户统计（优惠券数量等）
    */
   async loadUserStats() {

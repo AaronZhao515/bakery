@@ -19,6 +19,15 @@ const ORDER_STATUS = {
     bgColor: '#FFF3E0',
     icon: 'clock'
   },
+  // 线下支付
+  OFFLINE_PAY: {
+    code: 5,
+    name: 'offline_pay',
+    label: '线下支付',
+    color: '#D4A96A',
+    bgColor: '#FFF8EE',
+    icon: 'dollar-sign'
+  },
   // 待确认
   PENDING_CONFIRM: {
     code: 15,
@@ -117,7 +126,20 @@ const ORDER_STATUS = {
  * @returns {Object} 订单状态对象
  */
 function getOrderStatusByCode(code) {
-  return Object.values(ORDER_STATUS).find(status => status.code === code) || ORDER_STATUS.PENDING_PAYMENT;
+  // 处理云函数状态码与 constants 状态码的映射
+  const statusMap = {
+    0: ORDER_STATUS.PENDING_PAYMENT,   // 待支付
+    1: ORDER_STATUS.PAID,              // 已支付
+    2: ORDER_STATUS.PENDING_MAKE,      // 备餐中/待制作
+    3: ORDER_STATUS.DELIVERING,        // 配送中
+    4: ORDER_STATUS.COMPLETED,         // 已完成
+    5: ORDER_STATUS.OFFLINE_PAY,       // 线下支付
+    '-1': ORDER_STATUS.CANCELLED,      // 已取消
+    '-2': ORDER_STATUS.REFUNDING,      // 退款中
+    '-3': ORDER_STATUS.REFUNDED        // 已退款
+  };
+
+  return statusMap[code] || ORDER_STATUS.PENDING_PAYMENT;
 }
 
 /**

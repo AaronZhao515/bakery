@@ -387,6 +387,30 @@ const orderApi = {
   },
 
   /**
+   * 积分支付订单
+   * @param {string} orderId - 订单ID
+   */
+  payWithPoints(orderId) {
+    return callCloudFunction({
+      name: 'order',
+      data: { action: 'payWithPoints', data: { orderId } },
+      loadingText: '支付中...'
+    });
+  },
+
+  /**
+   * 线下支付订单
+   * @param {string} orderId - 订单ID
+   */
+  offlinePay(orderId) {
+    return callCloudFunction({
+      name: 'order',
+      data: { action: 'offlinePay', data: { orderId } },
+      loadingText: '处理中...'
+    });
+  },
+
+  /**
    * 确认收货
    * @param {string} orderId - 订单ID
    */
@@ -599,6 +623,41 @@ const couponApi = {
 
 // ==================== 店铺相关 API ====================
 
+// ==================== 积分相关 API ====================
+
+const pointsApi = {
+  /**
+   * 获取积分明细列表
+   * @param {Object} params - 查询参数
+   * @param {String} params.type - 类型: earn获取, spend使用
+   * @param {Number} params.page - 页码
+   * @param {Number} params.pageSize - 每页数量
+   */
+  getList(params = {}) {
+    return callCloudFunction({
+      name: 'points',
+      data: { action: 'getList', data: params }
+    });
+  },
+
+  /**
+   * 添加积分记录
+   * @param {Object} data - 记录数据
+   * @param {String} data.label - 记录标签
+   * @param {Number} data.points - 积分变动值
+   * @param {String} data.type - 类型: earn获取, spend使用
+   * @param {Number} data.balance - 变动后的余额
+   */
+  add(data) {
+    return callCloudFunction({
+      name: 'points',
+      data: { action: 'add', data }
+    });
+  }
+};
+
+// ==================== 店铺相关 API ====================
+
 const shopApi = {
   /**
    * 获取店铺信息
@@ -717,6 +776,7 @@ module.exports = {
   cart: cartApi,
   address: addressApi,
   coupon: couponApi,
+  points: pointsApi,
   shop: shopApi,
   admin: adminApi
 };

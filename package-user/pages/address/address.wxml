@@ -1,2 +1,116 @@
-<!--package-user/pages/address/address.wxml-->
-<text>package-user/pages/address/address.wxml</text>
+<!-- 配送地址页面 -->
+<view class="address-container">
+  <!-- 顶部导航栏 -->
+  <view class="header-bar">
+    <view class="header-content">
+      <view class="back-btn" bindtap="onBackTap">
+        <image class="back-icon" src="{{icons.chevronLeft}}" mode="aspectFit"/>
+      </view>
+      <text class="header-title">配送地址</text>
+      <view class="header-right"></view>
+    </view>
+    <text class="header-subtitle">已保存 {{addresses.length}} 个地址，最多可添加 5 个</text>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading-state" wx:if="{{isLoading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 地址列表 -->
+  <scroll-view class="address-list" scroll-y wx:if="{{!isLoading}}">
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{addresses.length === 0}}">
+      <view class="empty-icon-wrap">
+        <text class="empty-icon">📍</text>
+      </view>
+      <text class="empty-text">暂无收货地址</text>
+      <text class="empty-tip">添加地址后配送会更方便哦</text>
+    </view>
+
+    <!-- 地址卡片列表 -->
+    <view class="address-cards" wx:if="{{addresses.length > 0}}">
+      <view class="address-card {{item.isDefault ? 'is-default' : ''}} {{isSelectMode ? 'selectable' : ''}}"
+            wx:for="{{addresses}}"
+            wx:key="id"
+            data-id="{{item.id}}"
+            bindtap="{{isSelectMode ? 'onSelectAddress' : ''}}">
+        <!-- 主要内容 -->
+        <view class="card-main">
+          <!-- 姓名电话和默认标签 -->
+          <view class="card-header">
+            <view class="user-info">
+              <text class="user-name">{{item.name}}</text>
+              <text class="user-phone">{{item.phone}}</text>
+            </view>
+            <view class="default-badge" wx:if="{{item.isDefault}}">默认</view>
+          </view>
+
+          <!-- 完整地址 -->
+          <text class="address-text">{{item.province}} {{item.city}} {{item.district}} {{item.detail}}</text>
+        </view>
+
+        <!-- 操作栏 -->
+        <view class="card-actions" wx:if="{{!isSelectMode}}">
+          <!-- 设为默认 -->
+          <view class="action-default" wx:if="{{!item.isDefault}}" bindtap="onSetDefault" data-id="{{item.id}}">
+            <view class="radio-unchecked"></view>
+            <text class="action-text">设为默认</text>
+          </view>
+          <view class="action-default checked" wx:if="{{item.isDefault}}">
+            <view class="radio-checked">
+              <text class="check-icon">✓</text>
+            </view>
+            <text class="action-text checked">已设为默认</text>
+          </view>
+
+          <view class="action-spacer"></view>
+
+          <!-- 编辑 -->
+          <view class="action-btn" bindtap="onEditAddress" data-id="{{item.id}}">
+            <text class="action-icon">✏️</text>
+            <text class="action-text">编辑</text>
+          </view>
+
+          <!-- 删除 -->
+          <view class="action-btn delete" bindtap="onDeleteTap" data-id="{{item.id}}">
+            <text class="action-icon">🗑️</text>
+            <text class="action-text delete">删除</text>
+          </view>
+        </view>
+
+        <!-- 删除确认 -->
+        <view class="delete-confirm" wx:if="{{deleteConfirmingId === item.id}}" catchtap="stopPropagation">
+          <view class="confirm-content" catchtap="stopPropagation">
+            <view class="confirm-icon">⚠️</view>
+            <text class="confirm-text">确认删除该地址？</text>
+            <view class="confirm-actions">
+              <view class="confirm-btn cancel" bindtap="onDeleteCancel">取消</view>
+              <view class="confirm-btn delete" bindtap="onDeleteConfirm" data-id="{{item.id}}">删除</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 提示文字 -->
+      <text class="list-tip" wx:if="{{addresses.length > 0}}">点击"设为默认"可快速填入收货信息</text>
+    </view>
+
+    <!-- 底部间距 -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
+
+  <!-- 新增地址按钮 -->
+  <view class="add-btn-bar" wx:if="{{!isLoading && addresses.length < 5}}">
+    <view class="add-btn" bindtap="onAddAddress">
+      <text class="add-icon">+</text>
+      <text class="add-text">新增收货地址</text>
+    </view>
+  </view>
+
+  <!-- 已达上限提示 -->
+  <view class="max-limit-bar" wx:if="{{!isLoading && addresses.length >= 5}}">
+    <text class="max-limit-text">已达最大地址数量 (5 个)，请删除后再添加</text>
+  </view>
+</view>

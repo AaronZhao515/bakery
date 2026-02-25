@@ -39,7 +39,10 @@
       "Bash(git remote:*)",
       "Bash(gh auth:*)",
       "Bash(echo 需要手动处理冲突:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git pull origin main --allow-unrelated-histories --no-rebase -X theirs 2>&1 && git push origin main 2>&1)",
+      "Bash(git fetch:*)",
+      "Bash(git add -A && git commit -m \"feat: 新增积分支付、地址管理、优惠券选择等功能\n\n- 新增积分支付和线下支付方式\n- 新增地址列表和地址编辑页面\n- 新增优惠券选择页面\n- 新增积分历史页面\n- 优化订单确认和订单详情页面UI\n- 更新订单和支付回调云函数\n- 优化会员中心页面\" 2>/dev/null)"
     ]
   },
   "enableAllProjectMcpServers": true,

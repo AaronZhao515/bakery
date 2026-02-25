@@ -24,13 +24,13 @@ async function updateOrderPaid(orderNo, transactionId) {
   const { data: orders } = await db.collection('orders')
     .where({ orderNo })
     .get();
-  
+
   if (orders.length === 0) {
     throw new Error('订单不存在: ' + orderNo);
   }
-  
+
   const order = orders[0];
-  
+
   // 更新订单状态
   await db.collection('orders').doc(order._id).update({
     data: {
@@ -40,8 +40,73 @@ async function updateOrderPaid(orderNo, transactionId) {
       updateTime: db.serverDate()
     }
   });
-  
+
   return order;
+}
+
+/**
+ * 发放消费积分
+ * 规则：每消费1元获得2积分
+ */
+async function grantOrderPoints(order) {
+  try {
+    const points = Math.floor(order.payAmount * 2); // 每元2积分
+    const openid = order.openid || order._openid;
+
+    if (!points || points <= 0) {
+      console.log('[grantOrderPoints] 积分不足，不发放');
+      return;
+    }
+
+    // 1. 查询用户当前积分
+    const { data: users } = await db.collection('users')
+      .where({ _openid: openid })
+      .get();
+
+    let currentPoints = 0;
+    let userId = null;
+
+    if (users.length > 0) {
+      currentPoints = users[0].points || 0;
+      userId = users[0]._id;
+    }
+
+    const newBalance = currentPoints + points;
+
+    // 2. 创建积分记录
+    await db.collection('pointsHistory').add({
+      data: {
+        userId: openid,
+        label: '下单获得积分',
+        desc: `订单 ${order.orderNo}`,
+        points: points,
+        type: 'earn',
+        category: 'order',
+        balance: newBalance,
+        orderId: order._id,
+        orderNo: order.orderNo,
+        createTime: db.serverDate()
+      }
+    });
+
+    console.log('[grantOrderPoints] 积分记录已创建:', points);
+
+    // 3. 更新用户积分余额
+    if (userId) {
+      await db.collection('users').doc(userId).update({
+        data: {
+          points: newBalance,
+          updateTime: db.serverDate()
+        }
+      });
+      console.log('[grantOrderPoints] 用户积分已更新:', newBalance);
+    }
+
+    return { points, newBalance };
+  } catch (error) {
+    console.error('[grantOrderPoints] 发放积分失败:', error);
+    // 积分发放失败不影响支付流程
+  }
 }
 
 /**
@@ -94,10 +159,13 @@ exports.main = async (event, context) => {
     
     // 1. 更新订单状态
     const order = await updateOrderPaid(outTradeNo, transactionId);
-    
+
     console.log('订单状态已更新:', outTradeNo);
-    
-    // 2. 发送支付成功通知
+
+    // 2. 发放消费积分
+    await grantOrderPoints(order);
+
+    // 3. 发送支付成功通知
     await sendPaySuccessMessage(order, order.openid);
     
     return response;

@@ -1,0 +1,139 @@
+<!-- 积分明细页面 - 按照 Figma 设计稿实现 -->
+<view class="points-history-page">
+
+  <!-- ========== 固定头部区域 ========== -->
+  <view class="header-section">
+    <!-- 积分余额卡片 -->
+    <view class="points-card">
+      <!-- 装饰圆圈 -->
+      <view class="deco-circle circle-1"></view>
+      <view class="deco-circle circle-2"></view>
+
+      <text class="points-label">当前积分</text>
+      <view class="points-value-wrap">
+        <text class="points-value">{{userPoints}}</text>
+        <text class="points-unit">pt</text>
+      </view>
+
+      <!-- 本月统计 -->
+      <view class="monthly-stats">
+        <view class="stat-item">
+          <text class="stat-icon stat-icon-up">↗</text>
+          <text class="stat-label">本月获得</text>
+          <text class="stat-value stat-value-up">+{{monthEarned}}</text>
+        </view>
+        <view class="stat-divider"></view>
+        <view class="stat-item">
+          <text class="stat-icon stat-icon-down">↘</text>
+          <text class="stat-label">本月消费</text>
+          <text class="stat-value stat-value-down">−{{monthSpent}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 可滚动内容区域 ========== -->
+  <scroll-view class="content-section" scroll-y enable-back-to-top>
+
+    <!-- 积分说明 -->
+    <view class="notice-card notice-expiry">
+      <text class="notice-icon">ⓘ</text>
+      <text class="notice-text">
+        <text class="notice-highlight">1积分相当于¥1，抵相应金额</text>
+      </text>
+      <text class="notice-action" bindtap="goToExchange">去使用</text>
+    </view>
+
+    <!-- 筛选标签 -->
+    <view class="filter-tabs">
+      <view
+        class="tab-item {{activeTab === 'all' ? 'tab-active' : ''}}"
+        bindtap="onTabChange"
+        data-tab="all"
+      >
+        <text>全部</text>
+      </view>
+      <view
+        class="tab-item {{activeTab === 'earn' ? 'tab-active' : ''}}"
+        bindtap="onTabChange"
+        data-tab="earn"
+      >
+        <text>获得</text>
+      </view>
+      <view
+        class="tab-item {{activeTab === 'spend' ? 'tab-active' : ''}}"
+        bindtap="onTabChange"
+        data-tab="spend"
+      >
+        <text>消费</text>
+      </view>
+    </view>
+
+    <!-- 交易列表 -->
+    <view class="transaction-list" wx:if="{{!isLoading}}">
+      <!-- 按日期分组 -->
+      <block wx:for="{{groupedList}}" wx:key="date" wx:for-item="group">
+        <view class="date-group">
+          <!-- 日期标签 -->
+          <view class="date-header">
+            <text class="date-label">{{group.dateLabel}}</text>
+            <view class="date-line"></view>
+            <text class="date-subtotal">{{group.subtotal}}</text>
+          </view>
+
+          <!-- 当日交易卡片 -->
+          <view class="transaction-card">
+            <view
+              class="transaction-item"
+              wx:for="{{group.items}}"
+              wx:key="_id"
+              wx:for-index="itemIdx"
+              style="border-bottom: {{itemIdx < group.items.length - 1 ? '1rpx solid #F5EDD8' : 'none'}}"
+            >
+              <!-- 类别图标 -->
+              <view class="tx-icon" style="background: {{item.bgColor}};">
+                <text class="tx-icon-text" style="color: {{item.iconColor}};">{{item.icon}}</text>
+              </view>
+
+              <!-- 交易信息 -->
+              <view class="tx-info">
+                <text class="tx-title">{{item.label}}</text>
+                <text class="tx-subtitle">{{item.desc || item.subtitle}}</text>
+              </view>
+
+              <!-- 积分和时间 -->
+              <view class="tx-amount">
+                <text class="tx-points {{item.type === 'earn' ? 'tx-earn' : 'tx-spend'}}">
+                  {{item.type === 'earn' ? '+' : '−'}}{{item.points > 0 ? item.points : -item.points}}
+                </text>
+                <text class="tx-time">{{item.time}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{groupedList.length === 0}}">
+        <text class="empty-icon">📭</text>
+        <text class="empty-text">暂无记录</text>
+      </view>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="loading-state" wx:if="{{isLoading}}">
+      <view class="loading-spinner"></view>
+    </view>
+
+    <!-- 底部提示 -->
+    <view class="footer-hint">
+      <view class="footer-line"></view>
+      <text class="footer-text">仅显示最近 3 个月的记录</text>
+      <view class="footer-line"></view>
+    </view>
+
+    <!-- 底部安全区域 -->
+    <view class="safe-area-bottom"></view>
+  </scroll-view>
+
+</view>

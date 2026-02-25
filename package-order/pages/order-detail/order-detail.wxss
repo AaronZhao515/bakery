@@ -96,7 +96,7 @@ page {
 /* ========== 页面内容 ========== */
 .page-content {
   flex: 1;
-  padding: 280rpx 24rpx 160rpx;
+  padding: 280rpx 24rpx 180rpx;
   box-sizing: border-box;
 }
 
@@ -579,7 +579,87 @@ page {
   color: #F5EDD8;
 }
 
+.action-btn.offline {
+  background: linear-gradient(135deg, #D4A96A 0%, #C8A882 100%);
+  color: #3E2009;
+}
+
 .action-btn:active {
   transform: scale(0.98);
   opacity: 0.95;
+}
+
+/* ========== 底部操作栏（待支付状态显示） ========== */
+.action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #FFFFFF;
+  padding: 24rpx 30rpx calc(24rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -4rpx 32rpx rgba(155, 115, 85, 0.14);
+  border-radius: 40rpx 40rpx 0 0;
+  z-index: 100;
+}
+
+/* ========== 自定义 Tab Bar - 与主页一致 ========== */
+.custom-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: #FFFFFF;
+  box-shadow: 0 -4rpx 32rpx rgba(155,115,85,0.14);
+  z-index: 999;
+  border-radius: 40rpx 40rpx 0 0;
+  padding: 16rpx 24rpx calc(24rpx + env(safe-area-inset-bottom));
+}
+
+.tab-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  margin: 8rpx;
+  padding: 16rpx 8rpx;
+  border-radius: 32rpx;
+  border: 3rpx solid #EAD9BB;
+  background: #FFFFFF;
+  transition: all 0.2s;
+}
+
+.tab-active {
+  background: #F5EDD8;
+  border-color: #C8A882;
+}
+
+.tab-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-icon-img {
+  width: 48rpx;
+  height: 48rpx;
+  opacity: 0.7;
+}
+
+.tab-active .tab-icon-img {
+  opacity: 1;
+}
+
+.tab-text {
+  font-size: 20rpx;
+  color: #B08860;
+  letter-spacing: 0.6rpx;
+  white-space: nowrap;
+}
+
+.tab-active .tab-text {
+  color: #7A5533;
+  font-weight: 700;
 }

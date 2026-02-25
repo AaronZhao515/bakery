@@ -1,0 +1,384 @@
+/* 配送地址页面样式 */
+
+.address-container {
+  min-height: 100vh;
+  background: #F0EAD6;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== 顶部导航栏 ========== */
+.header-bar {
+  background: linear-gradient(135deg, #6B4423 0%, #3E2009 100%);
+  padding: 100rpx 30rpx 30rpx;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.back-btn {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -10rpx;
+}
+
+.back-icon {
+  width: 44rpx;
+  height: 44rpx;
+}
+
+.header-title {
+  flex: 1;
+  text-align: center;
+  font-size: 34rpx;
+  color: #F5EDD8;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  margin-right: 72rpx;
+}
+
+.header-right {
+  width: 72rpx;
+}
+
+.header-subtitle {
+  display: block;
+  text-align: center;
+  font-size: 24rpx;
+  color: rgba(245, 237, 216, 0.5);
+  margin-top: 12rpx;
+}
+
+/* ========== 加载状态 ========== */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 300rpx 0;
+}
+
+.loading-spinner {
+  width: 56rpx;
+  height: 56rpx;
+  border: 4rpx solid #F0F0F0;
+  border-top-color: #B08860;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  margin-top: 24rpx;
+  font-size: 26rpx;
+  color: #999999;
+}
+
+/* ========== 地址列表 ========== */
+.address-list {
+  flex: 1;
+  padding: 220rpx 30rpx 160rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 160rpx 0;
+}
+
+.empty-icon-wrap {
+  width: 144rpx;
+  height: 144rpx;
+  background: #EAD9BB;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32rpx;
+}
+
+.empty-icon {
+  font-size: 64rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #B08860;
+  margin-bottom: 12rpx;
+}
+
+.empty-tip {
+  font-size: 24rpx;
+  color: #C8B89A;
+}
+
+/* 地址卡片列表 */
+.address-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.address-card {
+  background: #FFFFFF;
+  border-radius: 40rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 24rpx rgba(155, 115, 85, 0.10);
+  border-left: 8rpx solid transparent;
+  position: relative;
+}
+
+.address-card.is-default {
+  border-left-color: #D4A96A;
+}
+
+.address-card.selectable:active {
+  background: #FFF8EE;
+}
+
+/* 卡片主要内容 */
+.card-main {
+  padding: 32rpx 32rpx 24rpx;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.user-name {
+  font-size: 30rpx;
+  color: #3E2009;
+  font-weight: 700;
+}
+
+.user-phone {
+  font-size: 26rpx;
+  color: #9B7355;
+}
+
+.default-badge {
+  background: linear-gradient(90deg, #D4A96A, #C8883A);
+  color: #FFF;
+  font-size: 20rpx;
+  font-weight: 700;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  letter-spacing: 1rpx;
+}
+
+.address-text {
+  font-size: 26rpx;
+  color: #7A5533;
+  line-height: 1.6;
+  display: block;
+}
+
+/* 操作栏 */
+.card-actions {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 32rpx;
+  border-top: 2rpx solid #F5EDD8;
+}
+
+.action-default {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.radio-unchecked {
+  width: 30rpx;
+  height: 30rpx;
+  border: 3rpx solid #C8A882;
+  border-radius: 50%;
+}
+
+.radio-checked {
+  width: 30rpx;
+  height: 30rpx;
+  background: #D4A96A;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.check-icon {
+  color: #FFF;
+  font-size: 18rpx;
+  font-weight: 700;
+}
+
+.action-spacer {
+  flex: 1;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 20rpx;
+}
+
+.action-icon {
+  font-size: 26rpx;
+}
+
+.action-text {
+  font-size: 24rpx;
+  color: #9B7355;
+}
+
+.action-text.checked {
+  color: #D4A96A;
+  font-weight: 600;
+}
+
+.action-text.delete {
+  color: #C07A6E;
+}
+
+/* 删除确认 */
+.delete-confirm {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-content {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 24rpx;
+}
+
+.confirm-icon {
+  font-size: 28rpx;
+}
+
+.confirm-text {
+  font-size: 26rpx;
+  color: #7A3B31;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-left: auto;
+}
+
+.confirm-btn {
+  padding: 8rpx 28rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+.confirm-btn.cancel {
+  border: 2rpx solid #C8A882;
+  background: #FFF;
+  color: #9B7355;
+}
+
+.confirm-btn.delete {
+  background: #C07A6E;
+  color: #FFF;
+  border: none;
+}
+
+/* 提示文字 */
+.list-tip {
+  display: block;
+  text-align: center;
+  font-size: 22rpx;
+  color: #C8B89A;
+  margin-top: 16rpx;
+}
+
+/* 底部间距 */
+.bottom-spacer {
+  height: 40rpx;
+}
+
+/* ========== 新增地址按钮 ========== */
+.add-btn-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24rpx 40rpx calc(24rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #F0EAD6 70%, transparent);
+}
+
+.add-btn {
+  height: 104rpx;
+  background: linear-gradient(135deg, #7A5533, #9B7355);
+  border-radius: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  box-shadow: 0 12rpx 40rpx rgba(122, 85, 51, 0.38);
+}
+
+.add-btn:active {
+  transform: scale(0.98);
+}
+
+.add-icon {
+  font-size: 36rpx;
+  color: #F5EDD8;
+  font-weight: 300;
+}
+
+.add-text {
+  font-size: 30rpx;
+  color: #F5EDD8;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+}
+
+/* 已达上限提示 */
+.max-limit-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24rpx 40rpx calc(24rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #F0EAD6 70%, transparent);
+  text-align: center;
+}
+
+.max-limit-text {
+  font-size: 24rpx;
+  color: #B08860;
+}

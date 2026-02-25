@@ -15,7 +15,7 @@
   </view>
 
   <!-- 页面内容 -->
-  <scroll-view class="page-content" scroll-y enhanced show-scrollbar="{{false}}">
+  <scroll-view class="page-content" scroll-y enhanced show-scrollbar="{{false}}" id="pageScroll">
 
     <!-- 自取/配送信息卡片 -->
     <view class="info-card">
@@ -155,87 +155,6 @@
     <view class="bottom-spacer"></view>
   </scroll-view>
 
-  <!-- 优惠券选择弹窗 -->
-  <view class="coupon-modal {{showCouponModal ? 'show' : ''}}" catchtouchmove="true">
-    <view class="modal-mask" bindtap="closeCouponModal"></view>
-    <view class="modal-content">
-      <view class="modal-header">
-        <text class="modal-title">选择优惠券</text>
-        <view class="close-btn" bindtap="closeCouponModal">
-          <text>✕</text>
-        </view>
-      </view>
-
-      <scroll-view class="modal-body" scroll-y>
-        <!-- 不使用优惠券 -->
-        <view class="no-coupon-option" bindtap="onNotUseCoupon">
-          <text class="option-text">不使用优惠券</text>
-          <view class="option-check {{!selectedCoupon ? 'checked' : ''}}">
-            <view class="check-inner"></view>
-          </view>
-        </view>
-
-        <!-- 可用优惠券 -->
-        <view class="coupon-section" wx:if="{{availableCoupons.length > 0}}">
-          <text class="section-title">可用优惠券（{{availableCoupons.length}}张）</text>
-          <view class="coupon-option-list">
-            <view class="coupon-option {{selectedCoupon.id === item.id ? 'selected' : ''}}"
-                   wx:for="{{availableCoupons}}"
-                   wx:key="id"
-                   data-id="{{item.id}}"
-                   bindtap="onCouponSelectTap">
-              <view class="option-left">
-                <text class="option-value {{item.displayType}}">{{item.displayValue}}</text>
-                <text class="option-condition">满{{item.minAmount}}可用</text>
-              </view>
-              <view class="option-right">
-                <text class="option-title">{{item.title}}</text>
-                <text class="option-desc">{{item.desc}}</text>
-                <text class="option-time">有效期至 {{item.endTimeStr}}</text>
-              </view>
-              <view class="option-check {{selectedCoupon.id === item.id ? 'checked' : ''}}">
-                <view class="check-inner"></view>
-              </view>
-            </view>
-          </view>
-        </view>
-
-        <!-- 不可用优惠券 -->
-        <view class="coupon-section" wx:if="{{unavailableCoupons.length > 0}}">
-          <text class="section-title unavailable">不可用优惠券（{{unavailableCoupons.length}}张）</text>
-          <view class="coupon-option-list">
-            <view class="coupon-option disabled"
-                   wx:for="{{unavailableCoupons}}"
-                   wx:key="id"
-                   data-id="{{item.id}}"
-                   bindtap="goToCouponCenter">
-              <view class="option-left">
-                <text class="option-value {{item.displayType}}">{{item.displayValue}}</text>
-                <text class="option-condition">满{{item.minAmount}}可用</text>
-              </view>
-              <view class="option-right">
-                <text class="option-title">{{item.title}}</text>
-                <text class="option-desc">{{item.desc}}</text>
-                <text class="option-time">有效期至 {{item.endTimeStr}}</text>
-              </view>
-              <view class="option-reason">去查看</view>
-            </view>
-          </view>
-        </view>
-
-        <!-- 无优惠券提示 -->
-        <view class="empty-coupon" wx:if="{{availableCoupons.length === 0 && unavailableCoupons.length === 0}}">
-          <text class="empty-icon">🎫</text>
-          <text class="empty-text">暂无优惠券</text>
-          <text class="empty-tip">去优惠券中心领取更多优惠</text>
-        </view>
-      </scroll-view>
-
-      <view class="modal-footer">
-        <view class="confirm-btn" bindtap="closeCouponModal">确定</view>
-      </view>
-    </view>
-  </view>
 
   <!-- 底部提交栏 -->
   <view class="submit-bar"

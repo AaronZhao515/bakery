@@ -44,15 +44,15 @@
           <view class="flow-dot"></view>
           <text class="flow-text">提交订单</text>
         </view>
-        <view class="flow-line {{order.status >= 1 ? 'active' : ''}}"></view>
-        <view class="flow-item {{order.status >= 1 ? 'active' : ''}}">
+        <view class="flow-line {{order.status >= 1 || order.status === 5 ? 'active' : ''}}"></view>
+        <view class="flow-item {{order.status >= 1 || order.status === 5 ? 'active' : ''}}">
           <view class="flow-dot"></view>
-          <text class="flow-text">支付</text>
+          <text class="flow-text">{{order.status === 5 ? '线下支付' : '支付'}}</text>
         </view>
         <view class="flow-line {{order.status >= 2 ? 'active' : ''}}"></view>
         <view class="flow-item {{order.status >= 2 ? 'active' : ''}}">
           <view class="flow-dot"></view>
-          <text class="flow-text">备餐</text>
+          <text class="flow-text">商家打包</text>
         </view>
         <view class="flow-line {{order.status >= 4 ? 'active' : ''}}"></view>
         <view class="flow-item {{order.status >= 4 ? 'active' : ''}}">
@@ -192,26 +192,39 @@
     <view class="bottom-spacer"></view>
   </scroll-view>
 
-  <!-- 底部操作栏 -->
-  <view class="action-bar" wx:if="{{!isLoading && order}}">
+  <!-- 底部操作栏 - 待支付状态：显示取消+支付按钮；已支付未完成状态：显示取消按钮 -->
+  <view class="action-bar" wx:if="{{!isLoading && order && (order.canPay || order.canCancel)}}">
     <view class="action-content">
-      <!-- 待支付状态 -->
+      <!-- 取消按钮 - 所有可取消状态都显示 -->
+      <button class="action-btn secondary" bindtap="onCancelOrder">取消订单</button>
+      <!-- 待支付状态显示支付按钮 -->
       <block wx:if="{{order.canPay}}">
-        <button class="action-btn secondary" bindtap="onCancelOrder">取消订单</button>
-        <button class="action-btn primary" bindtap="onPayOrder">立即支付 ¥{{order.payAmount}}</button>
+        <!-- 积分足够：显示积分支付按钮 -->
+        <button class="action-btn primary" bindtap="onPointsPay" wx:if="{{userPoints >= order.payAmount}}">
+          积分支付 ({{userPoints}}pt)
+        </button>
+        <!-- 积分不够：显示线下支付按钮 -->
+        <button class="action-btn offline" bindtap="onOfflinePay" wx:else>
+          线下支付
+        </button>
       </block>
+    </view>
+  </view>
 
-      <!-- 已支付/备餐中/配送中 -->
-      <block wx:elif="{{order.status === 1 || order.status === 2 || order.status === 3}}">
-        <button class="action-btn secondary" bindtap="onContactService">联系客服</button>
-        <button class="action-btn primary" bindtap="onCallPhone">拨打电话</button>
-      </block>
-
-      <!-- 已完成/已取消 -->
-      <block wx:else>
-        <button class="action-btn secondary" bindtap="goToOrderList">查看全部订单</button>
-        <button class="action-btn primary" bindtap="goToHome">再去逛逛</button>
-      </block>
+  <!-- 自定义 Tab Bar - 支付完成后或不可取消时显示 -->
+  <view class="custom-tab-bar" wx:if="{{!isLoading && order && !order.canPay && !order.canCancel}}">
+    <view
+      class="tab-bar-item {{tabBarSelected === index ? 'tab-active' : ''}}"
+      wx:for="{{tabBarList}}"
+      wx:key="index"
+      data-path="{{item.pagePath}}"
+      data-index="{{index}}"
+      bindtap="switchTab"
+    >
+      <view class="tab-icon-wrap">
+        <image class="tab-icon-img" src="{{item.iconUrl}}" mode="aspectFit"/>
+      </view>
+      <text class="tab-text">{{item.text}}</text>
     </view>
   </view>
 </view>

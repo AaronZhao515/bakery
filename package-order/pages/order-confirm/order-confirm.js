@@ -27,8 +27,6 @@ Page({
     availableCoupons: [],
     // 不可用优惠券列表
     unavailableCoupons: [],
-    // 是否显示优惠券弹窗
-    showCouponModal: false,
     // 选择的地址（配送时）
     selectedAddress: null,
     // 选择的取餐时间（自取时）
@@ -68,12 +66,15 @@ Page({
   },
 
   onUnload() {
-    // 清除临时存储的选中优惠券
+    // 清除临时存储的选中优惠券和标记
     wx.removeStorageSync('selectedCouponForOrder');
+    wx.removeStorageSync('couponSelectionMade');
   },
 
   onShow() {
     console.log('[订单确认] 页面显示');
+    // 检查是否有从优惠券页面返回的选中优惠券
+    this.checkSelectedCouponFromStorage();
   },
 
   /**
@@ -127,10 +128,21 @@ Page({
    * 检查从优惠券页面返回的选中优惠券
    */
   checkSelectedCouponFromStorage() {
+    // 检查是否有 couponSelectionMade 标记，表示用户从优惠券页面返回
+    const selectionMade = wx.getStorageSync('couponSelectionMade');
+    if (!selectionMade) return;
+
+    // 清除标记
+    wx.removeStorageSync('couponSelectionMade');
+
     const selectedCoupon = wx.getStorageSync('selectedCouponForOrder');
     if (selectedCoupon) {
       console.log('[订单确认] 从优惠券页面返回，选中优惠券:', selectedCoupon);
       this.selectCoupon(selectedCoupon);
+    } else {
+      // 用户选择了"不使用优惠券"
+      console.log('[订单确认] 用户选择不使用优惠券');
+      this.cancelSelectCoupon();
     }
   },
 
@@ -150,8 +162,8 @@ Page({
         const { availableList = [], unavailableList = [] } = result.data;
 
         // 格式化优惠券数据
-        const formattedAvailable = this.formatCouponsForDisplay(availableList);
-        const formattedUnavailable = this.formatCouponsForDisplay(unavailableList);
+        const formattedAvailable = this.formatCouponsForDisplay(availableList, true);
+        const formattedUnavailable = this.formatCouponsForDisplay(unavailableList, false);
 
         this.setData({
           availableCoupons: formattedAvailable,
@@ -165,16 +177,22 @@ Page({
           console.log('[订单确认] 自动选择最佳优惠券:', bestCoupon);
           this.selectCoupon(bestCoupon);
         }
+      } else {
+        console.warn('[订单确认] 获取优惠券失败:', result?.message);
       }
     } catch (error) {
       console.error('[订单确认] 加载优惠券失败:', error);
+      wx.showToast({
+        title: '优惠券加载失败',
+        icon: 'none'
+      });
     }
   },
 
   /**
    * 格式化优惠券用于显示
    */
-  formatCouponsForDisplay(couponList) {
+  formatCouponsForDisplay(couponList, isAvailable = true) {
     return couponList.map(item => {
       const coupon = item.coupon || {};
       const userCouponId = item._id || item.userCouponId;
@@ -207,7 +225,10 @@ Page({
         displayType,
         minAmount: coupon.minAmount || 0,
         endTime: coupon.endTime,
-        endTimeStr: this.formatCouponTime(coupon.endTime)
+        endTimeStr: this.formatCouponTime(coupon.endTime),
+        // 不可用原因
+        reason: item.reason || '',
+        isAvailable: isAvailable
       };
     });
   },
@@ -317,55 +338,12 @@ Page({
   },
 
   /**
-   * 选择优惠券 - 显示弹窗
+   * 选择优惠券 - 跳转到优惠券选择页面
    */
   onSelectCoupon() {
-    // 如果没有优惠券数据，先加载
-    if (this.data.availableCoupons.length === 0 && this.data.unavailableCoupons.length === 0) {
-      wx.showLoading({ title: '加载中...' });
-      this.loadAvailableCoupons().then(() => {
-        wx.hideLoading();
-        this.setData({ showCouponModal: true });
-      });
-    } else {
-      this.setData({ showCouponModal: true });
-    }
-  },
-
-  /**
-   * 关闭优惠券弹窗
-   */
-  closeCouponModal() {
-    this.setData({ showCouponModal: false });
-  },
-
-  /**
-   * 在弹窗中选择优惠券
-   */
-  onCouponSelectTap(e) {
-    const { id } = e.currentTarget.dataset;
-    const coupon = this.data.availableCoupons.find(c => c.id === id);
-
-    if (coupon) {
-      this.selectCoupon(coupon);
-      this.closeCouponModal();
-    }
-  },
-
-  /**
-   * 不使用优惠券
-   */
-  onNotUseCoupon() {
-    this.cancelSelectCoupon();
-    this.closeCouponModal();
-  },
-
-  /**
-   * 查看更多优惠券（跳转到优惠券中心）
-   */
-  goToCouponCenter() {
+    const { totalPrice } = this.data;
     wx.navigateTo({
-      url: '/package-user/pages/coupon/coupon'
+      url: `/package-order/pages/coupon-select/coupon-select?amount=${totalPrice}`
     });
   },
 

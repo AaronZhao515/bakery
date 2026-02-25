@@ -24,7 +24,8 @@ const ORDER_STATUS = {
   COMPLETED: 4,        // 已完成
   CANCELLED: -1,       // 已取消
   REFUNDING: -2,       // 退款中
-  REFUNDED: -3         // 已退款
+  REFUNDED: -3,        // 已退款
+  OFFLINE_PAY: 5       // 线下支付
 }
 
 // 主入口函数
@@ -50,6 +51,10 @@ exports.main = async (event, context) => {
         return await confirmReceive(OPENID, data)
       case 'pay':
         return await pay(OPENID, data)
+      case 'payWithPoints':
+        return await payWithPoints(OPENID, data)
+      case 'offlinePay':
+        return await offlinePay(OPENID, data)
       case 'applyRefund':
         return await applyRefund(OPENID, data)
       default:
@@ -460,14 +465,25 @@ async function cancel(openid, data) {
     return { code: -1, message: '无权限操作' }
   }
 
-  // 只能取消待支付订单
-  if (order.status !== ORDER_STATUS.PENDING_PAY) {
+  // 已完成、已取消、退款中、已退款的订单不能取消
+  const cannotCancelStatuses = [
+    ORDER_STATUS.COMPLETED,
+    ORDER_STATUS.CANCELLED,
+    ORDER_STATUS.REFUNDING,
+    ORDER_STATUS.REFUNDED
+  ]
+  if (cannotCancelStatuses.includes(order.status)) {
     return { code: -1, message: '订单状态不允许取消' }
   }
 
   const now = db.serverDate()
+  const isPaid = order.status === ORDER_STATUS.PAID ||
+                 order.status === ORDER_STATUS.PREPARING ||
+                 order.status === ORDER_STATUS.DELIVERING ||
+                 order.payType === 'points' ||
+                 order.payType === 'offline'
 
-  // 事务处理：恢复库存
+  // 事务处理：恢复库存、退还积分、退还优惠券
   const transaction = await db.startTransaction()
 
   try {
@@ -511,10 +527,51 @@ async function cancel(openid, data) {
       })
     }
 
-    // 3. 更新订单状态
+    // 3. 如果已支付（积分支付），退还积分
+    let refundedPoints = 0
+    if (isPaid && order.pointsDeducted > 0) {
+      refundedPoints = order.pointsDeducted
+
+      // 查询用户当前积分
+      const userResult = await transaction.collection('users').where({ openid }).get()
+      const user = userResult.data[0]
+      const currentPoints = user ? (user.points || 0) : 0
+      const newBalance = currentPoints + refundedPoints
+
+      // 退还积分到用户账户
+      if (user) {
+        await transaction.collection('users').doc(user._id).update({
+          data: {
+            points: newBalance,
+            updateTime: now
+          }
+        })
+      }
+
+      // 创建积分返还记录
+      await transaction.collection('pointsHistory').add({
+        data: {
+          userId: openid,
+          label: '订单取消返还',
+          desc: `订单 ${order.orderNo} 取消，积分返还`,
+          points: refundedPoints,
+          type: 'earn',
+          category: 'refund',
+          balance: newBalance,
+          orderId: orderId,
+          orderNo: order.orderNo,
+          createTime: now
+        }
+      })
+    }
+
+    // 4. 更新订单状态
     await transaction.collection('orders').doc(orderId).update({
       data: {
         status: ORDER_STATUS.CANCELLED,
+        cancelTime: now,
+        cancelReason: '用户主动取消',
+        refundedPoints: refundedPoints,
         updateTime: now
       }
     })
@@ -523,7 +580,11 @@ async function cancel(openid, data) {
 
     return {
       code: 0,
-      message: '订单取消成功'
+      message: '订单取消成功',
+      data: {
+        refundedPoints: refundedPoints,
+        refundedCoupon: !!order.userCouponId
+      }
     }
 
   } catch (err) {
@@ -582,7 +643,7 @@ async function confirmReceive(openid, data) {
 }
 
 /**
- * 支付订单
+ * 支付订单（微信支付）
  * @param {String} openid - 用户openid
  * @param {Object} data - 请求参数
  * @param {String} data.orderId - 订单ID
@@ -612,20 +673,69 @@ async function pay(openid, data) {
     return { code: -1, message: '订单状态不允许支付' }
   }
 
+  // 微信支付逻辑（这里返回预支付参数）
+  // 实际微信支付需要调用微信统一下单接口
+  return {
+    code: 0,
+    message: '请使用微信支付',
+    data: {
+      orderId,
+      payType: 'wechat',
+      payAmount: order.payAmount
+    }
+  }
+}
+
+/**
+ * 积分支付订单
+ * @param {String} openid - 用户openid
+ * @param {Object} data - 请求参数
+ * @param {String} data.orderId - 订单ID
+ */
+async function payWithPoints(openid, data) {
+  const { orderId } = data
+
+  if (!orderId) {
+    return { code: -1, message: '订单ID不能为空' }
+  }
+
+  const orderResult = await db.collection('orders').doc(orderId).get()
+
+  if (!orderResult.data) {
+    return { code: -1, message: '订单不存在' }
+  }
+
+  const order = orderResult.data
+
+  // 验证用户权限
+  if (order.userId !== openid) {
+    return { code: -1, message: '无权限操作' }
+  }
+
+  // 只能支付待支付订单
+  if (order.status !== ORDER_STATUS.PENDING_PAY) {
+    return { code: -1, message: '订单状态不允许支付' }
+  }
+
+  // 重新查询用户当前积分（防止积分已变化）
+  const userResult = await db.collection('users').where({ openid }).get()
+  const user = userResult.data[0]
+  const currentPoints = user ? (user.points || 0) : 0
+  const requiredPoints = Math.ceil(order.payAmount)
+
   // 检查积分是否足够
-  if (!order.hasEnoughPoints) {
+  if (currentPoints < requiredPoints) {
     return { code: -1, message: '积分不足，无法支付' }
   }
 
   const now = db.serverDate()
-  const requiredPoints = order.requiredPoints || 0
 
   // 使用事务处理积分扣减和订单状态更新
   const transaction = await db.startTransaction()
 
   try {
     // 1. 扣减用户积分
-    await transaction.collection('users').where({ openid }).update({
+    await transaction.collection('users').doc(user._id).update({
       data: {
         points: _.inc(-requiredPoints),
         updateTime: now
@@ -638,7 +748,24 @@ async function pay(openid, data) {
         status: ORDER_STATUS.PAID,
         payTime: now,
         pointsDeducted: requiredPoints,
+        payType: 'points',
         updateTime: now
+      }
+    })
+
+    // 3. 创建积分消费记录
+    await transaction.collection('pointsHistory').add({
+      data: {
+        userId: openid,
+        label: '订单支付',
+        desc: `订单 ${order.orderNo}`,
+        points: -requiredPoints,
+        type: 'spend',
+        category: 'order',
+        balance: currentPoints - requiredPoints,
+        orderId: orderId,
+        orderNo: order.orderNo,
+        createTime: now
       }
     })
 
@@ -656,8 +783,61 @@ async function pay(openid, data) {
     }
   } catch (err) {
     await transaction.rollback()
-    console.error('[Order Pay] 支付事务失败:', err)
+    console.error('[Order PayWithPoints] 积分支付事务失败:', err)
     return { code: -1, message: '支付失败: ' + err.message }
+  }
+}
+
+/**
+ * 线下支付订单
+ * @param {String} openid - 用户openid
+ * @param {Object} data - 请求参数
+ * @param {String} data.orderId - 订单ID
+ */
+async function offlinePay(openid, data) {
+  const { orderId } = data
+
+  if (!orderId) {
+    return { code: -1, message: '订单ID不能为空' }
+  }
+
+  const orderResult = await db.collection('orders').doc(orderId).get()
+
+  if (!orderResult.data) {
+    return { code: -1, message: '订单不存在' }
+  }
+
+  const order = orderResult.data
+
+  // 验证用户权限
+  if (order.userId !== openid) {
+    return { code: -1, message: '无权限操作' }
+  }
+
+  // 只能对待支付订单选择线下支付
+  if (order.status !== ORDER_STATUS.PENDING_PAY) {
+    return { code: -1, message: '订单状态不允许选择线下支付' }
+  }
+
+  const now = db.serverDate()
+
+  // 更新订单状态为商家打包中（线下支付后直接到打包环节）
+  await db.collection('orders').doc(orderId).update({
+    data: {
+      status: ORDER_STATUS.PREPARING,
+      payType: 'offline',
+      updateTime: now
+    }
+  })
+
+  return {
+    code: 0,
+    message: '已选择线下支付，等待商家打包',
+    data: {
+      orderId,
+      status: ORDER_STATUS.PREPARING,
+      payType: 'offline'
+    }
   }
 }
 

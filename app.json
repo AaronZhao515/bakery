@@ -21,7 +21,8 @@
       "pages": [
         "pages/order-detail/order-detail",
         "pages/order-confirm/order-confirm",
-        "pages/payment/payment"
+        "pages/payment/payment",
+        "pages/coupon-select/coupon-select"
       ]
     },
     {
@@ -32,7 +33,8 @@
         "pages/coupon/coupon",
         "pages/favorite/favorite",
         "pages/settings/settings",
-        "pages/vip-center/vip-center"
+        "pages/vip-center/vip-center",
+        "pages/points-history/points-history"
       ]
     },
     {

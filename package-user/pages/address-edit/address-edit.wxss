@@ -1,0 +1,383 @@
+/* 地址编辑页面样式 */
+
+.address-edit-container {
+  min-height: 100vh;
+  background: #F0EAD6;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* ========== 遮罩层 ========== */
+.page-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 100;
+}
+
+/* ========== 表单弹窗 ========== */
+.form-sheet {
+  flex: 1;
+  background: #F5EDD8;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 头部 */
+.sheet-header {
+  flex-shrink: 0;
+}
+
+.sheet-handle {
+  display: flex;
+  justify-content: center;
+  padding: 24rpx 0 12rpx;
+}
+
+.sheet-handle::after {
+  content: '';
+  width: 72rpx;
+  height: 8rpx;
+  background: #C8A882;
+  border-radius: 4rpx;
+}
+
+.sheet-title-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 40rpx;
+  position: relative;
+}
+
+.sheet-title {
+  flex: 1;
+  text-align: center;
+  font-size: 32rpx;
+  color: #3E2009;
+  font-weight: 800;
+}
+
+.close-btn {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F5F5F5;
+  border-radius: 50%;
+}
+
+.close-icon {
+  font-size: 28rpx;
+  color: #999999;
+}
+
+.sheet-divider {
+  height: 2rpx;
+  background: #EAD9BB;
+  margin: 0 40rpx;
+}
+
+/* 表单内容 */
+.form-body {
+  flex: 1;
+  padding: 32rpx 40rpx;
+}
+
+.form-item {
+  margin-bottom: 32rpx;
+}
+
+.form-label {
+  font-size: 24rpx;
+  color: #7A5533;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.required {
+  color: #C07A6E;
+}
+
+.input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  height: 100rpx;
+  background: #FFFFFF;
+  border-radius: 28rpx;
+  padding: 0 32rpx;
+  border: 3rpx solid transparent;
+  box-shadow: 0 2rpx 8rpx rgba(155, 115, 85, 0.08);
+}
+
+.input-wrap.error {
+  border-color: #C07A6E;
+}
+
+.input-icon {
+  font-size: 32rpx;
+}
+
+.form-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #3E2009;
+  background: transparent;
+  border: none;
+}
+
+.region-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #3E2009;
+}
+
+.region-text.placeholder {
+  color: #C8B89A;
+}
+
+.arrow-icon {
+  font-size: 40rpx;
+  color: #C8A882;
+  font-weight: 300;
+}
+
+.textarea-wrap {
+  background: #FFFFFF;
+  border-radius: 28rpx;
+  padding: 24rpx 32rpx;
+  border: 3rpx solid transparent;
+  box-shadow: 0 2rpx 8rpx rgba(155, 115, 85, 0.08);
+}
+
+.textarea-wrap.error {
+  border-color: #C07A6E;
+}
+
+.form-textarea {
+  width: 100%;
+  height: 120rpx;
+  font-size: 28rpx;
+  color: #3E2009;
+  background: transparent;
+  border: none;
+  line-height: 1.6;
+}
+
+.error-text {
+  font-size: 22rpx;
+  color: #C07A6E;
+  margin-top: 8rpx;
+  display: block;
+}
+
+/* 开关项 */
+.switch-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 104rpx;
+  background: #FFFFFF;
+  border-radius: 28rpx;
+  padding: 0 32rpx;
+  box-shadow: 0 2rpx 8rpx rgba(155, 115, 85, 0.08);
+}
+
+.switch-item .form-label {
+  margin-bottom: 0;
+  font-size: 28rpx;
+  color: #3E2009;
+}
+
+.custom-switch {
+  width: 88rpx;
+  height: 52rpx;
+  border-radius: 26rpx;
+  background: #D9CDB8;
+  position: relative;
+  transition: background 0.22s;
+}
+
+.custom-switch.on {
+  background: #7A5533;
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 6rpx;
+  left: 6rpx;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.18);
+  transition: left 0.22s;
+}
+
+.custom-switch.on .switch-thumb {
+  left: 42rpx;
+}
+
+/* 底部保存按钮 */
+.form-footer {
+  padding: 24rpx 40rpx calc(24rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #F5EDD8 70%, transparent);
+  flex-shrink: 0;
+}
+
+.save-btn {
+  height: 104rpx;
+  background: linear-gradient(135deg, #7A5533, #9B7355);
+  border-radius: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  color: #F5EDD8;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  box-shadow: 0 8rpx 32rpx rgba(122, 85, 51, 0.35);
+}
+
+.save-btn:active {
+  transform: scale(0.98);
+}
+
+/* ========== 地区选择器 ========== */
+.region-picker {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #F0EAD6;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 选择器头部 */
+.picker-header {
+  background: linear-gradient(135deg, #6B4423 0%, #3E2009 100%);
+  padding: 100rpx 30rpx 30rpx;
+  flex-shrink: 0;
+}
+
+.picker-nav {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32rpx;
+}
+
+.back-btn {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-icon {
+  width: 44rpx;
+  height: 44rpx;
+}
+
+.picker-title {
+  flex: 1;
+  text-align: center;
+  font-size: 32rpx;
+  color: #F5EDD8;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+
+.nav-placeholder {
+  width: 72rpx;
+}
+
+/* 步骤标签 */
+.step-tabs {
+  display: flex;
+  gap: 16rpx;
+}
+
+.step-tab {
+  flex: 1;
+  padding: 16rpx 8rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20rpx;
+  border: 2rpx solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.step-tab.active {
+  background: rgba(212, 169, 106, 0.25);
+  border-color: rgba(212, 169, 106, 0.5);
+}
+
+.step-tab.disabled {
+  opacity: 0.45;
+}
+
+.step-label {
+  font-size: 20rpx;
+  color: rgba(245, 237, 216, 0.55);
+}
+
+.step-value {
+  font-size: 26rpx;
+  color: #D4A96A;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.step-tab.disabled .step-value {
+  color: rgba(245, 237, 216, 0.5);
+  font-weight: 400;
+}
+
+/* 地区列表 */
+.picker-body {
+  flex: 1;
+  padding: 24rpx 32rpx;
+}
+
+.region-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 32rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  margin-bottom: 16rpx;
+  border: 3rpx solid transparent;
+  box-shadow: 0 2rpx 8rpx rgba(155, 115, 85, 0.07);
+}
+
+.region-item.active {
+  background: #FFF6E8;
+  border-color: #D4A96A;
+}
+
+.region-name {
+  font-size: 28rpx;
+  color: #3E2009;
+}
+
+.region-item.active .region-name {
+  color: #C8883A;
+  font-weight: 700;
+}
+
+.check-icon {
+  font-size: 30rpx;
+  color: #D4A96A;
+  font-weight: 700;
+}

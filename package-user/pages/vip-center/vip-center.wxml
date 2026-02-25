@@ -30,10 +30,13 @@
         </view>
 
         <!-- 中间：积分展示 -->
-        <view class="points-section">
+        <view class="points-section" bindtap="onPointsTap">
           <view class="points-main">
             <text class="points-value">{{userInfo.points || 0}}</text>
             <text class="points-unit">积分</text>
+          </view>
+          <view class="points-arrow">
+            <text class="arrow-text">查看明细 ></text>
           </view>
           <view class="points-divider"></view>
           <view class="user-info">
@@ -91,7 +94,7 @@
 
     <!-- 快捷统计 - 已登录 -->
     <view class="quick-stats" wx:if="{{isLogin}}">
-      <view class="stat-item">
+      <view class="stat-item" bindtap="onPointsTap">
         <view class="stat-icon-wrap" style="background: #FFF8E1;">
           <image class="stat-icon" src="{{icons.starFilled}}" mode="aspectFit"/>
         </view>
@@ -99,7 +102,7 @@
         <text class="stat-label">我的积分</text>
       </view>
       <view class="stat-divider"></view>
-      <view class="stat-item">
+      <view class="stat-item" bindtap="onCouponTap">
         <view class="stat-icon-wrap" style="background: #E8F5E9;">
           <image class="stat-icon" src="{{icons.gift}}" mode="aspectFit"/>
         </view>
