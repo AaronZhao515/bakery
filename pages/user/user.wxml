@@ -1,0 +1,173 @@
+<!-- 个人中心页面 - 匹配 Figma 设计稿 -->
+<view class="profile-page">
+  <!-- 顶部固定标题栏（未登录时显示） -->
+  <view class="fixed-header" wx:if="{{!isLogin}}">
+    <view class="header-inner">
+      <image class="header-icon" src="{{icons.user}}" mode="aspectFit"/>
+      <text class="header-title">登录</text>
+    </view>
+  </view>
+
+  <!-- 页面内容 -->
+  <scroll-view class="page-content" scroll-y enhanced show-scrollbar="{{false}}" style="padding-top: {{!isLogin ? 140 : 0}}rpx;">
+
+    <!-- ========== 未登录状态 ========== -->
+    <view class="login-section" wx:if="{{!isLogin}}">
+      <!-- 品牌头部 -->
+      <view class="brand-header">
+        <view class="wheat-left">
+          <image class="wheat-img" src="{{icons.wheat}}" mode="aspectFit"/>
+        </view>
+        <view class="brand-logo">
+          <image class="logo-img" src="cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/logo.png" mode="aspectFit"/>
+        </view>
+        <view class="wheat-right">
+          <image class="wheat-img" src="{{icons.wheat}}" mode="aspectFit" style="transform: scaleX(-1);"/>
+        </view>
+      </view>
+
+      <text class="brand-name">小赵面食</text>
+      <text class="brand-en">DAILY BAKERY</text>
+
+      <!-- 分隔线 -->
+      <view class="divider"></view>
+
+      <!-- 登录卡片 -->
+      <view class="login-card">
+        <text class="login-title">登录享受更多权益</text>
+        <text class="login-desc">登录后可查看订单、使用优惠券\n及享受会员积分权益</text>
+
+        <!-- 用户头像（未登录时可点击选择）-->
+        <view
+          class="avatar-preview"
+          bindtap="chooseAvatarFromAlbum"
+        >
+          <image class="avatar-img" src="{{tempAvatarUrl || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png'}}" mode="aspectFill" style="width: 100%; height: 100%;"/>
+          <view class="avatar-hint" wx:if="{{!tempAvatarUrl}}">点击选择头像</view>
+        </view>
+
+        <!-- 登录并获取手机号按钮 -->
+        <button
+          class="login-btn {{status}}"
+          open-type="getPhoneNumber"
+          bind:getphonenumber="onLoginWithPhone"
+          disabled="{{status !== 'idle'}}"
+        >
+          <block wx:if="{{status === 'idle'}}">
+            <image class="btn-wechat-icon" src="{{icons.wechat}}" mode="aspectFit"/>
+            <text>微信一键登录</text>
+          </block>
+          <block wx:if="{{status === 'loading'}}">
+            <view class="loading-spinner"></view>
+            <text>登录中…</text>
+          </block>
+          <block wx:if="{{status === 'success'}}">
+            <image class="check-icon" src="{{icons.checkCircle}}" mode="aspectFit"/>
+            <text>登录成功</text>
+          </block>
+        </button>
+
+        <!-- 仅登录按钮（不获取手机号） -->
+        <button
+          class="login-btn-simple"
+          bindtap="onWechatLogin"
+          disabled="{{status !== 'idle'}}"
+          wx:if="{{status === 'idle'}}"
+        >
+          <text>暂不绑定手机号</text>
+        </button>
+
+        <text class="agreement-hint">登录即代表同意《用户协议》与《隐私政策》</text>
+      </view>
+    </view>
+
+    <!-- ========== 已登录状态 ========== -->
+    <view class="profile-section" wx:if="{{isLogin}}">
+      <!-- 用户信息卡片 -->
+      <view class="user-header-card">
+        <!-- 装饰麦穗 -->
+        <view class="header-wheat">
+          <image class="wheat-img" src="{{icons.wheat}}" mode="aspectFit" style="transform: scaleX(-1);"/>
+        </view>
+
+        <!-- 用户信息 -->
+        <view class="user-info-row">
+          <!-- 头像：点击可从相册选择 -->
+          <view
+            class="avatar-wrap"
+            bindtap="chooseAvatarFromAlbum"
+          >
+            <image class="user-avatar" src="{{userInfo.avatarUrl || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png'}}" mode="aspectFill"/>
+            <view class="avatar-edit-hint">更换</view>
+          </view>
+          <view class="user-meta">
+            <!-- 昵称：优先显示微信昵称，其次显示默认 -->
+            <text class="user-name">{{userInfo.nickName || userInfo.wxNickName || '微信用户'}}</text>
+            <!-- 手机号 -->
+            <view class="phone-section" bindtap="onGetPhoneNumber" wx:if="{{!userInfo.phone}}">
+              <button
+                class="phone-btn"
+                open-type="getPhoneNumber"
+                bind:getphonenumber="onGetPhoneNumber"
+              >
+                <text class="phone-text">点击绑定手机号</text>
+              </button>
+            </view>
+            <text class="user-phone" wx:if="{{userInfo.phone}}">📱 {{userInfo.phone}}</text>
+            <view class="member-badge">
+              <text class="star">⭐</text>
+              <text>{{userInfo.memberLevel || '普通会员'}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 统计数据 -->
+        <view class="stats-row">
+          <view class="stat-item" bindtap="onPointsTap">
+            <text class="stat-value">{{stats.points || 0}}</text>
+            <text class="stat-label">积分</text>
+          </view>
+          <view class="stat-divider"></view>
+          <view class="stat-item" bindtap="onCouponTap">
+            <text class="stat-value">{{stats.couponCount || 0}}</text>
+            <text class="stat-label">优惠券</text>
+          </view>
+          <view class="stat-divider"></view>
+          <view class="stat-item" bindtap="onAllOrdersTap">
+            <text class="stat-value">{{orderStats.total || 0}}</text>
+            <text class="stat-label">订单</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 菜单列表 -->
+      <view class="menu-card">
+        <view
+          class="menu-item"
+          wx:for="{{menuItems}}"
+          wx:key="label"
+          bindtap="onMenuTap"
+          data-item="{{item}}"
+        >
+          <view class="menu-icon-wrap" style="background: {{item.bgColor}};">
+            <image class="menu-icon" src="{{item.icon}}" mode="aspectFit"/>
+          </view>
+          <view class="menu-content">
+            <text class="menu-label">{{item.label}}</text>
+            <text class="menu-sub">{{item.sub}}</text>
+          </view>
+          <image class="menu-arrow" src="{{icons.chevronRight}}" mode="aspectFit"/>
+        </view>
+      </view>
+
+      <!-- 退出登录 -->
+      <button class="logout-btn" bindtap="onLogout">
+        <image class="logout-icon" src="{{icons.logout}}" mode="aspectFit"/>
+        <text>退出登录</text>
+      </button>
+    </view>
+
+    <!-- 底部安全区域 -->
+    <view class="safe-area-bottom"></view>
+  </scroll-view>
+</view>

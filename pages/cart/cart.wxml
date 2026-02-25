@@ -1,0 +1,117 @@
+<!-- 购物车页面 - 确定预定（匹配 Figma 设计稿） -->
+<view class="cart-container">
+  <!-- 顶部导航栏 -->
+  <view class="header-bar">
+    <view class="header-content">
+      <view class="back-btn" bindtap="onBackTap">
+        <image class="back-icon" src="{{icons.arrowLeft}}" mode="aspectFit"/>
+        <text class="back-text">返回</text>
+      </view>
+      <text class="header-title">确定预定</text>
+      <view class="order-type-badge {{orderType === 'pickup' ? 'pickup' : 'delivery'}}">
+        {{orderType === 'pickup' ? '🏪 预定自取' : '🚚 预定配送'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 空购物车状态 -->
+  <view class="empty-cart" wx:if="{{!isLoading && cartList.length === 0}}">
+    <image class="empty-icon" src="{{icons.cartEmpty}}" mode="aspectFit"/>
+    <text class="empty-text">购物车是空的</text>
+    <view class="go-shopping-btn" bindtap="goToShop">去选购</view>
+  </view>
+
+  <!-- 购物车内容 -->
+  <scroll-view class="cart-content" scroll-y enhanced show-scrollbar="{{false}}" wx:if="{{cartList.length > 0}}">
+    <!-- 已选商品标签 -->
+    <view class="section-header">
+      <view class="section-icon-wrap">
+        <image class="section-icon" src="{{icons.cart}}" mode="aspectFit"/>
+      </view>
+      <text class="section-title">已选商品</text>
+      <view class="total-qty-badge">共 {{totalQty}} 件</view>
+    </view>
+
+    <!-- 商品列表 -->
+    <view class="product-list">
+      <view class="product-card" wx:for="{{cartList}}" wx:key="_id">
+        <!-- 商品图片 -->
+        <view class="product-image-wrap">
+          <image class="product-image" src="{{item.imageUrl || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png'}}" mode="aspectFill" lazy-load/>
+        </view>
+
+        <!-- 商品信息 -->
+        <view class="product-info">
+          <view class="product-name-wrap">
+            <text class="product-name">{{item.name}}</text>
+            <text class="product-desc" wx:if="{{item.desc}}">{{item.desc}}</text>
+          </view>
+
+          <view class="product-bottom">
+            <text class="product-price">¥{{item.price * item.quantity}}</text>
+
+            <!-- 数量调整 -->
+            <view class="quantity-stepper">
+              <view
+                class="stepper-btn minus {{item.quantity <= 1 ? 'disabled' : ''}}"
+                catchtap="decreaseQuantity"
+                data-index="{{index}}"
+              >
+                <text class="minus-icon">−</text>
+              </view>
+              <text class="quantity-value">{{item.quantity}}</text>
+              <view
+                class="stepper-btn plus"
+                catchtap="increaseQuantity"
+                data-index="{{index}}"
+              >
+                <text class="plus-icon">+</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 删除按钮 -->
+        <view class="delete-btn" catchtap="onDeleteItem" data-index="{{index}}">
+          <text class="delete-text">删除</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 配送/自取提示 -->
+    <view class="order-note delivery" wx:if="{{orderType === 'delivery'}}">
+      <text class="note-icon">🚚</text>
+      <view class="note-content">
+        <text class="note-title">配送信息</text>
+        <text class="note-desc">满 ¥88 免配送费 · 预计 30 分钟内送达</text>
+      </view>
+    </view>
+
+    <view class="order-note pickup" wx:if="{{orderType === 'pickup'}}">
+      <text class="note-icon">🏪</text>
+      <view class="note-content">
+        <text class="note-title">自取提示</text>
+        <text class="note-desc">预计 15 分钟内备好 · 请凭订单号自取</text>
+      </view>
+    </view>
+
+    <!-- 底部间距 -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
+
+  <!-- 底部确定预定栏 -->
+  <view class="confirm-bar" wx:if="{{cartList.length > 0}}">
+    <view class="confirm-content">
+      <view class="total-row">
+        <text class="total-label">合计</text>
+        <text class="total-price">¥{{totalPrice}}</text>
+      </view>
+      <button class="confirm-btn" bindtap="goToCheckout">
+        确定预定
+      </button>
+    </view>
+  </view>
+</view>
+
+<!-- Toast 提示 -->
+<toast id="toast"></toast>

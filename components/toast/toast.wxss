@@ -1,0 +1,387 @@
+/**
+ * 轻提示组件样式
+ */
+
+/* 提示容器 */
+.toast-wrapper {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+/* 位置样式 */
+.toast-top {
+  top: 200rpx;
+}
+
+.toast-middle {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.toast-bottom {
+  bottom: 200rpx;
+}
+
+/* 遮罩层 */
+.toast-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+}
+
+/* 提示内容 */
+.toast-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx 50rpx;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 16rpx;
+  min-width: 200rpx;
+  max-width: 560rpx;
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: auto;
+}
+
+/* 纯文字提示 */
+.toast-none {
+  padding: 24rpx 40rpx;
+}
+
+/* 图标区域 */
+.toast-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20rpx;
+}
+
+.toast-none .toast-icon-wrapper {
+  display: none;
+}
+
+/* 自定义图片 */
+.toast-image {
+  width: 80rpx;
+  height: 80rpx;
+}
+
+/* 图标基础样式 */
+.toast-icon {
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 成功图标 */
+.icon-success {
+  position: relative;
+}
+
+.success-check {
+  width: 40rpx;
+  height: 60rpx;
+  border-right: 6rpx solid #81C784;
+  border-bottom: 6rpx solid #81C784;
+  transform: rotate(45deg) translate(-5rpx, -10rpx);
+  animation: checkDraw 0.4s ease-out;
+}
+
+@keyframes checkDraw {
+  0% {
+    width: 0;
+    height: 0;
+  }
+  50% {
+    width: 40rpx;
+    height: 0;
+  }
+  100% {
+    width: 40rpx;
+    height: 60rpx;
+  }
+}
+
+/* 错误图标 */
+.icon-error {
+  position: relative;
+}
+
+.error-line {
+  position: absolute;
+  width: 50rpx;
+  height: 6rpx;
+  background: #E57373;
+  border-radius: 3rpx;
+}
+
+.line-1 {
+  transform: rotate(45deg);
+  animation: errorLine1 0.3s ease-out;
+}
+
+.line-2 {
+  transform: rotate(-45deg);
+  animation: errorLine2 0.3s ease-out 0.1s both;
+}
+
+@keyframes errorLine1 {
+  from {
+    width: 0;
+  }
+  to {
+    width: 50rpx;
+  }
+}
+
+@keyframes errorLine2 {
+  from {
+    width: 0;
+  }
+  to {
+    width: 50rpx;
+  }
+}
+
+/* 加载图标 */
+.icon-loading {
+  position: relative;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.2);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: loadingRotate 1s linear infinite;
+}
+
+@keyframes loadingRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 警告图标 */
+.icon-warning {
+  background: #FFD54F;
+  border-radius: 50%;
+}
+
+.icon-warning text {
+  color: #5D4037;
+  font-size: 48rpx;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* 文字区域 */
+.toast-text-wrapper {
+  text-align: center;
+}
+
+.toast-text {
+  font-size: 28rpx;
+  color: #fff;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+/* ========== 主题样式 ========== */
+
+/* 成功主题 */
+.toast-success-theme .toast-content {
+  background: rgba(129, 199, 132, 0.95);
+}
+
+/* 错误主题 */
+.toast-error-theme .toast-content {
+  background: rgba(229, 115, 115, 0.95);
+}
+
+/* 警告主题 */
+.toast-warning-theme .toast-content {
+  background: rgba(255, 213, 79, 0.95);
+}
+
+.toast-warning-theme .toast-text {
+  color: #5D4037;
+}
+
+/* 信息主题 */
+.toast-info-theme .toast-content {
+  background: rgba(100, 181, 246, 0.95);
+}
+
+/* ========== 尺寸样式 ========== */
+
+/* 小型提示 */
+.toast-small .toast-content {
+  padding: 20rpx 30rpx;
+}
+
+.toast-small .toast-icon {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+.toast-small .toast-text {
+  font-size: 24rpx;
+}
+
+/* 大型提示 */
+.toast-large .toast-content {
+  padding: 50rpx 70rpx;
+}
+
+.toast-large .toast-icon {
+  width: 100rpx;
+  height: 100rpx;
+}
+
+.toast-large .toast-text {
+  font-size: 32rpx;
+}
+
+/* ========== 动画效果 ========== */
+@keyframes toastFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes toastFadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes toastSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-50rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-animate-fade {
+  animation: toastFadeIn 0.3s ease-out;
+}
+
+.toast-animate-slide-down {
+  animation: toastSlideDown 0.3s ease-out;
+}
+
+.toast-animate-slide-up {
+  animation: toastSlideUp 0.3s ease-out;
+}
+
+/* ========== 长文字提示 ========== */
+.toast-long-text .toast-content {
+  padding: 30rpx 40rpx;
+}
+
+.toast-long-text .toast-text {
+  max-width: 400rpx;
+  text-align: left;
+  line-height: 1.8;
+}
+
+/* ========== 多行提示 ========== */
+.toast-multiline .toast-text {
+  white-space: pre-line;
+}
+
+/* ========== 带操作的提示 ========== */
+.toast-with-action .toast-content {
+  padding-bottom: 30rpx;
+}
+
+.toast-action {
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.2);
+}
+
+.toast-action-btn {
+  padding: 10rpx 30rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  color: #fff;
+}
+
+/* ========== 进度提示 ========== */
+.toast-progress .toast-content {
+  padding: 40rpx 50rpx;
+}
+
+.toast-progress-bar {
+  width: 300rpx;
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4rpx;
+  margin-top: 20rpx;
+  overflow: hidden;
+}
+
+.toast-progress-fill {
+  height: 100%;
+  background: #fff;
+  border-radius: 4rpx;
+  transition: width 0.3s ease;
+}
+
+/* ========== 深色模式适配 ========== */
+@media (prefers-color-scheme: dark) {
+  .toast-content {
+    background: rgba(40, 40, 40, 0.95);
+  }
+  
+  .loading-spinner {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-top-color: #D4A574;
+  }
+}

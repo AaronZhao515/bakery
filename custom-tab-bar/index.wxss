@@ -1,0 +1,63 @@
+
+/* Custom Tab Bar - Figma Design */
+
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: #FFFFFF;
+  box-shadow: 0 -4rpx 32rpx rgba(155,115,85,0.14);
+  z-index: 999;
+  border-radius: 40rpx 40rpx 0 0;
+  padding: 16rpx 24rpx calc(24rpx + env(safe-area-inset-bottom));
+}
+
+.tab-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  margin: 8rpx;
+  padding: 16rpx 8rpx;
+  border-radius: 32rpx;
+  border: 3rpx solid #EAD9BB;
+  background: #FFFFFF;
+  transition: all 0.2s;
+}
+
+.tab-active {
+  background: #F5EDD8;
+  border-color: #C8A882;
+}
+
+.tab-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-icon-img {
+  width: 48rpx;
+  height: 48rpx;
+  opacity: 0.7;
+}
+
+.tab-active .tab-icon-img {
+  opacity: 1;
+}
+
+.tab-text {
+  font-size: 20rpx;
+  color: #B08860;
+  letter-spacing: 0.6rpx;
+  white-space: nowrap;
+}
+
+.tab-active .tab-text {
+  color: #7A5533;
+  font-weight: 700;
+}

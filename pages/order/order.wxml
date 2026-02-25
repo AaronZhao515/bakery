@@ -1,0 +1,107 @@
+<!-- 订单页面 - 匹配Figma设计稿 -->
+<view class="orders-container">
+  <!-- Fixed Header -->
+  <view class="orders-header">
+    <view class="header-content">
+      <image class="header-icon" src="{{icons.order}}" mode="aspectFit"/>
+      <text class="header-title">预定订单</text>
+      <view class="order-count-badge" wx:if="{{orders.length > 0}}">
+        <text>{{orders.length}} 笔订单</text>
+      </view>
+    </view>
+
+    <!-- Status Tabs -->
+    <view class="status-tabs">
+      <view
+        class="tab-item {{activeTab === item.code ? 'active' : ''}}"
+        wx:for="{{tabs}}"
+        wx:key="code"
+        bindtap="onTabChange"
+        data-code="{{item.code}}"
+      >
+        <text class="tab-text">{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Scrollable Content -->
+  <scroll-view class="orders-content" scroll-y enhanced show-scrollbar="{{false}}" bindscrolltolower="onReachBottom">
+    <!-- Empty State -->
+    <view class="empty-state" wx:if="{{orders.length === 0 && !isLoading && !hasError}}">
+      <image class="empty-icon" src="{{icons.order}}" mode="aspectFit"/>
+      <text class="empty-text">暂无预定订单</text>
+      <text class="empty-tip" wx:if="{{!isLogin}}">请先登录后查看订单</text>
+      <view class="go-reserve-btn" bindtap="onGoReserve">
+        <text>{{isLogin ? '去预定' : '去登录'}}</text>
+        <image class="arrow-icon" src="{{icons.chevronRight}}" mode="aspectFit"/>
+      </view>
+    </view>
+
+    <!-- Error State -->
+    <view class="empty-state" wx:if="{{hasError && !isLoading}}">
+      <image class="empty-icon" src="{{icons.order}}" mode="aspectFit"/>
+      <text class="empty-text">加载失败</text>
+      <text class="empty-tip">请下拉刷新重试</text>
+    </view>
+
+    <!-- Order List -->
+    <view class="order-list" wx:if="{{orders.length > 0}}">
+      <view class="order-card" wx:for="{{orders}}" wx:key="_id" bindtap="onOrderTap" data-id="{{item._id}}">
+        <!-- Card Header -->
+        <view class="order-header">
+          <view class="order-no-wrap">
+            <text class="order-no-label">订单号</text>
+            <text class="order-no">#{{item.orderNo || item._id}}</text>
+          </view>
+          <view class="order-status" style="background: {{item.statusColor}}20; color: {{item.statusColor}};">
+            <text>{{item.statusText}}</text>
+          </view>
+        </view>
+
+        <!-- Order Type Row -->
+        <view class="order-type-row">
+          <view class="order-type-badge {{item.deliveryType === 0 ? 'type-pickup' : 'type-delivery'}}">
+            <text class="type-emoji">{{item.deliveryType === 0 ? '🏪' : '🚚'}}</text>
+            <text>{{item.deliveryType === 0 ? '预定自取' : '预定配送'}}</text>
+          </view>
+          <text class="order-date">{{item.createTime || item.date}}</text>
+        </view>
+
+        <!-- Product List -->
+        <view class="product-list">
+          <view class="product-item" wx:for="{{item.items}}" wx:key="_id" wx:for-item="product">
+            <view class="product-image-wrap">
+              <image class="product-image" src="{{product.image}}" mode="aspectFill" />
+            </view>
+            <view class="product-info">
+              <text class="product-name">{{product.name}}</text>
+              <text class="product-spec">{{product.desc || product.spec || '精选原料 · 手工制作'}}</text>
+            </view>
+            <view class="product-price-wrap">
+              <text class="product-total-price">¥{{product.price * (product.quantity || product.qty)}}</text>
+              <text class="product-qty">× {{product.quantity || product.qty}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- Order Footer -->
+        <view class="order-footer">
+          <text class="order-total-count">共 {{item.productCount || item.items.length}} 件</text>
+          <view class="order-total-wrap">
+            <text class="order-total-label">合计</text>
+            <text class="order-total">¥{{item.totalAmount || item.total}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Loading More -->
+    <view class="loading-more" wx:if="{{isLoadingMore}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- Bottom Spacer -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
+</view>

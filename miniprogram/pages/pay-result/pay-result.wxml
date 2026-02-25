@@ -1,0 +1,131 @@
+<!-- 支付结果页面 -->
+<view class="pay-result-container">
+  <!-- 支付成功状态 -->
+  <view class="result-section success" wx:if="{{payStatus === 'success'}}">
+    <view class="result-icon">
+      <view class="icon-circle success-circle">
+        <text class="icon-text">✓</text>
+      </view>
+    </view>
+    <text class="result-title">支付成功</text>
+    <text class="result-subtitle">感谢您的购买，我们会尽快为您准备美味的面包</text>
+    
+    <!-- 订单信息卡片 -->
+    <view class="order-info-card">
+      <view class="info-row">
+        <text class="info-label">订单编号</text>
+        <view class="info-value copy-box">
+          <text>{{orderNo}}</text>
+          <text class="copy-btn" bindtap="copyOrderNo">复制</text>
+        </view>
+      </view>
+      <view class="info-row">
+        <text class="info-label">支付金额</text>
+        <text class="info-value price">¥{{payAmount}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">支付方式</text>
+        <text class="info-value">微信支付</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">支付时间</text>
+        <text class="info-value">{{payTime}}</text>
+      </view>
+    </view>
+
+    <!-- 配送信息 -->
+    <view class="delivery-info-card" wx:if="{{deliveryInfo}}">
+      <view class="card-title">
+        <text class="title-icon">🚚</text>
+        <text>{{deliveryInfo.type === 'delivery' ? '配送信息' : '自取信息'}}</text>
+      </view>
+      <view class="delivery-content">
+        <block wx:if="{{deliveryInfo.type === 'delivery'}}">
+          <view class="delivery-row">
+            <text class="delivery-label">收货人</text>
+            <text class="delivery-value">{{deliveryInfo.name}} {{deliveryInfo.phone}}</text>
+          </view>
+          <view class="delivery-row">
+            <text class="delivery-label">收货地址</text>
+            <text class="delivery-value">{{deliveryInfo.address}}</text>
+          </view>
+          <view class="delivery-row">
+            <text class="delivery-label">预计送达</text>
+            <text class="delivery-value highlight">{{deliveryInfo.estimatedTime}}</text>
+          </view>
+        </block>
+        <block wx:else>
+          <view class="delivery-row">
+            <text class="delivery-label">自取门店</text>
+            <text class="delivery-value">温馨烘焙坊（总店）</text>
+          </view>
+          <view class="delivery-row">
+            <text class="delivery-label">门店地址</text>
+            <text class="delivery-value">{{deliveryInfo.storeAddress}}</text>
+          </view>
+          <view class="delivery-row">
+            <text class="delivery-label">自取时间</text>
+            <text class="delivery-value highlight">{{deliveryInfo.pickupTime}}</text>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <button class="btn primary" bindtap="viewOrder">查看订单</button>
+      <button class="btn secondary" bindtap="goHome">返回首页</button>
+    </view>
+  </view>
+
+  <!-- 支付失败状态 -->
+  <view class="result-section fail" wx:if="{{payStatus === 'fail'}}">
+    <view class="result-icon">
+      <view class="icon-circle fail-circle">
+        <text class="icon-text">✕</text>
+      </view>
+    </view>
+    <text class="result-title">支付失败</text>
+    <text class="result-subtitle">{{failMessage || '支付遇到问题，请重新尝试'}}</text>
+    
+    <!-- 订单信息 -->
+    <view class="order-info-card">
+      <view class="info-row">
+        <text class="info-label">订单编号</text>
+        <text class="info-value">{{orderNo}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">待付金额</text>
+        <text class="info-value price">¥{{payAmount}}</text>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <button class="btn primary" bindtap="retryPay">重新支付</button>
+      <button class="btn secondary" bindtap="viewOrder">查看订单</button>
+      <button class="btn text-btn" bindtap="goHome">返回首页</button>
+    </view>
+  </view>
+
+  <!-- 支付处理中状态 -->
+  <view class="result-section pending" wx:if="{{payStatus === 'pending'}}">
+    <view class="result-icon">
+      <view class="loading-spinner"></view>
+    </view>
+    <text class="result-title">支付处理中</text>
+    <text class="result-subtitle">正在确认支付结果，请稍候...</text>
+  </view>
+
+  <!-- 底部提示 -->
+  <view class="bottom-tips" wx:if="{{payStatus === 'success'}}">
+    <view class="tip-item">
+      <text class="tip-icon">📞</text>
+      <text class="tip-text">如有问题请联系客服：400-888-8888</text>
+    </view>
+    <view class="tip-item">
+      <text class="tip-icon">⏰</text>
+      <text class="tip-text">营业时间：08:00 - 21:00</text>
+    </view>
+  </view>
+</view>

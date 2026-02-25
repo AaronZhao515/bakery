@@ -1,0 +1,349 @@
+/* 优惠券页样式 */
+.container {
+  min-height: 100vh;
+  background-color: #FDF8F3;
+  padding-bottom: 160rpx;
+}
+
+/* 筛选栏 */
+.filter-bar {
+  display: flex;
+  background-color: #fff;
+  padding: 0 30rpx;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.filter-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30rpx 0;
+  position: relative;
+}
+
+.filter-text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.filter-count {
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 5rpx;
+}
+
+.filter-item.active .filter-text {
+  color: #D4A574;
+  font-weight: 600;
+}
+
+.filter-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 4rpx;
+  background-color: #D4A574;
+  border-radius: 2rpx;
+}
+
+/* 优惠券列表 */
+.coupon-list {
+  padding: 20rpx;
+}
+
+.coupon-card {
+  display: flex;
+  background-color: #fff;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.coupon-card.disabled {
+  opacity: 0.7;
+}
+
+.coupon-card.expiring {
+  border: 2rpx solid #ff9800;
+}
+
+.coupon-card.expiring::before {
+  content: '即将过期';
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #ff9800;
+  color: #fff;
+  font-size: 20rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 0 0 0 16rpx;
+}
+
+/* 左侧金额区 */
+.coupon-left {
+  width: 200rpx;
+  padding: 30rpx;
+  background: linear-gradient(135deg, #D4A574 0%, #c49a6b 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.coupon-card.disabled .coupon-left {
+  background: #ccc;
+}
+
+.coupon-amount {
+  display: flex;
+  align-items: flex-start;
+  color: #fff;
+}
+
+.amount-symbol {
+  font-size: 32rpx;
+  margin-top: 10rpx;
+}
+
+.amount-value {
+  font-size: 72rpx;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.coupon-condition {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 10rpx;
+}
+
+/* 中间分隔线 */
+.coupon-divider {
+  width: 20rpx;
+  position: relative;
+  background-color: #fff;
+  flex-shrink: 0;
+}
+
+.divider-dot {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20rpx;
+  height: 20rpx;
+  background-color: #FDF8F3;
+  border-radius: 50%;
+}
+
+.divider-dot.top {
+  top: -10rpx;
+}
+
+.divider-dot.bottom {
+  bottom: -10rpx;
+}
+
+.divider-line {
+  position: absolute;
+  top: 10rpx;
+  bottom: 10rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2rpx;
+  border-left: 2rpx dashed #eee;
+}
+
+/* 右侧信息区 */
+.coupon-right {
+  flex: 1;
+  padding: 30rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.coupon-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.coupon-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.coupon-scope {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 10rpx;
+}
+
+.coupon-time {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.coupon-status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: 20rpx;
+}
+
+.status-tag {
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 24rpx;
+  margin-bottom: 15rpx;
+}
+
+.status-tag.used {
+  background-color: #f0f0f0;
+  color: #999;
+}
+
+.status-tag.expired {
+  background-color: #f0f0f0;
+  color: #999;
+}
+
+.status-tag.expiring {
+  background-color: #fff3e0;
+  color: #ff9800;
+}
+
+.use-btn {
+  min-width: 120rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  background: linear-gradient(135deg, #D4A574 0%, #c49a6b 100%);
+  color: #fff;
+  font-size: 24rpx;
+  border-radius: 28rpx;
+  margin: 0;
+  padding: 0 30rpx;
+}
+
+.use-btn::after {
+  border: none;
+}
+
+/* 加载更多 */
+.load-more {
+  text-align: center;
+  padding: 30rpx 0;
+  color: #D4A574;
+  font-size: 26rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 150rpx;
+}
+
+.empty-image {
+  width: 280rpx;
+  height: 280rpx;
+  margin-bottom: 30rpx;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #666;
+  margin-bottom: 15rpx;
+}
+
+.empty-subtext {
+  font-size: 26rpx;
+  color: #999;
+  margin-bottom: 40rpx;
+}
+
+.empty-btn {
+  width: 280rpx;
+}
+
+/* 兑换码区域 */
+.exchange-section {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx 30rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background-color: #fff;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.exchange-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.exchange-input {
+  flex: 1;
+  height: 80rpx;
+  background-color: #f5f5f5;
+  border-radius: 40rpx;
+  padding: 0 30rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.exchange-btn {
+  width: 140rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  background-color: #ddd;
+  color: #fff;
+  font-size: 28rpx;
+  border-radius: 40rpx;
+  margin: 0;
+  padding: 0;
+  font-weight: 500;
+}
+
+.exchange-btn::after {
+  border: none;
+}
+
+.exchange-btn.active {
+  background: linear-gradient(135deg, #D4A574 0%, #c49a6b 100%);
+}
+
+/* 通用按钮 */
+.btn {
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 28rpx;
+  border-radius: 40rpx;
+  margin: 0;
+  padding: 0 40rpx;
+  text-align: center;
+}
+
+.btn::after {
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #D4A574 0%, #c49a6b 100%);
+  color: #fff;
+}

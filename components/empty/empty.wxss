@@ -1,0 +1,247 @@
+/**
+ * 空状态组件样式
+ */
+
+/* 空状态容器 */
+.empty-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 60rpx;
+  text-align: center;
+}
+
+/* 图片区域 */
+.empty-image-wrapper {
+  margin-bottom: 40rpx;
+}
+
+.empty-image {
+  width: 280rpx;
+  height: 280rpx;
+}
+
+/* 默认图标 */
+.empty-icon {
+  width: 200rpx;
+  height: 200rpx;
+  background: var(--bg-tertiary, #F5F0EB);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-text {
+  font-size: 100rpx;
+}
+
+/* 文字区域 */
+.empty-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+/* 标题 */
+.empty-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-primary, #5D4037);
+  line-height: 1.4;
+}
+
+/* 描述 */
+.empty-description {
+  font-size: 26rpx;
+  color: var(--text-secondary, #8D6E63);
+  line-height: 1.6;
+  max-width: 400rpx;
+}
+
+/* 操作区域 */
+.empty-action {
+  margin-top: 48rpx;
+}
+
+/* 按钮 */
+.empty-btn {
+  min-width: 240rpx;
+  height: 80rpx;
+  padding: 0 48rpx;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.empty-btn::after {
+  border: none;
+}
+
+.empty-btn:active {
+  transform: scale(0.96);
+}
+
+/* 主要按钮 */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary, #D4A574), var(--primary-dark, #B8935F));
+  color: #fff;
+  box-shadow: 0 8rpx 24rpx rgba(212, 165, 116, 0.35);
+}
+
+.btn-primary:active {
+  box-shadow: 0 4rpx 12rpx rgba(212, 165, 116, 0.25);
+}
+
+/* 描边按钮 */
+.btn-outline {
+  background: transparent;
+  border: 2rpx solid var(--primary, #D4A574);
+  color: var(--primary, #D4A574);
+}
+
+.btn-outline:active {
+  background: var(--primary-light, #E8D4C0);
+}
+
+/* 幽灵按钮 */
+.btn-ghost {
+  background: transparent;
+  color: var(--primary, #D4A574);
+}
+
+.btn-ghost:active {
+  background: var(--bg-tertiary, #F5F0EB);
+}
+
+/* ========== 不同场景样式 ========== */
+
+/* 小型空状态 */
+.empty-small .empty-image {
+  width: 160rpx;
+  height: 160rpx;
+}
+
+.empty-small .empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+}
+
+.empty-small .icon-text {
+  font-size: 60rpx;
+}
+
+.empty-small .empty-title {
+  font-size: 28rpx;
+}
+
+.empty-small .empty-description {
+  font-size: 24rpx;
+}
+
+.empty-small .empty-btn {
+  min-width: 180rpx;
+  height: 64rpx;
+  font-size: 26rpx;
+}
+
+/* 大型空状态 */
+.empty-large .empty-image {
+  width: 400rpx;
+  height: 400rpx;
+}
+
+.empty-large .empty-icon {
+  width: 280rpx;
+  height: 280rpx;
+}
+
+.empty-large .icon-text {
+  font-size: 140rpx;
+}
+
+.empty-large .empty-title {
+  font-size: 36rpx;
+}
+
+.empty-large .empty-description {
+  font-size: 28rpx;
+}
+
+/* ========== 动画效果 ========== */
+@keyframes emptyFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.empty-wrapper {
+  animation: emptyFadeIn 0.4s ease-out;
+}
+
+@keyframes emptyImageFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10rpx);
+  }
+}
+
+.empty-image,
+.empty-icon {
+  animation: emptyImageFloat 3s ease-in-out infinite;
+}
+
+/* ========== 页面级空状态 ========== */
+.empty-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary, #FDF8F3);
+}
+
+/* ========== 列表空状态 ========== */
+.empty-list {
+  padding: 120rpx 60rpx;
+}
+
+.empty-list .empty-image {
+  width: 200rpx;
+  height: 200rpx;
+}
+
+/* ========== 深色模式适配 ========== */
+@media (prefers-color-scheme: dark) {
+  .empty-wrapper {
+    background: transparent;
+  }
+  
+  .empty-icon {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .empty-title {
+    color: #fff;
+  }
+  
+  .empty-description {
+    color: #aaa;
+  }
+  
+  .btn-ghost:active {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "确定预定",
+  "navigationBarBackgroundColor": "#8B6347",
+  "navigationBarTextStyle": "white",
+  "navigationStyle": "custom",
+  "backgroundColor": "#F0EAD6",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "toast": "/components/toast/toast"
+  }
+}

@@ -1,0 +1,299 @@
+/* 支付结果页面样式 - 温暖烘焙风格 */
+
+page {
+  background-color: #FDF8F3;
+  min-height: 100vh;
+}
+
+.pay-result-container {
+  padding: 60rpx 40rpx;
+}
+
+/* ========== 结果区域 ========== */
+.result-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.result-icon {
+  margin-bottom: 40rpx;
+}
+
+.icon-circle {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: scaleIn 0.5s ease;
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-circle {
+  background: linear-gradient(135deg, #81C784 0%, #4CAF50 100%);
+  box-shadow: 0 8rpx 32rpx rgba(76, 175, 80, 0.3);
+}
+
+.fail-circle {
+  background: linear-gradient(135deg, #E57373 0%, #F44336 100%);
+  box-shadow: 0 8rpx 32rpx rgba(244, 67, 54, 0.3);
+}
+
+.icon-text {
+  font-size: 80rpx;
+  color: #FFFFFF;
+  font-weight: 300;
+}
+
+.result-title {
+  font-size: 44rpx;
+  color: #333333;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+}
+
+.result-subtitle {
+  font-size: 28rpx;
+  color: #666666;
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 50rpx;
+  padding: 0 40rpx;
+}
+
+/* ========== 加载动画 ========== */
+.loading-spinner {
+  width: 120rpx;
+  height: 120rpx;
+  border: 6rpx solid #F0E6DC;
+  border-top-color: #D4A574;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========== 订单信息卡片 ========== */
+.order-info-card {
+  width: 100%;
+  background-color: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-bottom: 2rpx solid #F5F5F5;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #666666;
+}
+
+.info-value {
+  font-size: 26rpx;
+  color: #333333;
+}
+
+.info-value.price {
+  font-size: 32rpx;
+  color: #D4A574;
+  font-weight: 600;
+}
+
+.copy-box {
+  display: flex;
+  align-items: center;
+}
+
+.copy-btn {
+  margin-left: 16rpx;
+  padding: 6rpx 16rpx;
+  background-color: #FDF8F3;
+  color: #D4A574;
+  font-size: 22rpx;
+  border-radius: 8rpx;
+  border: 2rpx solid #D4A574;
+}
+
+/* ========== 配送信息卡片 ========== */
+.delivery-info-card {
+  width: 100%;
+  background-color: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #F5F5F5;
+}
+
+.title-icon {
+  font-size: 36rpx;
+  margin-right: 12rpx;
+}
+
+.card-title text:last-child {
+  font-size: 30rpx;
+  color: #333333;
+  font-weight: 600;
+}
+
+.delivery-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.delivery-row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.delivery-label {
+  width: 140rpx;
+  font-size: 26rpx;
+  color: #999999;
+  flex-shrink: 0;
+}
+
+.delivery-value {
+  flex: 1;
+  font-size: 26rpx;
+  color: #333333;
+  line-height: 1.4;
+}
+
+.delivery-value.highlight {
+  color: #D4A574;
+  font-weight: 500;
+}
+
+/* ========== 操作按钮 ========== */
+.action-buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  margin-top: 20rpx;
+}
+
+.btn {
+  width: 100%;
+  height: 92rpx;
+  line-height: 92rpx;
+  font-size: 30rpx;
+  border-radius: 46rpx;
+  border: none;
+  font-weight: 500;
+}
+
+.btn::after {
+  border: none;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, #D4A574 0%, #B8935F 100%);
+  color: #FFFFFF;
+  box-shadow: 0 8rpx 24rpx rgba(212, 165, 116, 0.3);
+}
+
+.btn.primary:active {
+  opacity: 0.9;
+}
+
+.btn.secondary {
+  background-color: #FFFFFF;
+  color: #D4A574;
+  border: 2rpx solid #D4A574;
+}
+
+.btn.secondary:active {
+  background-color: #FDF8F3;
+}
+
+.btn.text-btn {
+  background-color: transparent;
+  color: #999999;
+  font-size: 28rpx;
+}
+
+.btn.text-btn:active {
+  color: #666666;
+}
+
+/* ========== 底部提示 ========== */
+.bottom-tips {
+  margin-top: 60rpx;
+  padding-top: 40rpx;
+  border-top: 2rpx solid #F0E6DC;
+}
+
+.tip-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16rpx;
+}
+
+.tip-item:last-child {
+  margin-bottom: 0;
+}
+
+.tip-icon {
+  font-size: 28rpx;
+  margin-right: 12rpx;
+}
+
+.tip-text {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+/* ========== 失败状态特殊样式 ========== */
+.result-section.fail .result-title {
+  color: #F44336;
+}
+
+/* ========== 处理中状态特殊样式 ========== */
+.result-section.pending .result-title {
+  color: #D4A574;
+}

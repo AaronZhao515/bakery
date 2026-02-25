@@ -1,0 +1,263 @@
+<!-- 营销配置页 -->
+<view class="marketing-container">
+  <!-- Tab切换 -->
+  <view class="tab-section">
+    <view class="tab-item {{currentTab === 'banner' ? 'active' : ''}}" bindtap="switchTab" data-tab="banner">
+      轮播图
+    </view>
+    <view class="tab-item {{currentTab === 'coupon' ? 'active' : ''}}" bindtap="switchTab" data-tab="coupon">
+      优惠券
+    </view>
+    <view class="tab-item {{currentTab === 'member' ? 'active' : ''}}" bindtap="switchTab" data-tab="member">
+      会员等级
+    </view>
+  </view>
+
+  <!-- 轮播图配置 -->
+  <view class="banner-section" wx:if="{{currentTab === 'banner'}}">
+    <view class="section-header">
+      <text class="section-title">首页轮播图</text>
+      <text class="section-tip">最多可添加5张轮播图</text>
+    </view>
+
+    <view class="banner-list">
+      <view class="banner-item" wx:for="{{banners}}" wx:key="id">
+        <view class="banner-image-wrap">
+          <image class="banner-image" src="{{item.image}}" mode="aspectFill"></image>
+          <view class="banner-sort">{{index + 1}}</view>
+        </view>
+        <view class="banner-info">
+          <view class="info-row">
+            <text class="label">链接类型:</text>
+            <text class="value">{{item.linkType === 'product' ? '商品详情' : item.linkType === 'category' ? '商品分类' : '无链接'}}</text>
+          </view>
+          <view class="info-row" wx:if="{{item.linkValue}}">
+            <text class="label">链接值:</text>
+            <text class="value">{{item.linkValue}}</text>
+          </view>
+        </view>
+        <view class="banner-actions">
+          <view class="action-btn" bindtap="editBanner" data-id="{{item.id}}">
+            <text class="iconfont icon-edit"></text>
+          </view>
+          <view class="action-btn delete" bindtap="deleteBanner" data-id="{{item.id}}">
+            <text class="iconfont icon-delete"></text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 添加轮播图按钮 -->
+    <view class="add-banner-btn" bindtap="addBanner" wx:if="{{banners.length < 5}}">
+      <text class="iconfont icon-plus"></text>
+      <text>添加轮播图</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{banners.length === 0}}">
+      <image class="empty-image" src="/images/empty-banner.png" mode="aspectFit"></image>
+      <text class="empty-text">暂无轮播图</text>
+      <text class="empty-subtext">点击上方按钮添加轮播图</text>
+    </view>
+  </view>
+
+  <!-- 优惠券管理 -->
+  <view class="coupon-section" wx:if="{{currentTab === 'coupon'}}">
+    <view class="section-header">
+      <text class="section-title">优惠券列表</text>
+    </view>
+
+    <view class="coupon-list">
+      <view class="coupon-card {{item.status}}" wx:for="{{coupons}}" wx:key="id">
+        <view class="coupon-left">
+          <view class="coupon-value">
+            <text class="currency" wx:if="{{item.type === 'amount'}}">¥</text>
+            <text class="amount">{{item.value}}</text>
+            <text class="unit" wx:if="{{item.type === 'discount'}}">折</text>
+          </view>
+          <view class="coupon-type">{{item.type === 'amount' ? '满减券' : '折扣券'}}</view>
+        </view>
+        <view class="coupon-divider"></view>
+        <view class="coupon-right">
+          <view class="coupon-name">{{item.name}}</view>
+          <view class="coupon-condition" wx:if="{{item.minAmount > 0}}">满¥{{item.minAmount}}可用</view>
+          <view class="coupon-condition" wx:else>无门槛</view>
+          <view class="coupon-time">{{item.startTime}} 至 {{item.endTime}}</view>
+          <view class="coupon-stats">
+            <text>已领取: {{item.receivedCount}}/{{item.totalCount}}</text>
+            <text>已使用: {{item.usedCount}}</text>
+          </view>
+        </view>
+        <view class="coupon-status-tag">{{item.statusText}}</view>
+        <view class="coupon-actions">
+          <view class="action-btn" bindtap="editCoupon" data-id="{{item.id}}">
+            <text class="iconfont icon-edit"></text>
+          </view>
+          <view class="action-btn delete" bindtap="deleteCoupon" data-id="{{item.id}}">
+            <text class="iconfont icon-delete"></text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 添加优惠券按钮 -->
+    <view class="add-coupon-btn" bindtap="addCoupon">
+      <text class="iconfont icon-plus"></text>
+      <text>新增优惠券</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{coupons.length === 0}}">
+      <image class="empty-image" src="/images/empty-coupon.png" mode="aspectFit"></image>
+      <text class="empty-text">暂无优惠券</text>
+      <text class="empty-subtext">点击上方按钮创建优惠券</text>
+    </view>
+  </view>
+
+  <!-- 会员等级设置 -->
+  <view class="member-section" wx:if="{{currentTab === 'member'}}">
+    <view class="section-header">
+      <text class="section-title">会员等级</text>
+      <text class="section-tip">设置会员等级及对应权益</text>
+    </view>
+
+    <view class="level-list">
+      <view class="level-card" wx:for="{{memberLevels}}" wx:key="id">
+        <view class="level-header" style="background: {{item.color}}">
+          <view class="level-icon">
+            <text class="iconfont icon-vip"></text>
+          </view>
+          <view class="level-info">
+            <text class="level-name">{{item.name}}</text>
+            <text class="level-condition">成长值 ≥ {{item.minGrowth}}</text>
+          </view>
+          <view class="level-badge">{{item.level}}</view>
+        </view>
+        <view class="level-body">
+          <view class="privilege-title">会员权益</view>
+          <view class="privilege-list">
+            <view class="privilege-item" wx:for="{{item.privileges}}" wx:for-item="privilege" wx:key="index">
+              <text class="privilege-icon">•</text>
+              <text class="privilege-text">{{privilege}}</text>
+            </view>
+          </view>
+          <view class="discount-info">
+            <text class="discount-label">购物折扣</text>
+            <text class="discount-value">{{item.discount}}折</text>
+          </view>
+        </view>
+        <view class="level-actions">
+          <view class="action-btn" bindtap="editMemberLevel" data-id="{{item.id}}">
+            <text class="iconfont icon-edit"></text>
+            <text>编辑</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 添加等级按钮 -->
+    <view class="add-level-btn" bindtap="addMemberLevel" wx:if="{{memberLevels.length < 5}}">
+      <text class="iconfont icon-plus"></text>
+      <text>添加会员等级</text>
+    </view>
+  </view>
+
+  <!-- 底部安全区域 -->
+  <view class="safe-area-bottom"></view>
+</view>
+
+<!-- 轮播图编辑弹窗 -->
+<view class="modal {{showBannerModal ? 'show' : ''}}">
+  <view class="modal-mask" bindtap="hideModal"></view>
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">{{editingBannerId ? '编辑轮播图' : '添加轮播图'}}</text>
+      <text class="close-btn" bindtap="hideModal">×</text>
+    </view>
+    <view class="modal-body">
+      <view class="form-item">
+        <text class="label">轮播图片 <text class="required">*</text></text>
+        <view class="image-upload" bindtap="chooseBannerImage">
+          <image wx:if="{{bannerForm.image}}" src="{{bannerForm.image}}" mode="aspectFill"></image>
+          <view class="upload-placeholder" wx:else>
+            <text class="iconfont icon-camera"></text>
+            <text>点击上传图片</text>
+          </view>
+        </view>
+      </view>
+      <view class="form-item">
+        <text class="label">链接类型</text>
+        <picker bindchange="onBannerLinkTypeChange" value="{{bannerLinkTypeIndex}}" range="{{linkTypes}}" range-key="name">
+          <view class="picker-value">{{bannerForm.linkTypeName || '请选择'}}</view>
+        </picker>
+      </view>
+      <view class="form-item" wx:if="{{bannerForm.linkType}}">
+        <text class="label">链接值</text>
+        <input type="text" placeholder="请输入链接值" value="{{bannerForm.linkValue}}" bindinput="onBannerLinkValueInput"/>
+      </view>
+    </view>
+    <view class="modal-footer">
+      <button class="cancel-btn" bindtap="hideModal">取消</button>
+      <button class="confirm-btn" bindtap="saveBanner">保存</button>
+    </view>
+  </view>
+</view>
+
+<!-- 优惠券编辑弹窗 -->
+<view class="modal {{showCouponModal ? 'show' : ''}}">
+  <view class="modal-mask" bindtap="hideModal"></view>
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">{{editingCouponId ? '编辑优惠券' : '新增优惠券'}}</text>
+      <text class="close-btn" bindtap="hideModal">×</text>
+    </view>
+    <view class="modal-body">
+      <view class="form-item">
+        <text class="label">优惠券名称 <text class="required">*</text></text>
+        <input type="text" placeholder="请输入优惠券名称" value="{{couponForm.name}}" bindinput="onCouponNameInput"/>
+      </view>
+      <view class="form-item">
+        <text class="label">优惠券类型</text>
+        <picker bindchange="onCouponTypeChange" value="{{couponTypeIndex}}" range="{{couponTypes}}" range-key="name">
+          <view class="picker-value">{{couponForm.typeName || '请选择'}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="label">{{couponForm.type === 'amount' ? '减免金额' : '折扣力度'}} <text class="required">*</text></text>
+        <view class="input-with-unit">
+          <input type="digit" placeholder="{{couponForm.type === 'amount' ? '0.00' : '0.0'}}" value="{{couponForm.value}}" bindinput="onCouponValueInput"/>
+          <text class="unit">{{couponForm.type === 'amount' ? '元' : '折'}}</text>
+        </view>
+      </view>
+      <view class="form-item">
+        <text class="label">最低消费金额</text>
+        <view class="input-with-unit">
+          <input type="digit" placeholder="0.00（无门槛可不填）" value="{{couponForm.minAmount}}" bindinput="onCouponMinAmountInput"/>
+          <text class="unit">元</text>
+        </view>
+      </view>
+      <view class="form-item">
+        <text class="label">发放总量</text>
+        <input type="number" placeholder="请输入发放数量" value="{{couponForm.totalCount}}" bindinput="onCouponTotalCountInput"/>
+      </view>
+      <view class="form-row">
+        <view class="form-item half">
+          <text class="label">开始时间</text>
+          <picker mode="date" value="{{couponForm.startTime}}" bindchange="onCouponStartTimeChange">
+            <view class="picker-value">{{couponForm.startTime || '请选择'}}</view>
+          </picker>
+        </view>
+        <view class="form-item half">
+          <text class="label">结束时间</text>
+          <picker mode="date" value="{{couponForm.endTime}}" bindchange="onCouponEndTimeChange">
+            <view class="picker-value">{{couponForm.endTime || '请选择'}}</view>
+          </picker>
+        </view>
+      </view>
+    </view>
+    <view class="modal-footer">
+      <button class="cancel-btn" bindtap="hideModal">取消</button>
+      <button class="confirm-btn" bindtap="saveCoupon">保存</button>
+    </view>
+  </view>
+</view>

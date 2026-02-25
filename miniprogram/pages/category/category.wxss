@@ -1,0 +1,402 @@
+/* 商品分类页样式 */
+
+.category-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg-color);
+}
+
+/* ==================== 搜索栏 ==================== */
+.search-header {
+  padding: 20rpx 30rpx;
+  background: var(--white);
+  border-bottom: 2rpx solid var(--border-color);
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  height: 64rpx;
+  background: var(--bg-secondary);
+  border-radius: 32rpx;
+  padding: 0 24rpx;
+}
+
+.search-icon {
+  font-size: 26rpx;
+  margin-right: 12rpx;
+  color: var(--text-light);
+}
+
+.search-placeholder {
+  font-size: 26rpx;
+  color: var(--text-light);
+}
+
+/* ==================== 分类内容区 ==================== */
+.category-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ==================== 左侧分类导航 ==================== */
+.category-nav {
+  width: 180rpx;
+  height: 100%;
+  background: var(--bg-secondary);
+}
+
+.nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 32rpx 20rpx;
+  transition: all 0.3s ease;
+}
+
+.nav-item.active {
+  background: var(--white);
+}
+
+.nav-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6rpx;
+  height: 0;
+  background: var(--primary-color);
+  border-radius: 0 4rpx 4rpx 0;
+  transition: height 0.3s ease;
+}
+
+.nav-item.active .nav-indicator {
+  height: 40rpx;
+}
+
+.nav-name {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.nav-item.active .nav-name {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.nav-count {
+  min-width: 32rpx;
+  height: 32rpx;
+  background: var(--primary-color);
+  color: var(--white);
+  font-size: 20rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8rpx;
+}
+
+/* ==================== 右侧商品列表 ==================== */
+.product-content {
+  flex: 1;
+  height: 100%;
+  background: var(--white);
+}
+
+/* ==================== 分类横幅 ==================== */
+.category-banner {
+  position: relative;
+  height: 200rpx;
+  margin: 20rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+}
+
+.banner-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 30rpx 24rpx;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+}
+
+.banner-name {
+  display: block;
+  color: #fff;
+  font-size: 36rpx;
+  font-weight: 600;
+}
+
+.banner-desc {
+  display: block;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 24rpx;
+  margin-top: 8rpx;
+}
+
+/* ==================== 子分类标签 ==================== */
+.sub-category-section {
+  padding: 20rpx;
+  border-bottom: 2rpx solid var(--border-color);
+}
+
+.sub-category-scroll {
+  white-space: nowrap;
+}
+
+.sub-category-list {
+  display: inline-flex;
+  gap: 16rpx;
+}
+
+.sub-category-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 12rpx 24rpx;
+  background: var(--bg-secondary);
+  border-radius: 28rpx;
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  transition: all 0.3s ease;
+}
+
+.sub-category-item.active {
+  background: var(--primary-color);
+  color: var(--white);
+}
+
+/* ==================== 排序筛选 ==================== */
+.sort-section {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  border-bottom: 2rpx solid var(--border-color);
+}
+
+.sort-item {
+  display: flex;
+  align-items: center;
+  margin-right: 40rpx;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
+}
+
+.sort-item.active {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.sort-arrow {
+  margin-left: 4rpx;
+  font-size: 22rpx;
+}
+
+/* ==================== 商品网格 ==================== */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  padding: 20rpx;
+}
+
+.product-item {
+  background: var(--white);
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-item:active {
+  transform: scale(0.98);
+}
+
+.product-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 240rpx;
+  overflow: hidden;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s ease;
+}
+
+.product-item:active .product-image {
+  transform: scale(1.05);
+}
+
+.product-badge {
+  position: absolute;
+  top: 12rpx;
+  left: 12rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+  font-size: 20rpx;
+  color: var(--white);
+  font-weight: 500;
+}
+
+.product-info {
+  padding: 16rpx;
+}
+
+.product-name {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-desc {
+  display: block;
+  font-size: 22rpx;
+  color: var(--text-light);
+  margin-top: 8rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-meta {
+  display: flex;
+  align-items: center;
+  margin-top: 12rpx;
+  gap: 20rpx;
+}
+
+.product-sales {
+  font-size: 20rpx;
+  color: var(--text-light);
+}
+
+.product-rating {
+  display: flex;
+  align-items: center;
+}
+
+.rating-star {
+  font-size: 20rpx;
+  color: #FFB74D;
+  margin-right: 4rpx;
+}
+
+.rating-score {
+  font-size: 20rpx;
+  color: var(--text-secondary);
+}
+
+.product-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16rpx;
+}
+
+.product-price {
+  display: flex;
+  align-items: baseline;
+  gap: 10rpx;
+}
+
+.price-medium {
+  font-size: 32rpx;
+}
+
+.add-cart-btn {
+  width: 52rpx;
+  height: 52rpx;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6rpx 16rpx rgba(212, 165, 116, 0.35);
+  transition: all 0.3s ease;
+}
+
+.add-cart-btn:active {
+  transform: scale(0.9);
+}
+
+.cart-icon {
+  font-size: 24rpx;
+}
+
+/* ==================== 加载状态 ==================== */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  color: var(--text-light);
+  font-size: 24rpx;
+}
+
+.loading-spinner {
+  width: 32rpx;
+  height: 32rpx;
+  border: 4rpx solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  margin-right: 16rpx;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==================== 空状态 ==================== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 40rpx;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.empty-subtext {
+  font-size: 26rpx;
+  color: var(--text-light);
+  margin-top: 12rpx;
+}
+
+/* ==================== 加载更多 ==================== */
+.load-more {
+  text-align: center;
+  padding: 40rpx;
+  color: var(--text-light);
+  font-size: 24rpx;
+}

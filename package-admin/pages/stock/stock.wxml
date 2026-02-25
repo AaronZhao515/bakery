@@ -1,0 +1,176 @@
+<!-- 库存管理页 -->
+<view class="stock-container">
+  <!-- 顶部统计卡片 -->
+  <view class="stats-cards">
+    <view class="stat-card">
+      <text class="stat-value">{{totalProducts}}</text>
+      <text class="stat-label">商品总数</text>
+    </view>
+    <view class="stat-card warning">
+      <text class="stat-value">{{lowStockCount}}</text>
+      <text class="stat-label">库存预警</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-value">{{outOfStockCount}}</text>
+      <text class="stat-label">已售罄</text>
+    </view>
+  </view>
+
+  <!-- Tab切换 -->
+  <view class="tab-section">
+    <view class="tab-item {{currentTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">
+      全部库存
+    </view>
+    <view class="tab-item {{currentTab === 'warning' ? 'active' : ''}}" bindtap="switchTab" data-tab="warning">
+      库存预警
+      <text class="badge" wx:if="{{lowStockCount > 0}}">{{lowStockCount}}</text>
+    </view>
+    <view class="tab-item {{currentTab === 'record' ? 'active' : ''}}" bindtap="switchTab" data-tab="record">
+      库存记录
+    </view>
+  </view>
+
+  <!-- 全部库存/库存预警列表 -->
+  <view class="stock-list" wx:if="{{currentTab !== 'record'}}">
+    <view class="stock-item {{item.stock <= item.warningStock ? 'warning' : ''}}" 
+          wx:for="{{stockList}}" 
+          wx:key="id">
+      <image class="product-image" src="{{item.image || '/images/default-product.png'}}" mode="aspectFill"></image>
+      
+      <view class="stock-info">
+        <view class="product-name">{{item.name}}</view>
+        <view class="stock-detail">
+          <text class="current-stock">当前库存: <text class="stock-num {{item.stock <= item.warningStock ? 'warning-text' : ''}}">{{item.stock}}</text></text>
+          <text class="warning-stock">预警值: {{item.warningStock}}</text>
+        </view>
+        <view class="stock-progress">
+          <view class="progress-bar">
+            <view class="progress-fill {{item.stock <= item.warningStock ? 'warning' : ''}}" style="width: {{(item.stock / (item.warningStock * 3)) * 100}}%"></view>
+          </view>
+        </view>
+      </view>
+
+      <view class="stock-actions">
+        <view class="action-btn in" bindtap="showStockModal" data-type="in" data-id="{{item.id}}" data-name="{{item.name}}">
+          <text class="iconfont icon-in"></text>
+          <text>入库</text>
+        </view>
+        <view class="action-btn out" bindtap="showStockModal" data-type="out" data-id="{{item.id}}" data-name="{{item.name}}">
+          <text class="iconfont icon-out"></text>
+          <text>出库</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{stockList.length === 0 && !isLoading}}">
+      <image class="empty-image" src="/images/empty-stock.png" mode="aspectFit"></image>
+      <text class="empty-text">{{currentTab === 'warning' ? '暂无库存预警商品' : '暂无库存数据'}}</text>
+    </view>
+  </view>
+
+  <!-- 库存记录 -->
+  <view class="record-list" wx:if="{{currentTab === 'record'}}">
+    <view class="record-filter">
+      <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+        <view class="date-picker">
+          {{startDate || '开始日期'}}
+          <text class="iconfont icon-down"></text>
+        </view>
+      </picker>
+      <text class="date-separator">至</text>
+      <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+        <view class="date-picker">
+          {{endDate || '结束日期'}}
+          <text class="iconfont icon-down"></text>
+        </view>
+      </picker>
+      <view class="filter-btn" bindtap="filterRecords">查询</view>
+    </view>
+
+    <view class="record-item {{item.type === 'in' ? 'in' : 'out'}}" wx:for="{{stockRecords}}" wx:key="id">
+      <view class="record-icon">
+        <text class="iconfont {{item.type === 'in' ? 'icon-in' : 'icon-out'}}"></text>
+      </view>
+      <view class="record-content">
+        <view class="record-header">
+          <text class="product-name">{{item.productName}}</text>
+          <text class="record-quantity {{item.type}}">{{item.type === 'in' ? '+' : '-'}}{{item.quantity}}</text>
+        </view>
+        <view class="record-detail">
+          <text class="record-type">{{item.typeName}}</text>
+          <text class="record-time">{{item.createTime}}</text>
+        </view>
+        <view class="record-remark" wx:if="{{item.remark}}">备注: {{item.remark}}</view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{stockRecords.length === 0 && !isLoading}}">
+      <image class="empty-image" src="/images/empty-record.png" mode="aspectFit"></image>
+      <text class="empty-text">暂无库存记录</text>
+    </view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{(currentTab !== 'record' && stockList.length > 0) || (currentTab === 'record' && stockRecords.length > 0)}}">
+    <text wx:if="{{isLoading}}">加载中...</text>
+    <text wx:elif="{{hasMore}}">上拉加载更多</text>
+    <text wx:else>没有更多了</text>
+  </view>
+</view>
+
+<!-- 库存调整弹窗 -->
+<view class="stock-modal {{showModal ? 'show' : ''}}">
+  <view class="modal-mask" bindtap="hideModal"></view>
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">{{modalType === 'in' ? '商品入库' : '商品出库'}}</text>
+      <text class="close-btn" bindtap="hideModal">×</text>
+    </view>
+    
+    <view class="modal-body">
+      <view class="product-info">
+        <text class="label">商品名称</text>
+        <text class="value">{{modalProductName}}</text>
+      </view>
+
+      <view class="form-item">
+        <text class="label">{{modalType === 'in' ? '入库数量' : '出库数量'}} <text class="required">*</text></text>
+        <input 
+          type="number" 
+          placeholder="请输入数量"
+          value="{{modalQuantity}}"
+          bindinput="onQuantityInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="label">操作类型</text>
+        <picker bindchange="onOperationTypeChange" value="{{operationTypeIndex}}" range="{{operationTypes}}" range-key="name">
+          <view class="picker-value">
+            {{operationTypes[operationTypeIndex].name}}
+            <text class="iconfont icon-right"></text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <text class="label">备注</text>
+        <textarea 
+          placeholder="请输入备注信息（选填）"
+          value="{{modalRemark}}"
+          bindinput="onRemarkInput"
+          maxlength="100"
+        />
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button class="cancel-btn" bindtap="hideModal">取消</button>
+      <button class="confirm-btn {{modalType === 'in' ? 'in' : 'out'}}" bindtap="confirmStockOperation">
+        确认{{modalType === 'in' ? '入库' : '出库'}}
+      </button>
+    </view>
+  </view>
+</view>

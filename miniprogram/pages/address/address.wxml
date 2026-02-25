@@ -1,0 +1,64 @@
+<!-- 地址管理页 -->
+<view class="container">
+  <!-- 地址列表 -->
+  <view class="address-list" wx:if="{{addressList.length > 0}}">
+    <view 
+      class="address-card {{item.isDefault ? 'default' : ''}}" 
+      wx:for="{{addressList}}" 
+      wx:key="_id"
+    >
+      <view class="address-content" bindtap="selectAddress" data-id="{{item._id}}">
+        <view class="address-header">
+          <text class="user-name">{{item.name}}</text>
+          <text class="user-phone">{{item.phone}}</text>
+          <view class="default-tag" wx:if="{{item.isDefault}}">默认</view>
+        </view>
+        <text class="address-detail">{{item.region}} {{item.detail}}</text>
+      </view>
+      
+      <view class="address-actions">
+        <view class="action-item" bindtap="setDefault" data-id="{{item._id}}" wx:if="{{!item.isDefault}}">
+          <text class="action-icon">⭕</text>
+          <text class="action-text">设为默认</text>
+        </view>
+        <view class="action-item active" wx:if="{{item.isDefault}}">
+          <text class="action-icon">✓</text>
+          <text class="action-text">默认地址</text>
+        </view>
+        <view class="action-divider"></view>
+        <view class="action-item" bindtap="editAddress" data-id="{{item._id}}">
+          <text class="action-icon">✏️</text>
+          <text class="action-text">编辑</text>
+        </view>
+        <view class="action-divider"></view>
+        <view class="action-item" bindtap="deleteAddress" data-id="{{item._id}}">
+          <text class="action-icon">🗑️</text>
+          <text class="action-text">删除</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:else>
+    <image class="empty-image" src="/images/empty-address.png" mode="aspectFit"/>
+    <text class="empty-text">暂无收货地址</text>
+    <text class="empty-subtext">添加地址，让美味更快送达~</text>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="footer">
+    <button class="add-btn" bindtap="addAddress">
+      <text class="add-icon">+</text>
+      <text class="add-text">新建收货地址</text>
+    </button>
+  </view>
+
+  <!-- 微信导入按钮 -->
+  <view class="wechat-import" wx:if="{{canImport}}">
+    <button class="import-btn" bindtap="importFromWechat">
+      <text class="import-icon">💬</text>
+      <text class="import-text">从微信导入</text>
+    </button>
+  </view>
+</view>

@@ -1,0 +1,123 @@
+<!-- 首页 -->
+<view class="home-container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px;">
+    <view class="nav-content">
+      <view class="location" bindtap="onLocationTap">
+        <text class="location-icon">📍</text>
+        <text class="location-text">{{location || '请选择位置'}}</text>
+        <text class="location-arrow">▼</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-section" style="margin-top: {{navBarHeight}}px;">
+    <view class="search-bar" bindtap="onSearchTap">
+      <text class="search-icon">🔍</text>
+      <text class="search-placeholder">搜索美味的面包...</text>
+    </view>
+  </view>
+
+  <!-- 轮播图 -->
+  <view class="banner-section">
+    <swiper class="banner-swiper" indicator-dots="{{true}}" autoplay="{{true}}" interval="4000" duration="500" circular="{{true}}" indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#D4A574">
+      <swiper-item wx:for="{{banners}}" wx:key="id" bindtap="onBannerTap" data-item="{{item}}">
+        <image class="banner-image" src="{{item.image}}" mode="aspectFill" lazy-load="{{true}}" />
+        <view class="banner-overlay">
+          <text class="banner-title">{{item.title}}</text>
+          <text class="banner-subtitle">{{item.subtitle}}</text>
+        </view>
+      </swiper-item>
+    </swiper>
+  </view>
+
+  <!-- 快捷入口 -->
+  <view class="quick-entry-section card">
+    <view class="quick-entry-item" wx:for="{{quickEntries}}" wx:key="id" bindtap="onQuickEntryTap" data-item="{{item}}">
+      <view class="quick-entry-icon" style="background: {{item.bgColor}};">
+        <text>{{item.icon}}</text>
+      </view>
+      <text class="quick-entry-text">{{item.name}}</text>
+    </view>
+  </view>
+
+  <!-- 配送方式选择 -->
+  <view class="delivery-section card">
+    <view class="delivery-header">
+      <text class="delivery-title">选择配送方式</text>
+      <text class="delivery-time">预计 {{deliveryTime}} 送达</text>
+    </view>
+    <view class="delivery-options">
+      <view class="delivery-option {{deliveryType === 'pickup' ? 'active' : ''}}" bindtap="onDeliveryTypeChange" data-type="pickup">
+        <view class="option-icon">🏪</view>
+        <view class="option-info">
+          <text class="option-name">预定自取</text>
+          <text class="option-desc">到店即取 免排队</text>
+        </view>
+        <view class="option-check {{deliveryType === 'pickup' ? 'active' : ''}}">
+          <text wx:if="{{deliveryType === 'pickup'}}">✓</text>
+        </view>
+      </view>
+      <view class="delivery-option {{deliveryType === 'delivery' ? 'active' : ''}}" bindtap="onDeliveryTypeChange" data-type="delivery">
+        <view class="option-icon">🚚</view>
+        <view class="option-info">
+          <text class="option-name">预定配送</text>
+          <text class="option-desc">新鲜直达 准时送达</text>
+        </view>
+        <view class="option-check {{deliveryType === 'delivery' ? 'active' : ''}}">
+          <text wx:if="{{deliveryType === 'delivery'}}">✓</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 推荐商品 -->
+  <view class="recommend-section">
+    <view class="section-header">
+      <view class="section-title">
+        <text class="title-icon">⭐</text>
+        <text>今日推荐</text>
+      </view>
+      <view class="section-more" bindtap="onMoreTap">
+        <text>查看更多</text>
+        <text class="more-arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 商品列表 -->
+    <view class="product-list">
+      <view class="product-card" wx:for="{{recommendProducts}}" wx:key="id" bindtap="onProductTap" data-id="{{item.id}}">
+        <view class="product-image-wrapper">
+          <image class="product-image" src="{{item.image}}" mode="aspectFill" lazy-load="{{true}}" />
+          <view class="product-tag" wx:if="{{item.tag}}" style="background: {{item.tagColor}};">{{item.tag}}</view>
+        </view>
+        <view class="product-info">
+          <text class="product-name">{{item.name}}</text>
+          <text class="product-desc">{{item.description}}</text>
+          <view class="product-bottom">
+            <view class="product-price">
+              <text class="price price-large">{{item.price}}</text>
+              <text wx:if="{{item.originalPrice}}" class="original-price">{{item.originalPrice}}</text>
+            </view>
+            <view class="product-sales">已售 {{item.sales}}</view>
+          </view>
+          <view class="add-cart-btn" catchtap="onAddCart" data-item="{{item}}">
+            <text>+</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+  <view class="load-more" wx:if="{{!hasMore && recommendProducts.length > 0}}">
+    <text>已经到底啦~</text>
+  </view>
+
+  <!-- 底部安全区域 -->
+  <view class="safe-area-bottom"></view>
+</view>

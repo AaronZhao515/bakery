@@ -1,0 +1,124 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/reserve/reserve",
+    "pages/order/order",
+    "pages/user/user",
+    "pages/login/login",
+    "pages/product-detail/product-detail",
+    "pages/cart/cart"
+  ],
+  "subPackages": [
+    {
+      "root": "package-product",
+      "pages": [
+        "pages/product-list/product-list",
+        "pages/category/category"
+      ]
+    },
+    {
+      "root": "package-order",
+      "pages": [
+        "pages/order-detail/order-detail",
+        "pages/order-confirm/order-confirm",
+        "pages/payment/payment"
+      ]
+    },
+    {
+      "root": "package-user",
+      "pages": [
+        "pages/address/address",
+        "pages/address-edit/address-edit",
+        "pages/coupon/coupon",
+        "pages/favorite/favorite",
+        "pages/settings/settings",
+        "pages/vip-center/vip-center"
+      ]
+    },
+    {
+      "root": "package-admin",
+      "pages": [
+        "pages/dashboard/dashboard",
+        "pages/product-manage/product-manage",
+        "pages/order-manage/order-manage",
+        "pages/statistics/statistics",
+        "pages/login/login",
+        "pages/product-list/product-list",
+        "pages/product-edit/product-edit",
+        "pages/stock/stock",
+        "pages/marketing/marketing"
+      ]
+    }
+  ],
+  "tabBar": {
+    "custom": true,
+    "color": "#B08860",
+    "selectedColor": "#7A5533",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/reserve/reserve",
+        "text": "预定"
+      },
+      {
+        "pagePath": "pages/order/order",
+        "text": "订单"
+      },
+      {
+        "pagePath": "pages/user/user",
+        "text": "我的"
+      }
+    ]
+  },
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#FDF8F3",
+    "navigationBarTitleText": "暖心烘焙",
+    "navigationBarTextStyle": "black",
+    "navigationStyle": "default",
+    "backgroundColor": "#FDF8F3",
+    "enablePullDownRefresh": true,
+    "onReachBottomDistance": 50
+  },
+  "usingComponents": {
+    "nav-bar": "/components/nav-bar/nav-bar",
+    "product-card": "/components/product-card/product-card",
+    "loading": "/components/loading/loading",
+    "empty": "/components/empty/empty",
+    "modal": "/components/modal/modal",
+    "toast": "/components/toast/toast"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "您的位置信息将用于推荐附近的门店"
+    }
+  },
+  "requiredBackgroundModes": [],
+  "plugins": {},
+  "cloud": true,
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "preloadRule": {
+    "pages/index/index": {
+      "network": "all",
+      "packages": ["package-product"]
+    },
+    "pages/reserve/reserve": {
+      "network": "all",
+      "packages": ["package-order"]
+    },
+    "pages/order/order": {
+      "network": "all",
+      "packages": ["package-order"]
+    },
+    "pages/user/user": {
+      "network": "wifi",
+      "packages": ["package-user"]
+    }
+  }
+}

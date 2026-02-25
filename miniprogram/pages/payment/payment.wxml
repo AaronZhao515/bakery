@@ -1,0 +1,94 @@
+<!-- 支付页面 -->
+<view class="payment-container">
+  <!-- 支付金额 -->
+  <view class="pay-amount-section">
+    <text class="pay-label">支付金额</text>
+    <view class="pay-amount">
+      <text class="currency">¥</text>
+      <text class="amount">{{payAmount}}</text>
+    </view>
+    <text class="pay-desc">订单号: {{orderNo}}</text>
+  </view>
+
+  <!-- 积分信息 -->
+  <view class="points-section" wx:if="{{requiredPoints > 0}}">
+    <view class="points-info">
+      <text class="points-label">需要积分</text>
+      <text class="points-value {{hasEnoughPoints ? '' : 'insufficient'}}">{{userPoints}} / {{requiredPoints}}</text>
+    </view>
+    <view class="points-hint" wx:if="{{!hasEnoughPoints}}">
+      <text class="hint-text">⚠️ 积分不足，请选择线下支付</text>
+    </view>
+  </view>
+
+  <!-- 支付方式 -->
+  <view class="pay-method-section">
+    <text class="section-title">选择支付方式</text>
+    <view class="method-list">
+      <!-- 积分支付（积分足够时显示） -->
+      <view wx:if="{{hasEnoughPoints}}" class="method-item {{selectedMethod === 'points' ? 'active' : ''}}" bindtap="selectMethod" data-method="points">
+        <view class="method-icon">
+          <text class="icon">⭐</text>
+        </view>
+        <view class="method-info">
+          <text class="method-name">积分支付</text>
+          <text class="method-desc">使用 {{requiredPoints}} 积分支付</text>
+        </view>
+        <view class="check-icon" wx:if="{{selectedMethod === 'points'}}">✓</view>
+      </view>
+
+      <!-- 线下支付（积分不足时显示） -->
+      <view wx:if="{{!hasEnoughPoints}}" class="method-item {{selectedMethod === 'offline' ? 'active' : ''}}" bindtap="selectMethod" data-method="offline">
+        <view class="method-icon">
+          <text class="icon">🏪</text>
+        </view>
+        <view class="method-info">
+          <text class="method-name">线下支付</text>
+          <text class="method-desc">到店扫码支付现金</text>
+        </view>
+        <view class="check-icon" wx:if="{{selectedMethod === 'offline'}}">✓</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 订单信息 -->
+  <view class="order-info-section">
+    <text class="section-title">订单信息</text>
+    <view class="info-list">
+      <view class="info-item">
+        <text class="info-label">商品总额</text>
+        <text class="info-value">¥{{goodsTotal}}</text>
+      </view>
+      <view class="info-item" wx:if="{{deliveryFee > 0}}">
+        <text class="info-label">配送费</text>
+        <text class="info-value">¥{{deliveryFee}}</text>
+      </view>
+      <view class="info-item" wx:if="{{discountAmount > 0}}">
+        <text class="info-label">优惠金额</text>
+        <text class="info-value discount">-¥{{discountAmount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 支付按钮 -->
+  <view class="pay-button-section">
+    <button class="pay-btn {{paying ? 'paying' : ''}} {{!hasEnoughPoints ? 'offline-btn' : ''}}" bindtap="confirmPay" disabled="{{paying}}">
+      <text wx:if="{{!paying && hasEnoughPoints}}">确认支付 {{requiredPoints}} 积分</text>
+      <text wx:if="{{!paying && !hasEnoughPoints}}">确认线下支付</text>
+      <view class="loading" wx:if="{{paying}}">
+        <view class="loading-spinner"></view>
+        <text>处理中...</text>
+      </view>
+    </button>
+  </view>
+
+  <!-- 安全提示 -->
+  <view class="security-tips" wx:if="{{hasEnoughPoints}}">
+    <text class="tip-icon">🔒</text>
+    <text class="tip-text">支付安全由CloudBase保障</text>
+  </view>
+  <view class="security-tips" wx:if="{{!hasEnoughPoints}}">
+    <text class="tip-icon">🏪</text>
+    <text class="tip-text">请到店内扫码支付现金</text>
+  </view>
+</view>

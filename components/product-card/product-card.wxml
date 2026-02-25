@@ -1,0 +1,97 @@
+<!-- 商品卡片组件 -->
+<view 
+  class="product-card product-card-{{layout}} {{selectable ? 'product-card-selectable' : ''}} {{processedProduct.isSoldOut ? 'product-card-soldout' : ''}}"
+  style="{{customStyle}}"
+  bindtap="onCardTap"
+>
+  <!-- 选中框（可选模式） -->
+  <view wx:if="{{selectable}}" class="select-box" catchtap="stopPropagation">
+    <checkbox 
+      class="select-checkbox" 
+      checked="{{selected}}"
+      bindchange="onSelectChange"
+    />
+  </view>
+
+  <!-- 图片区域 -->
+  <view class="product-image-wrapper">
+    <!-- 骨架屏 -->
+    <view wx:if="{{showSkeleton}}" class="image-skeleton"></view>
+    
+    <!-- 商品图片 -->
+    <image 
+      class="product-image"
+      src="{{processedProduct.imageUrl}}"
+      mode="{{imageMode}}"
+      lazy-load
+      bindload="onImageLoad"
+      binderror="onImageError"
+    />
+
+    <!-- 标签 -->
+    <view wx:if="{{showTag && processedProduct.tags.length > 0}}" class="product-tags">
+      <text 
+        wx:for="{{processedProduct.tags}}" 
+        wx:key="index"
+        class="tag tag-{{item.type || 'default'}}"
+      >{{item.name || item}}</text>
+    </view>
+
+    <!-- 售罄遮罩 -->
+    <view wx:if="{{processedProduct.isSoldOut}}" class="soldout-mask">
+      <text class="soldout-text">已售罄</text>
+    </view>
+
+    <!-- 新品标签 -->
+    <view wx:if="{{processedProduct.isNew && !processedProduct.isSoldOut}}" class="new-tag">
+      <text>NEW</text>
+    </view>
+  </view>
+
+  <!-- 内容区域 -->
+  <view class="product-content">
+    <!-- 商品名称 -->
+    <text class="product-name line-clamp-2">{{processedProduct.name}}</text>
+
+    <!-- 商品描述 -->
+    <text wx:if="{{processedProduct.description}}" class="product-desc line-clamp-1">
+      {{processedProduct.description}}
+    </text>
+
+    <!-- 规格信息 -->
+    <view wx:if="{{processedProduct.spec}}" class="product-spec">
+      <text>{{processedProduct.spec}}</text>
+    </view>
+
+    <!-- 底部区域 -->
+    <view class="product-footer">
+      <!-- 价格区域 -->
+      <view class="price-section">
+        <text class="price-current">{{processedProduct.priceText}}</text>
+        <text wx:if="{{showOriginalPrice && processedProduct.originalPriceText}}" class="price-original">
+          {{processedProduct.originalPriceText}}
+        </text>
+        <text wx:if="{{processedProduct.discount}}" class="price-discount">
+          {{processedProduct.discount}}折
+        </text>
+      </view>
+
+      <!-- 销量 -->
+      <text wx:if="{{showSold && processedProduct.soldCount}}" class="product-sold">
+        {{processedProduct.soldText}}
+      </text>
+    </view>
+
+    <!-- 加入购物车按钮 -->
+    <view 
+      wx:if="{{showCart}}" 
+      class="cart-btn {{processedProduct.isSoldOut ? 'cart-btn-disabled' : ''}}"
+      catchtap="onAddCartTap"
+    >
+      <text class="cart-icon">+</text>
+    </view>
+  </view>
+
+  <!-- 自定义插槽 -->
+  <slot></slot>
+</view>

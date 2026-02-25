@@ -1,0 +1,217 @@
+/**
+ * 自定义导航栏样式
+ */
+
+/* 导航栏容器 */
+.nav-bar-wrapper {
+  width: 100%;
+}
+
+/* 占位元素 */
+.nav-bar-placeholder {
+  width: 100%;
+}
+
+/* 导航栏主体 */
+.nav-bar {
+  width: 100%;
+  position: relative;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+/* 固定定位 */
+.nav-bar-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+/* 底部边框 */
+.nav-bar-border::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent, var(--border, #E8E0D8), transparent);
+}
+
+/* 状态栏占位 */
+.status-bar {
+  width: 100%;
+}
+
+/* 导航栏内容 */
+.nav-bar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16rpx;
+  position: relative;
+}
+
+/* 左侧区域 */
+.nav-bar-left {
+  display: flex;
+  align-items: center;
+  min-width: 120rpx;
+  height: 100%;
+}
+
+/* 中间标题区域 */
+.nav-bar-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 20rpx;
+}
+
+/* 右侧区域 */
+.nav-bar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 120rpx;
+  height: 100%;
+}
+
+/* 导航按钮 */
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64rpx;
+  min-width: 64rpx;
+  padding: 0 16rpx;
+  border-radius: 32rpx;
+  background: rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
+}
+
+.nav-btn:active {
+  background: rgba(0, 0, 0, 0.08);
+  transform: scale(0.95);
+}
+
+/* 返回按钮 */
+.nav-back {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.nav-back-text {
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+/* 首页按钮 */
+.nav-home {
+  margin-left: 16rpx;
+}
+
+/* 导航图标 */
+.nav-icon {
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+/* 使用系统字体图标 */
+.nav-icon-arrow-left::before {
+  content: '\e900';
+  font-family: 'iconfont';
+}
+
+.nav-icon-home::before {
+  content: '\e901';
+  font-family: 'iconfont';
+}
+
+/* 导航标题 */
+.nav-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 400rpx;
+}
+
+.nav-title-small {
+  font-size: 30rpx;
+}
+
+/* 胶囊按钮样式适配 */
+.nav-bar-capsule {
+  border: 2rpx solid rgba(0, 0, 0, 0.08);
+  border-radius: 32rpx;
+  overflow: hidden;
+}
+
+.nav-bar-capsule .nav-btn {
+  background: transparent;
+  border-radius: 0;
+}
+
+.nav-bar-capsule .nav-btn:first-child {
+  border-right: 2rpx solid rgba(0, 0, 0, 0.08);
+}
+
+/* 透明背景适配 */
+.nav-bar-transparent {
+  background: transparent !important;
+}
+
+.nav-bar-transparent .nav-btn {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  .nav-bar {
+    background: #1a1a1a !important;
+    color: #fff !important;
+  }
+  
+  .nav-btn {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .nav-btn:active {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* 动画效果 */
+@keyframes navBarSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.nav-bar-animate {
+  animation: navBarSlideDown 0.3s ease-out;
+}
+
+/* 渐变背景 */
+.nav-bar-gradient {
+  background: linear-gradient(180deg, rgba(253, 248, 243, 1) 0%, rgba(253, 248, 243, 0.95) 100%);
+}
+
+/* 模糊背景 */
+.nav-bar-blur {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}

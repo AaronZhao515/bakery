@@ -1,0 +1,323 @@
+/**
+ * 全局样式文件
+ * 温馨烘焙坊 - 面包烘焙小程序
+ */
+
+/* ========== 重置样式 ========== */
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: #333333;
+  background-color: #FDF8F3;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+view, text, image, scroll-view, swiper, swiper-item, input, textarea, button, navigator {
+  box-sizing: border-box;
+}
+
+/* ========== 颜色变量 ========== */
+:root {
+  /* 主色调 - 温暖烘焙风格 */
+  --primary-color: #D4A574;
+  --primary-light: #E8C9A0;
+  --primary-dark: #B8935F;
+  
+  /* 背景色 */
+  --bg-primary: #FDF8F3;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #F5EDE4;
+  
+  /* 文字色 */
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  
+  /* 功能色 */
+  --success-color: #4CAF50;
+  --warning-color: #FF9800;
+  --error-color: #F44336;
+  --info-color: #2196F3;
+  
+  /* 边框色 */
+  --border-color: #F0E6DC;
+}
+
+/* ========== 通用样式类 ========== */
+
+/* 容器 */
+.container {
+  padding: 30rpx;
+}
+
+/* 卡片 */
+.card {
+  background-color: #FFFFFF;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(212, 165, 116, 0.08);
+}
+
+/* 弹性布局 */
+.flex {
+  display: flex;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* 文字对齐 */
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+/* 文字省略 */
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-ellipsis-2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* 价格样式 */
+.price {
+  color: #D4A574;
+  font-weight: 600;
+}
+
+.price::before {
+  content: '¥';
+  font-size: 0.8em;
+  margin-right: 4rpx;
+}
+
+/* 按钮样式 */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #D4A574 0%, #B8935F 100%);
+  color: #FFFFFF;
+}
+
+.btn-primary:active {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: #D4A574;
+  border: 2rpx solid #D4A574;
+}
+
+.btn-secondary:active {
+  background-color: #FDF8F3;
+}
+
+.btn-disabled {
+  background-color: #CCCCCC;
+  color: #FFFFFF;
+}
+
+/* 标签样式 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+}
+
+.tag-primary {
+  background-color: #FFF3E0;
+  color: #D4A574;
+}
+
+.tag-success {
+  background-color: #E8F5E9;
+  color: #4CAF50;
+}
+
+.tag-warning {
+  background-color: #FFF3E0;
+  color: #FF9800;
+}
+
+.tag-error {
+  background-color: #FFEBEE;
+  color: #F44336;
+}
+
+/* 分割线 */
+.divider {
+  height: 2rpx;
+  background-color: #F0E6DC;
+  margin: 20rpx 0;
+}
+
+.divider-vertical {
+  width: 2rpx;
+  background-color: #F0E6DC;
+  margin: 0 20rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 60rpx;
+}
+
+.empty-icon {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 40rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #666666;
+  margin-bottom: 16rpx;
+}
+
+.empty-subtext {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 60rpx;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #F0E6DC;
+  border-top-color: #D4A574;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  margin-top: 20rpx;
+  font-size: 26rpx;
+  color: #999999;
+}
+
+/* 安全区域 */
+.safe-area-bottom {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 隐藏滚动条 - 在小程序中通过组件属性控制 */
+
+/* ========== 动画 ========== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease;
+}

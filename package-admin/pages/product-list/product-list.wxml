@@ -1,0 +1,145 @@
+<!-- 商品管理页 -->
+<view class="product-list-container">
+  <!-- 搜索栏 -->
+  <view class="search-section">
+    <view class="search-box">
+      <text class="iconfont icon-search"></text>
+      <input 
+        type="text" 
+        placeholder="搜索商品名称" 
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        confirm-type="search"
+        bindconfirm="onSearch"
+      />
+      <text class="clear-icon" wx:if="{{searchKeyword}}" bindtap="clearSearch">×</text>
+    </view>
+  </view>
+
+  <!-- 筛选栏 -->
+  <view class="filter-section">
+    <view class="filter-item {{currentCategory === 'all' ? 'active' : ''}}" bindtap="filterByCategory" data-category="all">
+      全部
+    </view>
+    <view class="filter-item {{currentCategory === category.id ? 'active' : ''}}" 
+          wx:for="{{categories}}" 
+          wx:for-item="category" 
+          wx:key="id"
+          bindtap="filterByCategory" 
+          data-category="{{category.id}}">
+      {{category.name}}
+    </view>
+  </view>
+
+  <!-- 状态筛选 -->
+  <view class="status-filter">
+    <view class="status-item {{statusFilter === 'all' ? 'active' : ''}}" bindtap="filterByStatus" data-status="all">
+      全部
+    </view>
+    <view class="status-item {{statusFilter === 'on' ? 'active' : ''}}" bindtap="filterByStatus" data-status="on">
+      已上架
+    </view>
+    <view class="status-item {{statusFilter === 'off' ? 'active' : ''}}" bindtap="filterByStatus" data-status="off">
+      已下架
+    </view>
+  </view>
+
+  <!-- 批量操作栏 -->
+  <view class="batch-section" wx:if="{{isBatchMode}}">
+    <view class="batch-info">
+      已选择 <text class="highlight">{{selectedProducts.length}}</text> 个商品
+    </view>
+    <view class="batch-actions">
+      <text class="batch-btn" bindtap="batchOnShelf">上架</text>
+      <text class="batch-btn" bindtap="batchOffShelf">下架</text>
+      <text class="batch-btn danger" bindtap="batchDelete">删除</text>
+    </view>
+    <text class="cancel-btn" bindtap="exitBatchMode">取消</text>
+  </view>
+
+  <!-- 商品列表 -->
+  <view class="product-list">
+    <view class="product-item {{isBatchMode ? 'batch-mode' : ''}}" 
+          wx:for="{{products}}" 
+          wx:key="id"
+          bindtap="onProductTap"
+          data-id="{{item.id}}">
+      
+      <!-- 批量选择框 -->
+      <view class="checkbox" wx:if="{{isBatchMode}}" catchtap="toggleSelect" data-id="{{item.id}}">
+        <view class="check-icon {{item.selected ? 'checked' : ''}}">
+          <text class="iconfont icon-check" wx:if="{{item.selected}}"></text>
+        </view>
+      </view>
+
+      <!-- 商品图片 -->
+      <image class="product-image" src="{{item.images[0] || '/images/default-product.png'}}" mode="aspectFill"></image>
+
+      <!-- 商品信息 -->
+      <view class="product-info">
+        <view class="product-header">
+          <text class="product-name">{{item.name}}</text>
+          <view class="status-tag {{item.status === 'on' ? 'on' : 'off'}}">
+            {{item.status === 'on' ? '上架' : '下架'}}
+          </view>
+        </view>
+        
+        <text class="product-category">{{item.categoryName}}</text>
+        
+        <view class="product-price-row">
+          <text class="current-price">¥{{item.price}}</text>
+          <text class="original-price" wx:if="{{item.originalPrice > item.price}}">¥{{item.originalPrice}}</text>
+        </view>
+        
+        <view class="product-footer">
+          <text class="stock-info">库存: {{item.stock}}</text>
+          <text class="sales-info">销量: {{item.sales || 0}}</text>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="product-actions" wx:if="{{!isBatchMode}}" catchtap="stopPropagation">
+        <view class="action-btn edit" bindtap="editProduct" data-id="{{item.id}}">
+          <text class="iconfont icon-edit"></text>
+        </view>
+        <view class="action-btn toggle {{item.status === 'on' ? 'off' : 'on'}}" bindtap="toggleStatus" data-id="{{item.id}}" data-status="{{item.status}}">
+          <text class="iconfont {{item.status === 'on' ? 'icon-down' : 'icon-up'}}"></text>
+        </view>
+        <view class="action-btn delete" bindtap="deleteProduct" data-id="{{item.id}}">
+          <text class="iconfont icon-delete"></text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{products.length === 0 && !isLoading}}">
+      <image class="empty-image" src="/images/empty-product.png" mode="aspectFit"></image>
+      <text class="empty-text">暂无商品</text>
+      <text class="empty-subtext">点击右下角按钮添加商品</text>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{products.length > 0}}">
+      <text wx:if="{{isLoading}}">加载中...</text>
+      <text wx:elif="{{hasMore}}">上拉加载更多</text>
+      <text wx:else>没有更多商品了</text>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar" wx:if="{{!isBatchMode}}">
+    <view class="batch-entry" bindtap="enterBatchMode">
+      <text class="iconfont icon-checkbox"></text>
+      <text>批量管理</text>
+    </view>
+    <view class="add-btn" bindtap="addProduct">
+      <text class="iconfont icon-plus"></text>
+      <text>新增商品</text>
+    </view>
+  </view>
+
+  <!-- 返回顶部按钮 -->
+  <view class="back-to-top" wx:if="{{showBackToTop}}" bindtap="backToTop">
+    <text class="iconfont icon-up"></text>
+  </view>
+</view>

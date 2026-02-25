@@ -1,0 +1,737 @@
+/* 会员中心页面样式 */
+
+/* 页面背景 */
+.vip-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #F5E6D3 0%, #FDF8F3 100%);
+}
+
+/* 页面内容 */
+.page-content {
+  padding: 30rpx;
+  box-sizing: border-box;
+}
+
+/* VIP 卡片 - 优化后的样式 */
+.vip-card {
+  position: relative;
+  background: linear-gradient(165deg, #8B5A2B 0%, #6B4423 30%, #3E2009 100%);
+  border-radius: 32rpx;
+  overflow: hidden;
+  margin-bottom: 30rpx;
+  box-shadow:
+    0 12rpx 40rpx rgba(62, 32, 9, 0.35),
+    0 4rpx 12rpx rgba(0, 0, 0, 0.1),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.1);
+}
+
+.vip-card.guest {
+  min-height: 420rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 装饰麦穗 */
+.wheat-deco {
+  position: absolute;
+  width: 240rpx;
+  height: 240rpx;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.wheat-deco.right {
+  top: -60rpx;
+  right: -60rpx;
+  transform: rotate(-15deg);
+}
+
+.wheat-deco.left {
+  top: 80rpx;
+  left: -80rpx;
+  transform: rotate(25deg);
+}
+
+.wheat-img {
+  width: 100%;
+  height: 100%;
+}
+
+/* 金色闪光线条 */
+.gold-line {
+  position: absolute;
+  top: 40%;
+  left: -100%;
+  width: 300%;
+  height: 1rpx;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(212, 169, 106, 0) 10%,
+    rgba(212, 169, 106, 0.4) 50%,
+    rgba(212, 169, 106, 0) 90%,
+    transparent 100%
+  );
+  transform: rotate(-20deg);
+  animation: shimmer 4s infinite linear;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-30%) rotate(-20deg); }
+  100% { transform: translateX(30%) rotate(-20deg); }
+}
+
+/* 卡片内容 */
+.card-content {
+  position: relative;
+  padding: 36rpx 32rpx 32rpx;
+  z-index: 1;
+}
+
+/* 顶部区域 */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32rpx;
+}
+
+.level-badge {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  background: linear-gradient(135deg, rgba(212, 169, 106, 0.25) 0%, rgba(212, 169, 106, 0.1) 100%);
+  padding: 10rpx 24rpx;
+  border-radius: 32rpx;
+  border: 1rpx solid rgba(212, 169, 106, 0.4);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.star-icon {
+  width: 28rpx;
+  height: 28rpx;
+}
+
+.level-name {
+  font-size: 24rpx;
+  color: #D4A96A;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+}
+
+.brand-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.brand-name {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  letter-spacing: 2rpx;
+}
+
+.brand-sub {
+  font-size: 20rpx;
+  color: rgba(212, 169, 106, 0.8);
+  margin-top: 4rpx;
+}
+
+/* 积分展示区域 */
+.points-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28rpx;
+}
+
+.points-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.points-value {
+  font-size: 80rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+  letter-spacing: -2rpx;
+}
+
+.points-unit {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 8rpx;
+  font-weight: 500;
+}
+
+.points-divider {
+  width: 2rpx;
+  height: 80rpx;
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%);
+  margin: 0 32rpx;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-nickname {
+  display: block;
+  font-size: 32rpx;
+  color: #FFFFFF;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+  letter-spacing: 1rpx;
+}
+
+.user-id {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: monospace;
+}
+
+/* 进度条区域 - 优化后 */
+.progress-wrapper {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+}
+
+.progress-info {
+  margin-bottom: 16rpx;
+}
+
+.progress-text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.progress-text .highlight {
+  color: #D4A96A;
+  font-weight: 600;
+  font-size: 28rpx;
+}
+
+.progress-bar-bg {
+  height: 12rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6rpx;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #D4A96A 0%, #E8C088 50%, #F0D4A0 100%);
+  border-radius: 6rpx;
+  position: relative;
+  transition: width 0.6s ease;
+}
+
+.progress-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.4) 50%, transparent 100%);
+  animation: progressShine 2s infinite;
+}
+
+@keyframes progressShine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.progress-levels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12rpx;
+}
+
+.level-start, .level-end {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.level-end {
+  color: #D4A96A;
+}
+
+/* 底部区域 - 储值咨询 */
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 20rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.recharge-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.recharge-title {
+  font-size: 28rpx;
+  color: #FFFFFF;
+  font-weight: 600;
+  margin-bottom: 6rpx;
+}
+
+.recharge-desc {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.recharge-btn {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  background: linear-gradient(135deg, #D4A96A 0%, #C8A882 100%);
+  padding: 18rpx 32rpx;
+  border-radius: 36rpx;
+  border: none;
+  line-height: 1.5;
+  box-shadow: 0 4rpx 16rpx rgba(212, 169, 106, 0.4);
+  transition: transform 0.2s;
+}
+
+.recharge-btn::after {
+  border: none;
+}
+
+.recharge-btn:active {
+  transform: scale(0.96);
+}
+
+.recharge-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.recharge-btn text {
+  font-size: 26rpx;
+  color: #3E2009;
+  font-weight: 600;
+}
+
+/* 未登录状态 - 优化后 */
+.guest-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 50rpx;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.guest-icon-wrap {
+  width: 140rpx;
+  height: 140rpx;
+  background: linear-gradient(135deg, rgba(212, 169, 106, 0.2) 0%, rgba(212, 169, 106, 0.05) 100%);
+  border-radius: 70rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32rpx;
+  border: 2rpx solid rgba(212, 169, 106, 0.3);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.2);
+}
+
+.guest-icon {
+  width: 64rpx;
+  height: 64rpx;
+}
+
+.guest-title {
+  font-size: 36rpx;
+  color: #FFFFFF;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+  letter-spacing: 2rpx;
+}
+
+.guest-desc {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 40rpx;
+  line-height: 1.6;
+}
+
+.guest-btn {
+  background: linear-gradient(135deg, #D4A96A 0%, #C8A882 100%);
+  color: #3E2009;
+  font-size: 30rpx;
+  font-weight: 600;
+  padding: 24rpx 80rpx;
+  border-radius: 44rpx;
+  border: none;
+  line-height: 1.5;
+  box-shadow: 0 4rpx 20rpx rgba(212, 169, 106, 0.4);
+}
+
+.guest-btn::after {
+  border: none;
+}
+
+/* 快捷统计 - 优化后 */
+.quick-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 32rpx 20rpx;
+  margin-bottom: 32rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0, 0, 0, 0.06);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stat-icon-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16rpx;
+}
+
+.stat-icon {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.stat-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #3E2009;
+  margin-bottom: 8rpx;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.stat-divider {
+  width: 2rpx;
+  height: 70rpx;
+  background: linear-gradient(180deg, transparent 0%, #F0EAD6 50%, transparent 100%);
+}
+
+/* 区块样式 */
+.section {
+  margin-bottom: 32rpx;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.section-line {
+  width: 6rpx;
+  height: 36rpx;
+  background: linear-gradient(180deg, #D4A96A 0%, #C8A882 100%);
+  border-radius: 3rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #3E2009;
+  flex: 1;
+}
+
+.section-tag {
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E8E 100%);
+  color: #FFFFFF;
+  font-size: 22rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 24rpx;
+  font-weight: 500;
+  box-shadow: 0 2rpx 8rpx rgba(255, 107, 107, 0.3);
+}
+
+.section-more {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.section-more text {
+  font-size: 26rpx;
+  color: #999999;
+}
+
+.more-icon {
+  width: 28rpx;
+  height: 28rpx;
+  opacity: 0.6;
+}
+
+/* 优惠券列表 */
+.coupon-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.coupon-card {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s;
+}
+
+.coupon-card:active {
+  transform: scale(0.98);
+}
+
+.coupon-strip {
+  width: 8rpx;
+  height: 100rpx;
+  border-radius: 4rpx;
+  margin-right: 20rpx;
+}
+
+.coupon-icon-wrap {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.coupon-icon {
+  width: 44rpx;
+  height: 44rpx;
+}
+
+.coupon-info {
+  flex: 1;
+}
+
+.coupon-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 8rpx;
+}
+
+.coupon-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #3E2009;
+}
+
+.coupon-tag {
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid;
+  font-weight: 500;
+}
+
+.coupon-amount {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  margin-bottom: 6rpx;
+}
+
+.coupon-desc {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.coupon-btn {
+  background: linear-gradient(135deg, #D4A96A 0%, #C8A882 100%);
+  color: #FFFFFF;
+  font-size: 24rpx;
+  padding: 18rpx 28rpx;
+  border-radius: 32rpx;
+  border: none;
+  font-weight: 600;
+  line-height: 1.5;
+  box-shadow: 0 4rpx 12rpx rgba(212, 169, 106, 0.3);
+}
+
+.coupon-btn::after {
+  border: none;
+}
+
+.coupon-btn.claimed {
+  background: #E8E8E8;
+  color: #999999;
+  box-shadow: none;
+}
+
+.empty-coupons {
+  padding: 60rpx 0;
+  text-align: center;
+  color: #999999;
+  font-size: 26rpx;
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 积分明细卡片 */
+.history-card {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 20rpx 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #F5F5F5;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-icon-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.history-icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+.history-info {
+  flex: 1;
+}
+
+.history-label {
+  display: block;
+  font-size: 28rpx;
+  color: #3E2009;
+  font-weight: 500;
+  margin-bottom: 6rpx;
+}
+
+.history-date {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.history-points {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.empty-history {
+  padding: 60rpx 0;
+  text-align: center;
+  color: #999999;
+  font-size: 26rpx;
+}
+
+/* 获取积分方式 - 优化后 */
+.earn-card {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.earn-item {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 24rpx;
+  background: #FAFAFA;
+  border-radius: 20rpx;
+  transition: all 0.2s;
+}
+
+.earn-item:active {
+  background: #F5F5F5;
+  transform: scale(0.99);
+}
+
+.earn-icon-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.earn-icon {
+  width: 36rpx;
+  height: 36rpx;
+}
+
+.earn-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.earn-label {
+  font-size: 28rpx;
+  color: #3E2009;
+  font-weight: 500;
+}
+
+.earn-points {
+  font-size: 24rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 16rpx;
+  font-weight: 600;
+  align-self: flex-start;
+}
+
+.earn-arrow {
+  width: 28rpx;
+  height: 28rpx;
+  opacity: 0.4;
+}
+
+/* 底部安全区域 */
+.safe-area-bottom {
+  height: 40rpx;
+}

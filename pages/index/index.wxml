@@ -1,0 +1,130 @@
+<!-- 首页 - 匹配Figma设计 -->
+<view class="home-container">
+  <!-- 主内容区 -->
+  <scroll-view class="home-content" scroll-y enhanced show-scrollbar="{{false}}">
+    <!-- Hero Section -->
+    <view class="hero-section">
+      <image class="hero-image" src="cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/banner1.jpg" mode="aspectFill" />
+      <view class="hero-overlay"></view>
+      <!-- Decorative wheat -->
+      <view class="wheat-decor wheat-left">
+        <image class="wheat-image" src="{{icons.wheat}}" mode="aspectFit"/>
+      </view>
+      <view class="wheat-decor wheat-right">
+        <image class="wheat-image" src="{{icons.wheat}}" mode="aspectFit" style="transform: scaleX(-1);"/>
+      </view>
+      <!-- Text overlay -->
+      <view class="hero-text">
+        <text class="hero-title">每日现烤 · 手作面包</text>
+      </view>
+    </view>
+
+    <!-- Service Cards -->
+    <view class="service-cards">
+      <!-- Pickup Card -->
+      <view class="service-card" bindtap="onPickupTap">
+        <view class="service-text">
+          <text class="service-title">预定自取</text>
+          <text class="service-subtitle">提前预定 线下自取</text>
+        </view>
+        <view class="service-icon pickup-icon">
+          <image class="icon-image" src="{{icons.bread}}" mode="aspectFit"/>
+        </view>
+      </view>
+
+      <!-- Divider -->
+      <view class="service-divider"></view>
+
+      <!-- Delivery Card -->
+      <view class="service-card" bindtap="onDeliveryTap">
+        <view class="service-text">
+          <text class="service-title">预定配送</text>
+          <text class="service-subtitle">约30分钟左右</text>
+        </view>
+        <view class="service-icon delivery-icon">
+          <image class="icon-image" src="{{icons.delivery}}" mode="aspectFit"/>
+        </view>
+      </view>
+    </view>
+
+    <!-- Member Value Card -->
+    <view class="feature-card" bindtap="onMemberTap">
+      <view class="feature-left">
+        <view class="feature-icon oven-icon">
+          <image class="icon-image-small" src="{{icons.fire}}" mode="aspectFit"/>
+        </view>
+        <view class="feature-text">
+          <text class="feature-title">会员储值</text>
+        </view>
+      </view>
+      <view class="feature-right">
+        <image class="vip-card-image" src="{{icons.vipCard}}" mode="aspectFit"/>
+      </view>
+    </view>
+
+    <!-- Coupon Center Card -->
+    <view class="feature-card" bindtap="onCouponTap">
+      <view class="feature-left">
+        <view class="feature-icon coupon-icon">
+          <image class="icon-image-small" src="{{icons.scissors}}" mode="aspectFit"/>
+        </view>
+        <view class="feature-text">
+          <text class="feature-title">领券中心</text>
+          <text class="feature-subtitle">每日限量</text>
+        </view>
+      </view>
+      <view class="feature-right">
+        <view class="ticket-icon">
+          <view class="ticket-left">
+            <text class="ticket-value">¥5</text>
+          </view>
+          <view class="ticket-line"></view>
+          <view class="ticket-right">
+            <text class="ticket-condition">满50可用</text>
+            <text class="ticket-desc">新鲜面包专享</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 今日推荐 -->
+    <view class="section-header" wx:if="{{recommendProducts.length > 0}}">
+      <view class="section-title-wrap">
+        <view class="section-icon">
+          <image class="section-icon-img" src="{{icons.star}}" mode="aspectFit"/>
+        </view>
+        <text class="section-title">今日推荐</text>
+      </view>
+      <view class="section-more" bindtap="onMoreProducts">
+        <text>更多</text>
+        <text class="more-arrow">></text>
+      </view>
+    </view>
+
+    <!-- 推荐商品横向滚动 -->
+    <scroll-view class="recommend-scroll" scroll-x enhanced show-scrollbar="{{false}}" wx:if="{{recommendProducts.length > 0}}">
+      <view class="recommend-list">
+        <view class="recommend-item" wx:for="{{recommendProducts}}" wx:key="_id" bindtap="onProductTap" data-id="{{item._id}}">
+          <view class="recommend-image-wrap">
+            <image class="recommend-image" src="{{item.images[0] || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png'}}" mode="aspectFill"/>
+            <view class="recommend-tag" wx:if="{{item.isHot}}">热销</view>
+          </view>
+          <view class="recommend-info">
+            <text class="recommend-name">{{item.name}}</text>
+            <text class="recommend-desc">{{item.description || '新鲜现烤'}}</text>
+            <view class="recommend-footer">
+              <text class="recommend-price">¥{{item.price}}</text>
+              <view class="recommend-cart" catchtap="onAddToCart" data-product="{{item}}">
+                <image class="cart-icon-img" src="{{icons.cart}}" mode="aspectFit"/>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- Bottom Spacer -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
+
+</view>

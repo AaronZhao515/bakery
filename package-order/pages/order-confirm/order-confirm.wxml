@@ -1,0 +1,263 @@
+<!-- 订单确认页面 - 预定订单（匹配 Figma 设计稿） -->
+<view class="order-confirm-container">
+  <!-- 顶部导航栏 -->
+  <view class="header-bar">
+    <view class="header-content">
+      <view class="back-btn" bindtap="onBackTap">
+        <image class="back-icon" src="{{icons.arrowLeft}}" mode="aspectFit"/>
+        <text class="back-text">返回</text>
+      </view>
+      <text class="header-title">确认订单</text>
+      <view class="order-type-badge {{orderType === 'pickup' ? 'pickup' : 'delivery'}}">
+        {{orderType === 'pickup' ? '🏪 预定自取' : '🚚 预定配送'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 页面内容 -->
+  <scroll-view class="page-content" scroll-y enhanced show-scrollbar="{{false}}">
+
+    <!-- 自取/配送信息卡片 -->
+    <view class="info-card">
+      <view class="info-header">
+        <view class="info-icon-wrap">
+          <text class="info-icon">{{orderType === 'pickup' ? '🏪' : '🚚'}}</text>
+        </view>
+        <view class="info-title-wrap">
+          <text class="info-title">{{orderType === 'pickup' ? '到店自取' : '配送上门'}}</text>
+          <text class="info-subtitle">{{orderType === 'pickup' ? '预计15分钟内备好' : '预计30分钟内送达'}}</text>
+        </view>
+      </view>
+
+      <!-- 自取时间选择 -->
+      <view class="time-selector" wx:if="{{orderType === 'pickup'}}" bindtap="onSelectTime">
+        <text class="selector-label">取餐时间</text>
+        <view class="selector-value">
+          <text class="time-text">{{selectedTime || '尽快取餐'}}</text>
+          <image class="arrow-icon" src="{{icons.chevronRight}}" mode="aspectFit"/>
+        </view>
+      </view>
+
+      <!-- 配送地址选择 -->
+      <view class="address-selector" wx:if="{{orderType === 'delivery'}}" bindtap="onSelectAddress"
+      >
+        <view class="address-content" wx:if="{{selectedAddress}}"
+        >
+          <view class="address-top"
+          >
+            <text class="address-name"
+            >{{selectedAddress.name}}</text>
+            <text class="address-phone"
+            >{{selectedAddress.phone}}</text>
+          </view>
+          <text class="address-detail"
+          >{{selectedAddress.address}}</text>
+        </view>
+        <view class="address-empty" wx:else
+        >
+          <text class="empty-text"
+          >请选择配送地址</text>
+        </view>
+        <image class="arrow-icon" src="{{icons.chevronRight}}" mode="aspectFit"/>
+      </view>
+    </view>
+
+    <!-- 商品列表卡片 -->
+    <view class="products-card">
+      <view class="card-header">
+        <view class="shop-icon-wrap">
+          <image class="shop-icon" src="{{icons.store}}" mode="aspectFit"/>
+        </view>
+        <text class="shop-name">暖心烘焙</text>
+      </view>
+
+      <view class="product-list">
+        <view class="product-item" wx:for="{{orderItems}}" wx:key="id">
+          <view class="product-image-wrap"
+          >
+            <image class="product-image" src="{{item.imageUrl || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png'}}" mode="aspectFill" lazy-load/>
+          </view>
+          <view class="product-info"
+          >
+            <text class="product-name"
+            >{{item.name}}</text>
+            <text class="product-desc" wx:if="{{item.desc}}"
+            >{{item.desc}}</text>
+            <view class="product-bottom"
+            >
+              <text class="product-price"
+              >¥{{item.price}}</text>
+              <text class="product-qty"
+              >x{{item.quantity}}</text>
+            </view>
+          </view>
+          <text class="product-total"
+          >¥{{item.price * item.quantity}}</text>
+        </view>
+      </view>
+
+      <!-- 小计 -->
+      <view class="subtotal-row"
+      >
+        <text class="subtotal-label"
+        >共 {{totalQty}} 件商品，小计</text>
+        <text class="subtotal-price"
+        >¥{{totalPrice}}</text>
+      </view>
+    </view>
+
+    <!-- 优惠券 -->
+    <view class="coupon-row" bindtap="onSelectCoupon">
+      <text class="row-label">优惠券</text>
+      <view class="row-value">
+        <block wx:if="{{selectedCoupon}}">
+          <text class="coupon-text active">{{selectedCoupon.displayType === 'discount' ? selectedCoupon.displayValue + '优惠' : '-¥' + selectedCoupon.amount}}</text>
+        </block>
+        <block wx:elif="{{availableCoupons.length > 0}}">
+          <text class="coupon-text available">{{availableCoupons.length}}张可用</text>
+        </block>
+        <block wx:else>
+          <text class="coupon-text">暂无可用</text>
+        </block>
+        <image class="arrow-icon" src="{{icons.chevronRight}}" mode="aspectFit"/>
+      </view>
+    </view>
+
+    <!-- 备注 -->
+    <view class="remark-row"
+    >
+      <text class="row-label"
+      >订单备注</text>
+      <input
+        class="remark-input"
+        placeholder="请输入备注信息（选填）"
+        placeholder-class="remark-placeholder"
+        value="{{remark}}"
+        bindinput="onRemarkInput"
+      />
+    </view>
+
+    <!-- 配送/自取提示 -->
+    <view class="order-note {{orderType}}"
+    >
+      <text class="note-icon"
+      >{{orderType === 'pickup' ? '🏪' : '🚚'}}</text>
+      <view class="note-content"
+      >
+        <text class="note-title"
+        >{{orderType === 'pickup' ? '自取提示' : '配送信息'}}</text>
+        <text class="note-desc"
+        >{{orderType === 'pickup' ? '请凭订单号到店自取，订单保留2小时' : '满¥88免配送费，预计30分钟内送达'}}</text>
+      </view>
+    </view>
+
+    <!-- 底部间距 -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
+
+  <!-- 优惠券选择弹窗 -->
+  <view class="coupon-modal {{showCouponModal ? 'show' : ''}}" catchtouchmove="true">
+    <view class="modal-mask" bindtap="closeCouponModal"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">选择优惠券</text>
+        <view class="close-btn" bindtap="closeCouponModal">
+          <text>✕</text>
+        </view>
+      </view>
+
+      <scroll-view class="modal-body" scroll-y>
+        <!-- 不使用优惠券 -->
+        <view class="no-coupon-option" bindtap="onNotUseCoupon">
+          <text class="option-text">不使用优惠券</text>
+          <view class="option-check {{!selectedCoupon ? 'checked' : ''}}">
+            <view class="check-inner"></view>
+          </view>
+        </view>
+
+        <!-- 可用优惠券 -->
+        <view class="coupon-section" wx:if="{{availableCoupons.length > 0}}">
+          <text class="section-title">可用优惠券（{{availableCoupons.length}}张）</text>
+          <view class="coupon-option-list">
+            <view class="coupon-option {{selectedCoupon.id === item.id ? 'selected' : ''}}"
+                   wx:for="{{availableCoupons}}"
+                   wx:key="id"
+                   data-id="{{item.id}}"
+                   bindtap="onCouponSelectTap">
+              <view class="option-left">
+                <text class="option-value {{item.displayType}}">{{item.displayValue}}</text>
+                <text class="option-condition">满{{item.minAmount}}可用</text>
+              </view>
+              <view class="option-right">
+                <text class="option-title">{{item.title}}</text>
+                <text class="option-desc">{{item.desc}}</text>
+                <text class="option-time">有效期至 {{item.endTimeStr}}</text>
+              </view>
+              <view class="option-check {{selectedCoupon.id === item.id ? 'checked' : ''}}">
+                <view class="check-inner"></view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 不可用优惠券 -->
+        <view class="coupon-section" wx:if="{{unavailableCoupons.length > 0}}">
+          <text class="section-title unavailable">不可用优惠券（{{unavailableCoupons.length}}张）</text>
+          <view class="coupon-option-list">
+            <view class="coupon-option disabled"
+                   wx:for="{{unavailableCoupons}}"
+                   wx:key="id"
+                   data-id="{{item.id}}"
+                   bindtap="goToCouponCenter">
+              <view class="option-left">
+                <text class="option-value {{item.displayType}}">{{item.displayValue}}</text>
+                <text class="option-condition">满{{item.minAmount}}可用</text>
+              </view>
+              <view class="option-right">
+                <text class="option-title">{{item.title}}</text>
+                <text class="option-desc">{{item.desc}}</text>
+                <text class="option-time">有效期至 {{item.endTimeStr}}</text>
+              </view>
+              <view class="option-reason">去查看</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 无优惠券提示 -->
+        <view class="empty-coupon" wx:if="{{availableCoupons.length === 0 && unavailableCoupons.length === 0}}">
+          <text class="empty-icon">🎫</text>
+          <text class="empty-text">暂无优惠券</text>
+          <text class="empty-tip">去优惠券中心领取更多优惠</text>
+        </view>
+      </scroll-view>
+
+      <view class="modal-footer">
+        <view class="confirm-btn" bindtap="closeCouponModal">确定</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部提交栏 -->
+  <view class="submit-bar"
+  >
+    <view class="submit-content"
+    >
+      <view class="price-wrap"
+      >
+        <text class="price-label"
+        >合计</text>
+        <text class="price-symbol"
+        >¥</text>
+        <text class="price-value"
+        >{{payPrice}}</text>
+      </view>
+      <button class="submit-btn {{isSubmitting ? 'submitting' : ''}}" bindtap="onSubmitOrder" disabled="{{isSubmitting}}"
+      >
+        {{isSubmitting ? '提交中...' : '提交订单'}}
+      </button>
+    </view>
+  </view>
+</view>
+
+<!-- Toast 提示 -->
+<toast id="toast"></toast>

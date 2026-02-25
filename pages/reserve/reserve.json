@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "新鲜预定",
+  "navigationStyle": "custom",
+  "backgroundColor": "#FDF8F3",
+  "usingComponents": {
+    "nav-bar": "/components/nav-bar/nav-bar",
+    "product-card": "/components/product-card/product-card",
+    "loading": "/components/loading/loading",
+    "empty": "/components/empty/empty"
+  }
+}

@@ -1,0 +1,37 @@
+<!-- 空状态组件 -->
+<view class="empty-wrapper" style="{{customStyle}}">
+  <!-- 图片区域 -->
+  <view class="empty-image-wrapper">
+    <!-- 使用自定义图片 -->
+    <image 
+      wx:if="{{content.image}}"
+      class="empty-image"
+      src="{{content.image}}"
+      mode="aspectFit"
+    />
+    <!-- 默认图标 -->
+    <view wx:else class="empty-icon">
+      <text class="icon-text">📦</text>
+    </view>
+  </view>
+
+  <!-- 文字区域 -->
+  <view class="empty-text-wrapper">
+    <!-- 标题 -->
+    <text wx:if="{{content.title}}" class="empty-title">{{content.title}}</text>
+    
+    <!-- 描述 -->
+    <text wx:if="{{content.description}}" class="empty-description">{{content.description}}</text>
+  </view>
+
+  <!-- 按钮 -->
+  <view wx:if="{{showButton && content.buttonText}}" class="empty-action">
+    <button 
+      class="empty-btn btn-{{buttonType}}"
+      bindtap="onButtonTap"
+    >{{content.buttonText}}</button>
+  </view>
+
+  <!-- 自定义内容插槽 -->
+  <slot></slot>
+</view>

@@ -1,0 +1,217 @@
+<!-- 订单详情页面 - 预定订单详情（匹配 Figma 设计稿） -->
+<view class="order-detail-container">
+  <!-- 顶部导航栏 -->
+  <view class="header-bar">
+    <view class="header-content">
+      <view class="back-btn" bindtap="onBackTap">
+        <image class="back-icon" src="{{icons.arrowLeft}}" mode="aspectFit"/>
+        <text class="back-text">返回</text>
+      </view>
+      <text class="header-title">订单详情</text>
+      <view class="header-right" bindtap="goToHome">
+        <image class="home-icon" src="{{icons.home}}" mode="aspectFit"/>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading-wrap" wx:if="{{isLoading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 页面内容 -->
+  <scroll-view class="page-content" scroll-y enhanced show-scrollbar="{{false}}" wx:if="{{!isLoading && order}}">
+
+    <!-- 订单状态卡片 -->
+    <view class="status-card">
+      <view class="status-header" style="background: {{order.statusInfo.bgColor}};">
+        <text class="status-icon">{{order.statusInfo.icon}}</text>
+        <view class="status-info">
+          <text class="status-text" style="color: {{order.statusInfo.color}};">{{order.statusInfo.text}}</text>
+          <text class="status-desc" wx:if="{{order.status === 0}}">请在30分钟内完成支付</text>
+          <text class="status-desc" wx:if="{{order.status === 1}}">商家已接单，正在备餐中</text>
+          <text class="status-desc" wx:if="{{order.status === 2}}">美食正在制作中，请耐心等待</text>
+          <text class="status-desc" wx:if="{{order.status === 3}}">配送员正在配送中</text>
+          <text class="status-desc" wx:if="{{order.status === 4}}">订单已完成，期待您的再次光临</text>
+          <text class="status-desc" wx:if="{{order.status === -1}}">订单已取消</text>
+        </view>
+      </view>
+
+      <!-- 状态流程 -->
+      <view class="status-flow" wx:if="{{order.status >= 0 && order.status !== -1}}">
+        <view class="flow-item {{order.status >= 0 ? 'active' : ''}}">
+          <view class="flow-dot"></view>
+          <text class="flow-text">提交订单</text>
+        </view>
+        <view class="flow-line {{order.status >= 1 ? 'active' : ''}}"></view>
+        <view class="flow-item {{order.status >= 1 ? 'active' : ''}}">
+          <view class="flow-dot"></view>
+          <text class="flow-text">支付</text>
+        </view>
+        <view class="flow-line {{order.status >= 2 ? 'active' : ''}}"></view>
+        <view class="flow-item {{order.status >= 2 ? 'active' : ''}}">
+          <view class="flow-dot"></view>
+          <text class="flow-text">备餐</text>
+        </view>
+        <view class="flow-line {{order.status >= 4 ? 'active' : ''}}"></view>
+        <view class="flow-item {{order.status >= 4 ? 'active' : ''}}">
+          <view class="flow-dot"></view>
+          <text class="flow-text">完成</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 配送/自取信息卡片 -->
+    <view class="info-card">
+      <view class="info-header">
+        <view class="info-icon-wrap" style="background: {{order.deliveryType === 1 ? '#E8F4FD' : '#FFF8EE'}};">
+          <text class="info-icon">{{order.deliveryType === 1 ? '🚚' : '🏪'}}</text>
+        </view>
+        <view class="info-title-wrap">
+          <text class="info-title">{{order.deliveryType === 1 ? '配送上门' : '到店自取'}}</text>
+          <text class="info-subtitle">{{order.deliveryType === 1 ? '预计30分钟内送达' : '预计15分钟内备好'}}</text>
+        </view>
+      </view>
+
+      <!-- 自取信息 -->
+      <view class="pickup-info" wx:if="{{order.deliveryType === 0}}">
+        <view class="info-row">
+          <text class="info-label">取餐时间</text>
+          <text class="info-value">{{order.pickupTime || '尽快取餐'}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">取餐地址</text>
+          <text class="info-value">小赵面食（暖心路123号）</text>
+        </view>
+      </view>
+
+      <!-- 配送信息 -->
+      <view class="delivery-info" wx:if="{{order.deliveryType === 1 && order.address}}">
+        <view class="info-row">
+          <text class="info-label">收货人</text>
+          <text class="info-value">{{order.address.name}} {{order.address.phone}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">收货地址</text>
+          <text class="info-value">{{order.address.address}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 商品列表卡片 -->
+    <view class="products-card">
+      <view class="card-header">
+        <view class="shop-icon-wrap">
+          <image class="shop-icon" src="{{icons.store}}" mode="aspectFit"/>
+        </view>
+        <text class="shop-name">小赵面食</text>
+      </view>
+
+      <view class="product-list">
+        <view class="product-item" wx:for="{{order.products}}" wx:key="productId">
+          <view class="product-image-wrap">
+            <image class="product-image" src="{{item.image || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png'}}" mode="aspectFill" lazy-load/>
+          </view>
+          <view class="product-info">
+            <text class="product-name">{{item.name}}</text>
+            <text class="product-spec" wx:if="{{item.specName}}">{{item.specName}}</text>
+            <view class="product-bottom">
+              <text class="product-price">¥{{item.price}}</text>
+              <text class="product-qty">x{{item.quantity}}</text>
+            </view>
+          </view>
+          <text class="product-total">¥{{item.totalAmount}}</text>
+        </view>
+      </view>
+
+      <!-- 小计 -->
+      <view class="subtotal-row">
+        <text class="subtotal-label">共 {{order.totalQty}} 件商品</text>
+        <text class="subtotal-price">¥{{order.totalAmount}}</text>
+      </view>
+    </view>
+
+    <!-- 价格明细卡片 -->
+    <view class="price-card">
+      <view class="price-row">
+        <text class="price-label">商品总额</text>
+        <text class="price-value">¥{{order.totalAmount}}</text>
+      </view>
+      <view class="price-row" wx:if="{{order.deliveryFee > 0}}">
+        <text class="price-label">配送费</text>
+        <text class="price-value">¥{{order.deliveryFee}}</text>
+      </view>
+      <view class="price-row" wx:if="{{order.discountAmount > 0}}">
+        <text class="price-label">优惠金额</text>
+        <text class="price-value discount">-¥{{order.discountAmount}}</text>
+      </view>
+      <view class="price-row total">
+        <text class="price-label">实付金额</text>
+        <text class="price-value total">¥{{order.payAmount}}</text>
+      </view>
+    </view>
+
+    <!-- 订单信息卡片 -->
+    <view class="order-info-card">
+      <view class="info-title-row">
+        <text class="section-title">订单信息</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">订单编号</text>
+        <view class="info-value-wrap">
+          <text class="info-value">{{order.orderNo}}</text>
+          <text class="copy-btn" bindtap="onCopyOrderNo">复制</text>
+        </view>
+      </view>
+      <view class="info-row">
+        <text class="info-label">下单时间</text>
+        <text class="info-value">{{order.createTimeStr}}</text>
+      </view>
+      <view class="info-row" wx:if="{{order.payTimeStr}}">
+        <text class="info-label">支付时间</text>
+        <text class="info-value">{{order.payTimeStr}}</text>
+      </view>
+      <view class="info-row" wx:if="{{order.remark}}">
+        <text class="info-label">订单备注</text>
+        <text class="info-value">{{order.remark}}</text>
+      </view>
+    </view>
+
+    <!-- 客服卡片 -->
+    <view class="service-card" bindtap="onContactService">
+      <text class="service-icon">💁</text>
+      <view class="service-content">
+        <text class="service-title">遇到问题？</text>
+        <text class="service-desc">联系客服获取帮助</text>
+      </view>
+      <image class="arrow-icon" src="{{icons.chevronRight}}" mode="aspectFit"/>
+    </view>
+
+    <!-- 底部间距 -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
+
+  <!-- 底部操作栏 -->
+  <view class="action-bar" wx:if="{{!isLoading && order}}">
+    <view class="action-content">
+      <!-- 待支付状态 -->
+      <block wx:if="{{order.canPay}}">
+        <button class="action-btn secondary" bindtap="onCancelOrder">取消订单</button>
+        <button class="action-btn primary" bindtap="onPayOrder">立即支付 ¥{{order.payAmount}}</button>
+      </block>
+
+      <!-- 已支付/备餐中/配送中 -->
+      <block wx:elif="{{order.status === 1 || order.status === 2 || order.status === 3}}">
+        <button class="action-btn secondary" bindtap="onContactService">联系客服</button>
+        <button class="action-btn primary" bindtap="onCallPhone">拨打电话</button>
+      </block>
+
+      <!-- 已完成/已取消 -->
+      <block wx:else>
+        <button class="action-btn secondary" bindtap="goToOrderList">查看全部订单</button>
+        <button class="action-btn primary" bindtap="goToHome">再去逛逛</button>
+      </block>
+    </view>
+  </view>
+</view>

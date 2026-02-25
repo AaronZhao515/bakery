@@ -1,0 +1,212 @@
+<!-- 会员中心页面 -->
+<view class="vip-page">
+  <!-- 页面内容 -->
+  <scroll-view class="page-content" scroll-y enhanced show-scrollbar="{{false}}">
+
+    <!-- VIP 卡片 - 已登录 -->
+    <view class="vip-card" wx:if="{{isLogin}}">
+      <!-- 装饰麦穗 -->
+      <view class="wheat-deco right">
+        <image class="wheat-img" src="{{icons.wheat}}" mode="aspectFit"/>
+      </view>
+      <view class="wheat-deco left">
+        <image class="wheat-img" src="{{icons.wheat}}" mode="aspectFit" style="transform: scaleX(-1) rotate(20deg);"/>
+      </view>
+
+      <!-- 金色闪光线条 -->
+      <view class="gold-line"></view>
+
+      <view class="card-content">
+        <!-- 顶部：等级和店铺名 -->
+        <view class="card-header">
+          <view class="level-badge">
+            <image class="star-icon" src="{{icons.crown}}" mode="aspectFit"/>
+            <text class="level-name">{{levelInfo.name}}</text>
+          </view>
+          <view class="brand-section">
+            <text class="brand-name">小赵面食</text>
+            <text class="brand-sub">暖心烘焙</text>
+          </view>
+        </view>
+
+        <!-- 中间：积分展示 -->
+        <view class="points-section">
+          <view class="points-main">
+            <text class="points-value">{{userInfo.points || 0}}</text>
+            <text class="points-unit">积分</text>
+          </view>
+          <view class="points-divider"></view>
+          <view class="user-info">
+            <text class="user-nickname">{{userInfo.nickName || '微信用户'}}</text>
+            <text class="user-id">ID: {{userInfo._id || '****'}}</text>
+          </view>
+        </view>
+
+        <!-- 进度条区域 -->
+        <view class="progress-wrapper" wx:if="{{levelInfo.nextLevel}}">
+          <view class="progress-info">
+            <text class="progress-text">再积 <text class="highlight">{{levelInfo.nextLevel.min - (userInfo.points || 0)}}</text> 分升级 {{levelInfo.nextLevel.name}}</text>
+          </view>
+          <view class="progress-bar-bg">
+            <view class="progress-bar-fill" style="width: {{levelInfo.progress}}%;">
+              <view class="progress-shine"></view>
+            </view>
+          </view>
+          <view class="progress-levels">
+            <text class="level-start">{{levelInfo.name}}</text>
+            <text class="level-end">{{levelInfo.nextLevel.name}}</text>
+          </view>
+        </view>
+
+        <!-- 底部：储值咨询按钮 -->
+        <view class="card-footer">
+          <view class="recharge-info">
+            <text class="recharge-title">会员储值</text>
+            <text class="recharge-desc">储值享更多优惠权益</text>
+          </view>
+          <button class="recharge-btn" bindtap="onRechargeConsult">
+            <image class="recharge-icon" src="{{icons.wallet}}" mode="aspectFit"/>
+            <text>立即咨询</text>
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- VIP 卡片 - 未登录 -->
+    <view class="vip-card guest" wx:if="{{!isLogin}}">
+      <view class="gold-line"></view>
+      <view class="wheat-deco right">
+        <image class="wheat-img" src="{{icons.wheat}}" mode="aspectFit"/>
+      </view>
+
+      <view class="guest-content">
+        <view class="guest-icon-wrap">
+          <image class="guest-icon" src="{{icons.crown}}" mode="aspectFit"/>
+        </view>
+        <text class="guest-title">加入会员 尊享权益</text>
+        <text class="guest-desc">登录即可享受积分、优惠券等会员特权</text>
+        <button class="guest-btn" bindtap="goToLogin">立即登录</button>
+      </view>
+    </view>
+
+    <!-- 快捷统计 - 已登录 -->
+    <view class="quick-stats" wx:if="{{isLogin}}">
+      <view class="stat-item">
+        <view class="stat-icon-wrap" style="background: #FFF8E1;">
+          <image class="stat-icon" src="{{icons.starFilled}}" mode="aspectFit"/>
+        </view>
+        <text class="stat-value">{{userInfo.points || 0}}</text>
+        <text class="stat-label">我的积分</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <view class="stat-icon-wrap" style="background: #E8F5E9;">
+          <image class="stat-icon" src="{{icons.gift}}" mode="aspectFit"/>
+        </view>
+        <text class="stat-value">{{stats.couponCount || 0}}</text>
+        <text class="stat-label">优惠券</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <view class="stat-icon-wrap" style="background: #E3F2FD;">
+          <image class="stat-icon" src="{{icons.award}}" mode="aspectFit"/>
+        </view>
+        <text class="stat-value">{{levelInfo.level + 1}}</text>
+        <text class="stat-label">{{levelInfo.name}}</text>
+      </view>
+    </view>
+
+    <!-- 专属礼包 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-line"></view>
+        <text class="section-title">专属礼包</text>
+        <view class="section-tag">限时领取</view>
+      </view>
+
+      <view class="coupon-list" wx:if="{{newCoupons.length > 0}}">
+        <view class="coupon-card" wx:for="{{newCoupons}}" wx:key="id">
+          <view class="coupon-strip" style="background: {{item.iconColor}};"></view>
+          <view class="coupon-icon-wrap" style="background: {{item.iconBg}};">
+            <image class="coupon-icon" src="{{icons.gift}}" mode="aspectFit"/>
+          </view>
+          <view class="coupon-info">
+            <view class="coupon-title-row">
+              <text class="coupon-title">{{item.title}}</text>
+              <view class="coupon-tag" style="color: {{item.tagColor}}; background: {{item.tagBg}}; border-color: {{item.tagColor}}33;">
+                {{item.tag}}
+              </view>
+            </view>
+            <text class="coupon-amount" style="color: {{item.amountColor}};">{{item.amount}}</text>
+            <text class="coupon-desc">{{item.desc}}</text>
+          </view>
+          <button
+            class="coupon-btn {{item.claimed ? 'claimed' : ''}}"
+            bindtap="claimCoupon"
+            data-index="{{index}}"
+            disabled="{{item.claimed}}"
+          >
+            {{item.claimed ? '已领取' : '立即领取'}}
+          </button>
+        </view>
+      </view>
+      <view class="empty-coupons" wx:if="{{newCoupons.length === 0}}">
+        <text>暂无可用优惠券</text>
+      </view>
+    </view>
+
+    <!-- 积分明细 - 已登录 -->
+    <view class="section" wx:if="{{isLogin}}">
+      <view class="section-header">
+        <view class="section-line" style="background: #9B7355;"></view>
+        <text class="section-title">积分明细</text>
+        <view class="section-more" bindtap="viewAllHistory">
+          <text>查看全部</text>
+          <image class="more-icon" src="{{icons.chevronRight}}" mode="aspectFit"/>
+        </view>
+      </view>
+
+      <view class="history-card">
+        <view class="history-item" wx:for="{{pointsHistory}}" wx:key="id">
+          <view class="history-icon-wrap" style="background: {{item.bgColor || '#F5F5F5'}};">
+            <image class="history-icon" src="{{item.icon || icons.clock}}" mode="aspectFit"/>
+          </view>
+          <view class="history-info">
+            <text class="history-label">{{item.label}}</text>
+            <text class="history-date">{{item.date}}</text>
+          </view>
+          <text class="history-points" style="color: {{item.color}};">{{item.pts}}</text>
+        </view>
+        <view class="empty-history" wx:if="{{pointsHistory.length === 0}}">
+          <text>暂无积分记录</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 如何获得积分 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-line" style="background: #C8A882;"></view>
+        <text class="section-title">如何获得积分</text>
+      </view>
+
+      <view class="earn-card">
+        <view class="earn-item" wx:for="{{earnMethods}}" wx:key="label" bindtap="onEarnTap" data-item="{{item}}">
+          <view class="earn-icon-wrap" style="background: {{item.color}}18;">
+            <image class="earn-icon" src="{{item.icon}}" mode="aspectFit"/>
+          </view>
+          <view class="earn-content">
+            <text class="earn-label">{{item.label}}</text>
+            <view class="earn-points" style="color: {{item.color}}; background: {{item.color}}15;">
+              {{item.pts}}
+            </view>
+          </view>
+          <image class="earn-arrow" src="{{icons.chevronRight}}" mode="aspectFit"/>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部安全区域 -->
+    <view class="safe-area-bottom"></view>
+  </scroll-view>
+</view>

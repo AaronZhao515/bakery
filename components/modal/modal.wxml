@@ -1,0 +1,63 @@
+<!-- 弹窗组件 -->
+<view 
+  wx:if="{{isShowing}}"
+  class="modal-wrapper"
+  catchtouchmove="stopPropagation"
+>
+  <!-- 遮罩层 -->
+  <view 
+    class="modal-mask"
+    animation="{{maskAnimationData}}"
+    bindtap="onMaskTap"
+  ></view>
+
+  <!-- 弹窗内容 -->
+  <view 
+    class="modal-content"
+    animation="{{animationData}}"
+    style="{{customStyle}}"
+  >
+    <!-- 关闭图标 -->
+    <view 
+      wx:if="{{showClose}}"
+      class="modal-close"
+      bindtap="onCloseTap"
+    >
+      <text class="close-icon">×</text>
+    </view>
+
+    <!-- 标题 -->
+    <view wx:if="{{showTitle && title}}" class="modal-header">
+      <text class="modal-title">{{title}}</text>
+    </view>
+
+    <!-- 内容区域 -->
+    <view class="modal-body" style="{{contentStyle}}">
+      <!-- 默认内容 -->
+      <slot name="content">
+        <text wx:if="{{content}}" class="modal-text">{{content}}</text>
+      </slot>
+    </view>
+
+    <!-- 自定义内容插槽 -->
+    <slot></slot>
+
+    <!-- 按钮区域 -->
+    <view class="modal-footer {{buttonLayout === 'vertical' ? 'footer-vertical' : ''}}">
+      <!-- 取消按钮 -->
+      <button
+        wx:if="{{showCancel}}"
+        class="modal-btn btn-cancel"
+        style="color: {{cancelColor}};"
+        bindtap="onCancelTap"
+      >{{cancelText}}</button>
+
+      <!-- 确认按钮 -->
+      <button
+        class="modal-btn btn-confirm"
+        style="background: {{confirmColor}};"
+        bindtap="onConfirmTap"
+      >{{confirmText}}</button>
+    </view>
+  </view>
+</view>

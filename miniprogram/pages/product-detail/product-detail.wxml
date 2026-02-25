@@ -1,0 +1,237 @@
+<!-- 商品详情页 -->
+<view class="product-detail-container">
+  <!-- 自定义导航栏 -->
+  <view class="custom-nav {{showNavBg ? 'show-bg' : ''}}" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px;">
+    <view class="nav-content">
+      <view class="nav-back" bindtap="onBackTap">
+        <text class="back-icon">←</text>
+      </view>
+      <text class="nav-title {{showNavBg ? 'show' : ''}}">{{product.name || '商品详情'}}</text>
+      <view class="nav-actions">
+        <view class="nav-btn" bindtap="onShareTap">
+          <text>分享</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 商品图片轮播 -->
+  <view class="product-gallery" style="margin-top: {{navBarHeight}}px;">
+    <swiper class="gallery-swiper" indicator-dots="{{true}}" autoplay="{{true}}" interval="5000" duration="500" circular="{{true}}" indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#D4A574" bindchange="onSwiperChange">
+      <swiper-item wx:for="{{product.images || [product.image]}}" wx:key="index">
+        <image class="gallery-image" src="{{item}}" mode="aspectFill" lazy-load="{{true}}" bindtap="onPreviewImage" data-url="{{item}}" />
+      </swiper-item>
+    </swiper>
+    <view class="gallery-indicator">{{currentImageIndex + 1}} / {{imageCount}}</view>
+  </view>
+
+  <!-- 商品信息 -->
+  <view class="product-info-section card">
+    <view class="price-row">
+      <view class="current-price">
+        <text class="price-symbol">¥</text>
+        <text class="price-value">{{selectedSku.price || product.price}}</text>
+      </view>
+      <view wx:if="{{selectedSku.originalPrice || product.originalPrice}}" class="original-price">
+        <text>¥{{selectedSku.originalPrice || product.originalPrice}}</text>
+      </view>
+      <view class="product-tags">
+        <text wx:for="{{product.tags}}" wx:key="index" class="tag" style="background: {{item.color}};">{{item.name}}</text>
+      </view>
+    </view>
+
+    <view class="product-name-row">
+      <text class="product-name">{{product.name}}</text>
+    </view>
+
+    <view class="product-desc">{{product.description}}</view>
+
+    <view class="product-stats">
+      <view class="stat-item">
+        <text class="stat-value">{{product.sales}}+</text>
+        <text class="stat-label">销量</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-value">{{product.rating || '4.9'}}</text>
+        <text class="stat-label">评分</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-value">{{product.stock || 99}}+</text>
+        <text class="stat-label">库存</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 规格选择 -->
+  <view class="sku-section card" wx:if="{{product.skus && product.skus.length > 0}}">
+    <view class="sku-title">选择规格</view>
+    <view class="sku-list">
+      <view class="sku-item {{selectedSku.id === item.id ? 'active' : ''}} {{item.stock === 0 ? 'disabled' : ''}}" wx:for="{{product.skus}}" wx:key="id" bindtap="onSkuSelect" data-sku="{{item}}">
+        <text class="sku-name">{{item.name}}</text>
+        <text class="sku-price">¥{{item.price}}</text>
+        <text wx:if="{{item.stock === 0}}" class="sku-soldout">售罄</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数量选择 -->
+  <view class="quantity-section card">
+    <view class="quantity-label">购买数量</view>
+    <view class="quantity-selector">
+      <view class="quantity-btn {{quantity <= 1 ? 'disabled' : ''}}" bindtap="onQuantityChange" data-action="decrease">
+        <text>-</text>
+      </view>
+      <input class="quantity-input" type="number" value="{{quantity}}" bindblur="onQuantityInput" />
+      <view class="quantity-btn" bindtap="onQuantityChange" data-action="increase">
+        <text>+</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 商品详情 -->
+  <view class="detail-section card">
+    <view class="detail-tabs">
+      <view class="tab-item {{activeTab === 'detail' ? 'active' : ''}}" bindtap="onTabChange" data-tab="detail">
+        <text>商品详情</text>
+      </view>
+      <view class="tab-item {{activeTab === 'params' ? 'active' : ''}}" bindtap="onTabChange" data-tab="params">
+        <text>规格参数</text>
+      </view>
+      <view class="tab-item {{activeTab === 'reviews' ? 'active' : ''}}" bindtap="onTabChange" data-tab="reviews">
+        <text>用户评价({{product.reviewCount || 0}})</text>
+      </view>
+    </view>
+
+    <!-- 商品详情内容 -->
+    <view class="tab-content" wx:if="{{activeTab === 'detail'}}">
+      <view class="detail-images">
+        <image wx:for="{{product.detailImages}}" wx:key="index" class="detail-image" src="{{item}}" mode="widthFix" lazy-load="{{true}}" />
+      </view>
+    </view>
+
+    <!-- 规格参数 -->
+    <view class="tab-content" wx:if="{{activeTab === 'params'}}">
+      <view class="params-list">
+        <view class="param-item" wx:for="{{product.params}}" wx:key="name">
+          <text class="param-name">{{item.name}}</text>
+          <text class="param-value">{{item.value}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 用户评价 -->
+    <view class="tab-content" wx:if="{{activeTab === 'reviews'}}">
+      <view class="reviews-summary">
+        <view class="rating-score">
+          <text class="score-value">{{product.rating || '4.9'}}</text>
+          <view class="score-stars">
+            <text wx:for="{{5}}" wx:key="index" class="star {{index < (product.rating || 5) ? 'active' : ''}}">★</text>
+          </view>
+        </view>
+        <view class="rating-tags">
+          <text class="rating-tag">全部({{product.reviewCount || 0}})</text>
+          <text class="rating-tag">好评({{product.goodReviewCount || 0}})</text>
+          <text class="rating-tag">有图({{product.imageReviewCount || 0}})</text>
+        </view>
+      </view>
+
+      <view class="review-list">
+        <view class="review-item" wx:for="{{reviews}}" wx:key="id">
+          <view class="review-header">
+            <image class="reviewer-avatar" src="{{item.avatar}}" mode="aspectFill" />
+            <view class="reviewer-info">
+              <text class="reviewer-name">{{item.nickname}}</text>
+              <view class="review-rating">
+                <text wx:for="{{5}}" wx:for-index="starIndex" wx:key="starIndex" class="star {{starIndex < item.rating ? 'active' : ''}}">★</text>
+              </view>
+            </view>
+            <text class="review-date">{{item.date}}</text>
+          </view>
+          <view class="review-content">{{item.content}}</view>
+          <view class="review-images" wx:if="{{item.images && item.images.length > 0}}">
+            <image wx:for="{{item.images}}" wx:for-item="img" wx:key="index" class="review-image" src="{{img}}" mode="aspectFill" bindtap="onPreviewReviewImage" data-images="{{item.images}}" data-current="{{img}}" />
+          </view>
+          <view class="review-sku" wx:if="{{item.sku}}">{{item.sku}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-bar safe-area-bottom">
+    <view class="bar-actions">
+      <view class="action-item" bindtap="onHomeTap">
+        <text class="action-icon">🏠</text>
+        <text class="action-text">首页</text>
+      </view>
+      <view class="action-item" bindtap="onCartTap">
+        <text class="action-icon">🛒</text>
+        <text class="action-text">购物车</text>
+        <view wx:if="{{cartCount > 0}}" class="cart-badge">{{cartCount > 99 ? '99+' : cartCount}}</view>
+      </view>
+      <view class="action-item" bindtap="onCollectTap">
+        <text class="action-icon">{{isCollected ? '❤️' : '🤍'}}</text>
+        <text class="action-text">收藏</text>
+      </view>
+    </view>
+    <view class="bar-buttons">
+      <view class="btn-add-cart" bindtap="onAddCart">
+        <text>加入购物车</text>
+      </view>
+      <view class="btn-buy" bindtap="onBuyNow">
+        <text>立即购买</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 规格选择弹窗 -->
+  <view class="sku-popup {{showSkuPopup ? 'show' : ''}}" bindtap="onCloseSkuPopup">
+    <view class="sku-popup-content" catchtap="onPreventBubble">
+      <view class="popup-header">
+        <image class="popup-image" src="{{product.image}}" mode="aspectFill" />
+        <view class="popup-info">
+          <view class="popup-price">
+            <text class="price-symbol">¥</text>
+            <text class="price-value">{{selectedSku.price || product.price}}</text>
+          </view>
+          <view class="popup-stock">库存 {{selectedSku.stock || product.stock}} 件</view>
+          <view class="popup-selected">已选：{{selectedSku.name || '默认规格'}}</view>
+        </view>
+        <view class="popup-close" bindtap="onCloseSkuPopup">
+          <text>✕</text>
+        </view>
+      </view>
+
+      <scroll-view class="popup-body" scroll-y="{{true}}">
+        <view class="popup-sku-section" wx:if="{{product.skus && product.skus.length > 0}}">
+          <view class="popup-sku-title">规格</view>
+          <view class="popup-sku-list">
+            <view class="popup-sku-item {{selectedSku.id === item.id ? 'active' : ''}} {{item.stock === 0 ? 'disabled' : ''}}" wx:for="{{product.skus}}" wx:key="id" bindtap="onSkuSelect" data-sku="{{item}}">
+              {{item.name}}
+            </view>
+          </view>
+        </view>
+
+        <view class="popup-quantity-section">
+          <view class="popup-quantity-label">数量</view>
+          <view class="quantity-selector">
+            <view class="quantity-btn {{quantity <= 1 ? 'disabled' : ''}}" bindtap="onQuantityChange" data-action="decrease">
+              <text>-</text>
+            </view>
+            <input class="quantity-input" type="number" value="{{quantity}}" bindblur="onQuantityInput" />
+            <view class="quantity-btn" bindtap="onQuantityChange" data-action="increase">
+              <text>+</text>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="popup-footer">
+        <view class="btn-add-cart" bindtap="onAddCart">加入购物车</view>
+        <view class="btn-buy" bindtap="onBuyNow">立即购买</view>
+      </view>
+    </view>
+  </view>
+</view>

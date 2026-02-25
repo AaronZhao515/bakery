@@ -1,0 +1,361 @@
+
+/* Orders Page Styles - Figma Design */
+
+page {
+  background-color: #F0EAD6;
+  min-height: 100vh;
+}
+
+.orders-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Fixed Header */
+.orders-header {
+  position: fixed;
+  top: 12rpx;
+  left: 24rpx;
+  right: 24rpx;
+  background: linear-gradient(135deg, #8B6347 0%, #7A5533 100%);
+  border-radius: 48rpx;
+  z-index: 50;
+  padding: 80rpx 24rpx 24rpx;
+  box-sizing: border-box;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.header-title {
+  font-size: 32rpx;
+  color: #F5EDD8;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+
+.order-count-badge {
+  margin-left: auto;
+  background: #D4A96A;
+  color: #fff;
+  border-radius: 999rpx;
+  padding: 4rpx 20rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+/* Status Tabs */
+.status-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 24rpx;
+  padding-top: 16rpx;
+  border-top: 2rpx solid rgba(245, 237, 216, 0.2);
+}
+
+.tab-item {
+  padding: 12rpx 24rpx;
+  border-radius: 999rpx;
+  transition: all 0.3s;
+}
+
+.tab-item.active {
+  background: rgba(245, 237, 216, 0.25);
+}
+
+.tab-text {
+  font-size: 26rpx;
+  color: rgba(245, 237, 216, 0.7);
+  font-weight: 500;
+}
+
+.tab-item.active .tab-text {
+  color: #F5EDD8;
+  font-weight: 700;
+}
+
+/* Scrollable Content */
+.orders-content {
+  flex: 1;
+  padding: 0 24rpx;
+  padding-top: 320rpx;
+  padding-bottom: 160rpx;
+  box-sizing: border-box;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 192rpx;
+  gap: 32rpx;
+}
+
+.empty-icon {
+  width: 104rpx;
+  height: 104rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  color: #B08860;
+  font-size: 28rpx;
+}
+
+.empty-tip {
+  color: #999;
+  font-size: 24rpx;
+  margin-top: -16rpx;
+}
+
+.go-reserve-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  background: linear-gradient(135deg, #8B6347 0%, #7A5533 100%);
+  color: #F5EDD8;
+  border: none;
+  border-radius: 999rpx;
+  padding: 20rpx 56rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+/* Order List */
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+/* Order Card */
+.order-card {
+  border-radius: 32rpx;
+  overflow: hidden;
+  background: #FFFFFF;
+  box-shadow: 0 4rpx 24rpx rgba(155, 115, 85, 0.12);
+  display: flex;
+  flex-direction: column;
+}
+
+.order-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx;
+  border-bottom: 3rpx solid #F5EDD8;
+}
+
+.order-no-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.order-no-label {
+  font-size: 24rpx;
+  color: #B08860;
+}
+
+.order-no {
+  font-size: 24rpx;
+  color: #5C3D1E;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+}
+
+.order-status {
+  border-radius: 999rpx;
+  padding: 6rpx 20rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+/* Order Type Row */
+.order-type-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 32rpx;
+  background: #FDFAF5;
+}
+
+.order-type-badge {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  border-radius: 999rpx;
+  padding: 4rpx 20rpx;
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.type-emoji {
+  font-size: 20rpx;
+}
+
+.type-pickup {
+  background: #D4A96A;
+}
+
+.type-delivery {
+  background: #9B7355;
+}
+
+.order-date {
+  font-size: 20rpx;
+  color: #B08860;
+}
+
+/* Product List */
+.product-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0 32rpx;
+}
+
+.product-item {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  padding: 24rpx 0;
+  border-bottom: 2rpx solid #F5EDD8;
+}
+
+.product-item:last-child {
+  border-bottom: none;
+}
+
+.product-image-wrap {
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #F5F5F5;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 8rpx;
+}
+
+.product-name {
+  font-size: 24rpx;
+  color: #5C3D1E;
+  font-weight: 600;
+}
+
+.product-spec {
+  font-size: 20rpx;
+  color: #B08860;
+}
+
+.product-price-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8rpx;
+}
+
+.product-total-price {
+  font-size: 24rpx;
+  color: #9B7355;
+  font-weight: 700;
+}
+
+.product-qty {
+  font-size: 20rpx;
+  color: #B08860;
+}
+
+/* Order Footer */
+.order-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx;
+  border-top: 3rpx solid #F5EDD8;
+}
+
+.order-total-count {
+  font-size: 24rpx;
+  color: #B08860;
+}
+
+.order-total-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.order-total-label {
+  font-size: 24rpx;
+  color: #B08860;
+}
+
+.order-total {
+  font-size: 36rpx;
+  color: #7A5533;
+  font-weight: 800;
+}
+
+/* Loading More */
+.loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  padding: 32rpx 0;
+}
+
+.loading-spinner {
+  width: 32rpx;
+  height: 32rpx;
+  border: 4rpx solid #F5EDD8;
+  border-top-color: #8B6347;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  font-size: 24rpx;
+  color: #B08860;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Bottom Spacer */
+.bottom-spacer {
+  height: 40rpx;
+}
+
+/* Icon Styles */
+.header-icon {
+  width: 36rpx;
+  height: 36rpx;
+  filter: brightness(0) invert(0.95);
+}
+
+.arrow-icon {
+  width: 28rpx;
+  height: 28rpx;
+  filter: brightness(0) invert(0.95);
+}

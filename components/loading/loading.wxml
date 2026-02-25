@@ -1,0 +1,65 @@
+<!-- 加载动画组件 -->
+<view 
+  wx:if="{{visible}}"
+  class="loading-wrapper {{fullScreen ? 'loading-fullscreen' : ''}}"
+  style="{{customStyle}}"
+>
+  <!-- 遮罩层 -->
+  <view wx:if="{{mask}}" class="loading-mask"></view>
+
+  <!-- 加载内容 -->
+  <view class="loading-content">
+    <!-- 旋转加载器 -->
+    <view wx:if="{{type === 'spinner'}}" class="loading-spinner loading-{{size}}">
+      <view 
+        class="spinner-ring"
+        style="border-color: {{color}}; border-top-color: transparent;"
+      ></view>
+    </view>
+
+    <!-- 圆形进度 -->
+    <view wx:elif="{{type === 'circle'}}" class="loading-circle loading-{{size}}">
+      <view class="circle-svg" style="border-color: {{color}};">
+        <view class="circle-progress" style="border-color: {{color}};"></view>
+      </view>
+    </view>
+
+    <!-- 跳动圆点 -->
+    <view wx:elif="{{type === 'dots'}}" class="loading-dots loading-{{size}}">
+      <view class="dot dot-1" style="background: {{color}};"></view>
+      <view class="dot dot-2" style="background: {{color}};"></view>
+      <view class="dot dot-3" style="background: {{color}};"></view>
+    </view>
+
+    <!-- 脉冲动画 -->
+    <view wx:elif="{{type === 'pulse'}}" class="loading-pulse loading-{{size}}">
+      <view class="pulse-ring" style="border-color: {{color}};"></view>
+      <view class="pulse-core" style="background: {{color}};"></view>
+    </view>
+
+    <!-- 面包主题动画 -->
+    <view wx:elif="{{type === 'bread'}}" class="loading-bread loading-{{size}}">
+      <view class="bread-icon" style="color: {{color}};">🍞</view>
+      <view class="steam steam-1"></view>
+      <view class="steam steam-2"></view>
+      <view class="steam steam-3"></view>
+    </view>
+
+    <!-- 波浪动画 -->
+    <view wx:elif="{{type === 'wave'}}" class="loading-wave loading-{{size}}">
+      <view class="wave-bar" style="background: {{color}};"></view>
+      <view class="wave-bar" style="background: {{color}};"></view>
+      <view class="wave-bar" style="background: {{color}};"></view>
+      <view class="wave-bar" style="background: {{color}};"></view>
+      <view class="wave-bar" style="background: {{color}};"></view>
+    </view>
+
+    <!-- 提示文字 -->
+    <view wx:if="{{text}}" class="loading-text" style="color: {{color}};">
+      {{text}}
+    </view>
+
+    <!-- 自定义内容插槽 -->
+    <slot></slot>
+  </view>
+</view>

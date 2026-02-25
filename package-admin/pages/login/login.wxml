@@ -1,0 +1,81 @@
+<!-- 管理端登录页 -->
+<view class="login-container">
+  <!-- Logo区域 -->
+  <view class="logo-section">
+    <image class="logo" src="/images/admin-logo.png" mode="aspectFit"></image>
+    <text class="app-name">面包烘焙管理后台</text>
+    <text class="app-slogan">让烘焙生意更简单</text>
+  </view>
+
+  <!-- 登录表单 -->
+  <view class="login-form" wx:if="{{!isAuthorized}}">
+    <view class="form-title">管理员登录</view>
+    
+    <view class="input-group">
+      <view class="input-item">
+        <text class="iconfont icon-user"></text>
+        <input 
+          type="text" 
+          placeholder="请输入管理员账号" 
+          value="{{account}}"
+          bindinput="onAccountInput"
+        />
+      </view>
+      
+      <view class="input-item">
+        <text class="iconfont icon-lock"></text>
+        <input 
+          type="password" 
+          placeholder="请输入密码" 
+          value="{{password}}"
+          bindinput="onPasswordInput"
+        />
+      </view>
+    </view>
+
+    <view class="remember-row">
+      <checkbox checked="{{rememberMe}}" bindtap="toggleRemember">记住账号</checkbox>
+      <text class="forgot-link" bindtap="forgotPassword">忘记密码?</text>
+    </view>
+
+    <button class="login-btn {{isLoading ? 'loading' : ''}}" bindtap="handleLogin">
+      <text wx:if="{{!isLoading}}">登录</text>
+      <text wx:else>登录中...</text>
+    </button>
+  </view>
+
+  <!-- 微信授权登录 -->
+  <view class="wx-login-section" wx:if="{{!isAuthorized}}">
+    <view class="divider">
+      <text class="line"></text>
+      <text class="text">或</text>
+      <text class="line"></text>
+    </view>
+    
+    <button 
+      class="wx-login-btn" 
+      open-type="getPhoneNumber" 
+      bind:getphonenumber="handleWxLogin"
+    >
+      <text class="iconfont icon-wechat"></text>
+      <text>微信一键登录</text>
+    </button>
+  </view>
+
+  <!-- 已授权状态 -->
+  <view class="authorized-section" wx:if="{{isAuthorized}}">
+    <view class="user-info">
+      <image class="avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <text class="nickname">{{userInfo.nickName || '管理员'}}</text>
+      <text class="role-tag">{{userInfo.role === 'super' ? '超级管理员' : '店员'}}</text>
+    </view>
+    
+    <button class="enter-btn" bindtap="enterDashboard">进入管理后台</button>
+    <button class="switch-btn" bindtap="switchAccount">切换账号</button>
+  </view>
+
+  <!-- 底部版权 -->
+  <view class="footer">
+    <text>© 2024 面包烘焙 版权所有</text>
+  </view>
+</view>

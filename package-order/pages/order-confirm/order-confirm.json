@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "确认订单",
+  "navigationBarBackgroundColor": "#8B6347",
+  "navigationBarTextStyle": "white",
+  "navigationStyle": "custom",
+  "backgroundColor": "#F0EAD6",
+  "usingComponents": {
+    "toast": "/components/toast/toast"
+  }
+}

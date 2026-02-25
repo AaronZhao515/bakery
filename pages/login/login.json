@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "登录",
+  "navigationBarBackgroundColor": "#F0EAD6",
+  "navigationBarTextStyle": "black",
+  "backgroundColor": "#F0EAD6",
+  "usingComponents": {
+    "toast": "/components/toast/toast",
+    "modal": "/components/modal/modal"
+  }
+}

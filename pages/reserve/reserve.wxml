@@ -1,0 +1,169 @@
+<!-- 预定自取页面 - 严格按照Figma设计稿 -->
+<view class="reserve-container">
+  <!-- Fixed Header -->
+  <view class="reserve-header">
+    <!-- Back Row -->
+    <view class="header-top">
+      <view class="back-btn" bindtap="onBackTap">
+        <image class="back-icon" src="{{icons.arrowLeft}}" mode="aspectFit"/>
+        <text class="back-text">返回</text>
+      </view>
+      <text class="header-title">{{pageTitle}}</text>
+
+    </view>
+
+    <!-- Sub Tabs -->
+    <view class="sub-tabs">
+      <view class="sub-tab {{activeSubTab === index ? 'sub-tab-active' : ''}}" wx:for="{{subTabs}}" wx:key="index" bindtap="onSubTabChange" data-index="{{index}}">
+        <text class="sub-tab-label">{{item.label}}</text>
+        <text class="sub-tab-sub">{{item.sub}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Scrollable Content -->
+  <scroll-view class="reserve-content" scroll-y enhanced show-scrollbar="{{false}}">
+    <!-- Coupon Banner -->
+    <view class="coupon-banner">
+      <view class="coupon-left">
+        <text class="coupon-value">¥10</text>
+        <text class="coupon-condition">满300可用</text>
+      </view>
+
+      <view class="coupon-middle">
+        <text class="coupon-title">新客有礼</text>
+        <text class="coupon-desc">生日蛋糕适用</text>
+      </view>
+
+      <view class="coupon-right">
+        <image class="gift-icon" src="{{icons.gift}}" mode="aspectFit"/>
+        <view class="coupon-action-divider"></view>
+        <view class="coupon-action">
+          <text class="coupon-action-text">立即</text>
+          <text class="coupon-action-text">领取</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- Seasonal Recommendations -->
+    <view class="section-header">
+      <view class="section-icon">
+        <image class="flame-icon" src="{{icons.fire}}" mode="aspectFit"/>
+      </view>
+      <view class="section-text">
+        <text class="section-title">当季推荐</text>
+        <text class="section-subtitle">Seasonal recommendations</text>
+      </view>
+    </view>
+
+    <!-- Loading State -->
+    <view class="loading-state" wx:if="{{isLoading}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- Empty State -->
+    <view class="empty-products" wx:if="{{!isLoading && products.length === 0}}">
+      <text class="empty-text">暂无商品</text>
+    </view>
+
+    <!-- Product Grid -->
+    <view class="product-grid" wx:if="{{!isLoading && products.length > 0}}">
+      <view class="product-card" wx:for="{{products}}" wx:key="_id" wx:for-item="product">
+        <view class="product-image-wrap">
+          <image class="product-image" src="{{product.image || product.images[0] || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png'}}" mode="aspectFill" lazy-load/>
+          <view class="product-overlay"></view>
+        </view>
+
+        <view class="product-info">
+          <text class="product-name">{{product.name}}</text>
+          <text class="product-desc">{{product.desc || product.description || '精选原料 · 手工制作'}}</text>
+
+          <view class="product-footer">
+            <text class="product-price">¥{{product.price}}</text>
+
+            <view class="add-cart-btn" catchtap="onAddToCart" data-product="{{product}}">
+              <image class="cart-add-icon" src="{{icons.cart}}" mode="aspectFit"/>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Bottom Spacer -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
+
+  <!-- Floating Cart Button -->
+  <view class="floating-cart-btn" bindtap="onGoToCart" wx:if="{{cartCount > 0}}">
+    <view class="floating-cart-icon-wrap">
+      <image class="floating-cart-icon" src="{{icons.cart}}" mode="aspectFit"/>
+      <view class="floating-cart-badge">{{cartCount}}</view>
+    </view>
+    <view class="floating-cart-info">
+      <text class="floating-cart-total">¥{{cartTotal}}</text>
+      <text class="floating-cart-label">{{orderType === 'pickup' ? '查看购物车(自取)' : '查看购物车(配送)'}}</text>
+    </view>
+  </view>
+
+  <!-- Bottom Category Tabs -->
+  <view class="category-tabs">
+    <view class="category-tab {{activeCategory === item.id ? 'category-tab-active' : ''}}" wx:for="{{categories}}" wx:key="id" bindtap="onCategoryChange" data-id="{{item.id}}">
+      <image class="category-icon" src="{{item.iconUrl}}" mode="aspectFit"/>
+      <text class="category-label">{{item.label}}</text>
+    </view>
+  </view>
+
+  <!-- Quantity Selector Modal -->
+  <view class="quantity-modal-container" hidden="{{!showQuantityModal}}" bindtap="onCloseQuantityModal">
+    <view class="quantity-modal" catchtap="onModalTap">
+      <!-- Header -->
+      <view class="modal-header">
+        <text class="modal-title">加入购物车</text>
+        <view class="modal-close" bindtap="onCloseQuantityModal">
+          <text class="close-icon">×</text>
+        </view>
+      </view>
+
+      <!-- Product Info -->
+      <view class="modal-product" wx:if="{{selectedProduct}}">
+        <image class="modal-product-image" src="{{selectedProduct.image || selectedProduct.images[0] || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png'}}" mode="aspectFill"/>
+        <view class="modal-product-info">
+          <text class="modal-product-name">{{selectedProduct.name}}</text>
+          <text class="modal-product-desc">{{selectedProduct.description || selectedProduct.desc}}</text>
+          <text class="modal-product-price">¥{{selectedProduct.price}}</text>
+        </view>
+      </view>
+
+      <!-- Divider -->
+      <view class="modal-divider"></view>
+
+      <!-- Quantity Selector -->
+      <view class="quantity-section">
+        <text class="section-title">选择数量</text>
+        <view class="quantity-control">
+          <view class="quantity-btn minus {{selectedQuantity <= 1 ? 'disabled' : ''}}" bindtap="onDecreaseQuantity">
+            <text class="btn-icon">-</text>
+          </view>
+          <view class="quantity-display">
+            <text class="quantity-value">{{selectedQuantity}}</text>
+          </view>
+          <view class="quantity-btn plus {{selectedQuantity >= 99 ? 'disabled' : ''}}" bindtap="onIncreaseQuantity">
+            <text class="btn-icon">+</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- Bottom Action Bar -->
+      <view class="modal-action-bar">
+        <view class="price-info">
+          <text class="price-label">合计</text>
+          <text class="price-value">¥{{totalPrice}}</text>
+        </view>
+        <button class="modal-add-cart-btn" bindtap="onConfirmAddToCart" plain="{{true}}" hover-class="modal-add-cart-btn-hover">
+          <text class="modal-add-cart-text">加入购物车</text>
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

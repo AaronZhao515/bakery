@@ -1,0 +1,159 @@
+<!-- 会员中心页 -->
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="user-card">
+    <view class="user-bg"></view>
+    <view class="user-content">
+      <view class="user-avatar-wrapper" bindtap="chooseAvatar">
+        <image class="user-avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"/>
+        <view class="avatar-edit">
+          <text class="edit-icon">📷</text>
+        </view>
+      </view>
+      <view class="user-info">
+        <text class="user-name">{{userInfo.nickName || '点击登录'}}</text>
+        <view class="member-badge" wx:if="{{userInfo.isLogin}}">
+          <image class="badge-icon" src="/images/vip-icon.png" mode="aspectFit"/>
+          <text class="badge-text">{{memberInfo.levelName}}</text>
+        </view>
+      </view>
+      <button 
+        class="login-btn" 
+        wx:if="{{!userInfo.isLogin}}"
+        open-type="getUserInfo"
+        bindgetuserinfo="onGetUserInfo"
+      >
+        微信登录
+      </button>
+    </view>
+    
+    <!-- 会员权益 -->
+    <view class="member-benefits" wx:if="{{userInfo.isLogin}}">
+      <view class="benefit-item" wx:for="{{memberInfo.benefits}}" wx:key="index">
+        <text class="benefit-icon">{{item.icon}}</text>
+        <text class="benefit-text">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 资产卡片 -->
+  <view class="assets-card" wx:if="{{userInfo.isLogin}}">
+    <view class="asset-item" bindtap="goToPoints">
+      <text class="asset-value">{{assets.points}}</text>
+      <text class="asset-label">积分</text>
+    </view>
+    <view class="asset-divider"></view>
+    <view class="asset-item" bindtap="goToCoupon">
+      <text class="asset-value">{{assets.coupons}}</text>
+      <text class="asset-label">优惠券</text>
+    </view>
+    <view class="asset-divider"></view>
+    <view class="asset-item" bindtap="goToBalance">
+      <text class="asset-value">¥{{assets.balance}}</text>
+      <text class="asset-label">余额</text>
+    </view>
+  </view>
+
+  <!-- 订单入口 -->
+  <view class="menu-card">
+    <view class="menu-header" bindtap="goToOrderList">
+      <text class="menu-title">我的订单</text>
+      <view class="menu-more">
+        <text class="more-text">查看全部</text>
+        <text class="arrow">></text>
+      </view>
+    </view>
+    <view class="order-menu">
+      <view class="order-menu-item" bindtap="goToOrderList" data-status="0">
+        <view class="menu-icon-wrapper">
+          <text class="menu-icon">💰</text>
+          <text class="menu-badge" wx:if="{{orderCounts.pendingPay > 0}}">{{orderCounts.pendingPay}}</text>
+        </view>
+        <text class="menu-text">待付款</text>
+      </view>
+      <view class="order-menu-item" bindtap="goToOrderList" data-status="1">
+        <view class="menu-icon-wrapper">
+          <text class="menu-icon">📦</text>
+          <text class="menu-badge" wx:if="{{orderCounts.pendingShip > 0}}">{{orderCounts.pendingShip}}</text>
+        </view>
+        <text class="menu-text">待发货</text>
+      </view>
+      <view class="order-menu-item" bindtap="goToOrderList" data-status="2">
+        <view class="menu-icon-wrapper">
+          <text class="menu-icon">🚚</text>
+          <text class="menu-badge" wx:if="{{orderCounts.pendingReceive > 0}}">{{orderCounts.pendingReceive}}</text>
+        </view>
+        <text class="menu-text">待收货</text>
+      </view>
+      <view class="order-menu-item" bindtap="goToOrderList" data-status="3">
+        <view class="menu-icon-wrapper">
+          <text class="menu-icon">⭐</text>
+        </view>
+        <text class="menu-text">待评价</text>
+      </view>
+      <view class="order-menu-item" bindtap="goToAfterSale">
+        <view class="menu-icon-wrapper">
+          <text class="menu-icon">🔄</text>
+        </view>
+        <text class="menu-text">退款/售后</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-card">
+    <view class="menu-title" style="margin-bottom: 20rpx;">更多服务</view>
+    <view class="service-menu">
+      <view class="service-item" bindtap="goToAddress">
+        <view class="service-icon-wrapper">
+          <text class="service-icon">📍</text>
+        </view>
+        <text class="service-text">收货地址</text>
+        <text class="arrow">></text>
+      </view>
+      <view class="service-item" bindtap="goToCoupon">
+        <view class="service-icon-wrapper">
+          <text class="service-icon">🎫</text>
+        </view>
+        <text class="service-text">优惠券</text>
+        <text class="arrow">></text>
+      </view>
+      <view class="service-item" bindtap="goToPoints">
+        <view class="service-icon-wrapper">
+          <text class="service-icon">🎁</text>
+        </view>
+        <text class="service-text">积分商城</text>
+        <text class="arrow">></text>
+      </view>
+      <view class="service-item" bindtap="goToCollection">
+        <view class="service-icon-wrapper">
+          <text class="service-icon">❤️</text>
+        </view>
+        <text class="service-text">我的收藏</text>
+        <text class="arrow">></text>
+      </view>
+      <view class="service-item" bindtap="contactService">
+        <view class="service-icon-wrapper">
+          <text class="service-icon">💬</text>
+        </view>
+        <text class="service-text">联系客服</text>
+        <text class="arrow">></text>
+      </view>
+      <view class="service-item" bindtap="goToSettings">
+        <view class="service-icon-wrapper">
+          <text class="service-icon">⚙️</text>
+        </view>
+        <text class="service-text">设置</text>
+        <text class="arrow">></text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 客服按钮 -->
+  <button 
+    class="contact-btn" 
+    open-type="contact"
+    bindcontact="onContact"
+    style="display: none;"
+  ></button>
+</view>

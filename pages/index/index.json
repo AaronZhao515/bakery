@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "暖心烘焙",
+  "navigationStyle": "custom",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#FDF8F3",
+  "usingComponents": {}
+}

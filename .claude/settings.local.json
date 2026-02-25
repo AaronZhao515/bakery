@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tail:*)",
+      "mcp__figma__get_metadata",
+      "mcp__figma__get_design_context",
+      "Bash(head:*)",
+      "WebFetch(domain:docs.cloudbase.net)",
+      "mcp__cloudbase__login",
+      "mcp__cloudbase__envQuery",
+      "mcp__cloudbase__readNoSqlDatabaseStructure",
+      "mcp__cloudbase__writeNoSqlDatabaseStructure",
+      "mcp__cloudbase__writeNoSqlDatabaseContent",
+      "mcp__cloudbase__downloadRemoteFile",
+      "mcp__cloudbase__uploadFiles",
+      "mcp__cloudbase__queryStorage",
+      "mcp__cloudbase__getFunctionList",
+      "mcp__cloudbase__updateFunctionCode",
+      "mcp__figma__get_figjam",
+      "mcp__cloudbase__findFiles",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:cdn-icons-png.flaticon.com)",
+      "mcp__figma__get_screenshot",
+      "mcp__ide__executeCode",
+      "Bash(python3:*)",
+      "mcp__cloudbase__readNoSqlDatabaseContent",
+      "Bash(npx:*)",
+      "mcp__cloudbase__searchWeb",
+      "mcp__cloudbase__manageStorage",
+      "mcp__cloudbase__createFunction",
+      "mcp__cloudbase__invokeFunction",
+      "WebFetch(domain:developers.weixin.qq.com)",
+      "Bash(powershell -Command \"Get-ChildItem -Path 'D:\\\\bread-bakery-miniprogram' -Directory | ForEach-Object { $size = \\(Get-ChildItem -Path $_.FullName -Recurse -File -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum\\).Sum / 1MB; Write-Output \\('{0:N2} MB - {1}' -f $size, $_.Name\\) }\" 2>/dev/null || find . -type d -maxdepth 1 -exec du -sh {} \\\\; 2>/dev/null)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(echo:*)",
+      "mcp__cloudbase__callCloudApi",
+      "Bash(git init:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "cloudbase"
+  ]
+}

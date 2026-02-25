@@ -1,0 +1,38 @@
+{
+  "products": {
+    "read": true,
+    "write": "auth != null && auth.isAdmin == true"
+  },
+  "categories": {
+    "read": true,
+    "write": "auth != null && auth.isAdmin == true"
+  },
+  "orders": {
+    "read": "doc.userId == auth.openid || (auth != null && auth.isAdmin == true)",
+    "write": "doc.userId == auth.openid || (auth != null && auth.isAdmin == true)"
+  },
+  "users": {
+    "read": "doc.openid == auth.openid || (auth != null && auth.isAdmin == true)",
+    "write": "doc.openid == auth.openid || (auth != null && auth.isAdmin == true)"
+  },
+  "cart": {
+    "read": "doc.userId == auth.openid",
+    "write": "doc.userId == auth.openid"
+  },
+  "addresses": {
+    "read": "doc.userId == auth.openid",
+    "write": "doc.userId == auth.openid"
+  },
+  "coupons": {
+    "read": true,
+    "write": "auth != null && auth.isAdmin == true"
+  },
+  "userCoupons": {
+    "read": "doc.userId == auth.openid",
+    "write": "doc.userId == auth.openid || (auth != null && auth.isAdmin == true)"
+  },
+  "banners": {
+    "read": true,
+    "write": "auth != null && auth.isAdmin == true"
+  }
+}

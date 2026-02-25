@@ -1,0 +1,700 @@
+/* 营销配置页样式 */
+.marketing-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 40rpx;
+}
+
+/* Tab切换 */
+.tab-section {
+  display: flex;
+  background: #fff;
+  padding: 0 30rpx;
+  border-bottom: 2rpx solid #f5f5f5;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 30rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+}
+
+.tab-item.active {
+  color: #d4a574;
+  font-weight: 500;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 4rpx;
+  background: #d4a574;
+  border-radius: 2rpx;
+}
+
+/* 区块标题 */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.section-tip {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 轮播图配置 */
+.banner-section {
+  padding-bottom: 40rpx;
+}
+
+.banner-list {
+  padding: 0 30rpx;
+}
+
+.banner-item {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+}
+
+.banner-image-wrap {
+  position: relative;
+  width: 180rpx;
+  height: 120rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  margin-right: 20rpx;
+}
+
+.banner-image {
+  width: 100%;
+  height: 100%;
+}
+
+.banner-sort {
+  position: absolute;
+  top: 8rpx;
+  left: 8rpx;
+  width: 36rpx;
+  height: 36rpx;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 22rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner-info {
+  flex: 1;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 8rpx;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-row .label {
+  font-size: 24rpx;
+  color: #999;
+  margin-right: 12rpx;
+}
+
+.info-row .value {
+  font-size: 24rpx;
+  color: #333;
+}
+
+.banner-actions {
+  display: flex;
+  flex-direction: column;
+  margin-left: 16rpx;
+}
+
+.action-btn {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12rpx;
+}
+
+.action-btn:last-child {
+  margin-bottom: 0;
+}
+
+.action-btn .iconfont {
+  font-size: 28rpx;
+  color: #2196f3;
+}
+
+.action-btn.delete .iconfont {
+  color: #f44336;
+}
+
+.add-banner-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30rpx;
+  padding: 30rpx;
+  background: #fff;
+  border: 2rpx dashed #ddd;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  color: #d4a574;
+}
+
+.add-banner-btn .iconfont {
+  margin-right: 12rpx;
+  font-size: 32rpx;
+}
+
+/* 优惠券管理 */
+.coupon-section {
+  padding-bottom: 40rpx;
+}
+
+.coupon-list {
+  padding: 0 30rpx;
+}
+
+.coupon-card {
+  display: flex;
+  align-items: stretch;
+  background: #fff;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  position: relative;
+}
+
+.coupon-card.expired {
+  opacity: 0.6;
+}
+
+.coupon-left {
+  width: 200rpx;
+  background: linear-gradient(135deg, #d4a574 0%, #c9956b 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30rpx 20rpx;
+  color: #fff;
+}
+
+.coupon-value {
+  display: flex;
+  align-items: baseline;
+}
+
+.coupon-value .currency {
+  font-size: 28rpx;
+  margin-right: 4rpx;
+}
+
+.coupon-value .amount {
+  font-size: 56rpx;
+  font-weight: 700;
+}
+
+.coupon-value .unit {
+  font-size: 28rpx;
+}
+
+.coupon-type {
+  font-size: 24rpx;
+  margin-top: 12rpx;
+  opacity: 0.9;
+}
+
+.coupon-divider {
+  width: 2rpx;
+  background: #f5f5f5;
+  position: relative;
+}
+
+.coupon-divider::before,
+.coupon-divider::after {
+  content: '';
+  position: absolute;
+  left: -12rpx;
+  width: 24rpx;
+  height: 24rpx;
+  background: #f5f5f5;
+  border-radius: 50%;
+}
+
+.coupon-divider::before {
+  top: -12rpx;
+}
+
+.coupon-divider::after {
+  bottom: -12rpx;
+}
+
+.coupon-right {
+  flex: 1;
+  padding: 24rpx;
+}
+
+.coupon-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 12rpx;
+}
+
+.coupon-condition {
+  font-size: 24rpx;
+  color: #f44336;
+  margin-bottom: 8rpx;
+}
+
+.coupon-time {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 12rpx;
+}
+
+.coupon-stats {
+  display: flex;
+  gap: 30rpx;
+}
+
+.coupon-stats text {
+  font-size: 22rpx;
+  color: #666;
+}
+
+.coupon-status-tag {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+  padding: 6rpx 16rpx;
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  font-size: 22rpx;
+  border-radius: 8rpx;
+}
+
+.coupon-card.expired .coupon-status-tag {
+  background: rgba(158, 158, 158, 0.1);
+  color: #9e9e9e;
+}
+
+.coupon-actions {
+  display: flex;
+  flex-direction: column;
+  padding: 20rpx;
+}
+
+.add-coupon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30rpx;
+  padding: 30rpx;
+  background: linear-gradient(135deg, #d4a574 0%, #c9956b 100%);
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  color: #fff;
+  font-weight: 500;
+}
+
+.add-coupon-btn .iconfont {
+  margin-right: 12rpx;
+  font-size: 32rpx;
+}
+
+/* 会员等级 */
+.member-section {
+  padding-bottom: 40rpx;
+}
+
+.level-list {
+  padding: 0 30rpx;
+}
+
+.level-card {
+  background: #fff;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.level-header {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  color: #fff;
+}
+
+.level-icon {
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20rpx;
+}
+
+.level-icon .iconfont {
+  font-size: 40rpx;
+}
+
+.level-info {
+  flex: 1;
+}
+
+.level-name {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.level-condition {
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+.level-badge {
+  width: 60rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.level-body {
+  padding: 30rpx;
+}
+
+.privilege-title {
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+
+.privilege-list {
+  margin-bottom: 20rpx;
+}
+
+.privilege-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.privilege-icon {
+  color: #d4a574;
+  margin-right: 12rpx;
+}
+
+.privilege-text {
+  font-size: 26rpx;
+  color: #333;
+}
+
+.discount-info {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  background: #f9f9f9;
+  border-radius: 12rpx;
+}
+
+.discount-label {
+  flex: 1;
+  font-size: 26rpx;
+  color: #666;
+}
+
+.discount-value {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #d4a574;
+}
+
+.level-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 20rpx 30rpx;
+  border-top: 2rpx solid #f5f5f5;
+}
+
+.level-actions .action-btn {
+  flex-direction: row;
+  width: auto;
+  height: auto;
+  padding: 12rpx 24rpx;
+  background: rgba(33, 150, 243, 0.1);
+  border-radius: 8rpx;
+}
+
+.level-actions .action-btn .iconfont {
+  margin-right: 8rpx;
+}
+
+.add-level-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 30rpx;
+  padding: 30rpx;
+  background: #fff;
+  border: 2rpx dashed #ddd;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  color: #d4a574;
+}
+
+.add-level-btn .iconfont {
+  margin-right: 12rpx;
+  font-size: 32rpx;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 100rpx 60rpx;
+}
+
+.empty-image {
+  width: 200rpx;
+  height: 200rpx;
+  margin-bottom: 40rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #999;
+  margin-bottom: 12rpx;
+}
+
+.empty-subtext {
+  font-size: 24rpx;
+  color: #bbb;
+}
+
+/* 弹窗 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.3s;
+}
+
+.modal.show {
+  visibility: visible;
+  opacity: 1;
+}
+
+.modal-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 40rpx 40rpx 0 0;
+  padding: 40rpx 30rpx;
+  padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+  transform: translateY(100%);
+  transition: transform 0.3s;
+}
+
+.modal.show .modal-content {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.close-btn {
+  font-size: 48rpx;
+  color: #999;
+  line-height: 1;
+}
+
+.modal-body {
+  margin-bottom: 40rpx;
+}
+
+.form-item {
+  margin-bottom: 30rpx;
+}
+
+.form-row {
+  display: flex;
+  gap: 20rpx;
+}
+
+.form-item.half {
+  flex: 1;
+}
+
+.form-item .label {
+  display: block;
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 16rpx;
+}
+
+.form-item input,
+.picker-value {
+  width: 100%;
+  padding: 20rpx 24rpx;
+  background: #f9f9f9;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.input-with-unit {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  background: #f9f9f9;
+  border-radius: 12rpx;
+}
+
+.input-with-unit input {
+  flex: 1;
+  padding: 0;
+  background: transparent;
+}
+
+.input-with-unit .unit {
+  font-size: 26rpx;
+  color: #999;
+  margin-left: 12rpx;
+}
+
+.image-upload {
+  width: 100%;
+  height: 300rpx;
+  background: #f9f9f9;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.image-upload image {
+  width: 100%;
+  height: 100%;
+}
+
+.upload-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.upload-placeholder .iconfont {
+  font-size: 60rpx;
+  margin-bottom: 16rpx;
+}
+
+.required {
+  color: #f44336;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 20rpx;
+}
+
+.modal-footer button {
+  flex: 1;
+  height: 96rpx;
+  border-radius: 48rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  border: none;
+}
+
+.modal-footer button::after {
+  border: none;
+}
+
+.cancel-btn {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.confirm-btn {
+  background: linear-gradient(135deg, #d4a574 0%, #c9956b 100%);
+  color: #fff;
+}
+
+.safe-area-bottom {
+  height: 40rpx;
+}

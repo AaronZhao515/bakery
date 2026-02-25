@@ -1,0 +1,13 @@
+{
+  "desc": "面包烘焙小程序站点地图",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "*"
+    },
+    {
+      "action": "disallow",
+      "page": "pages/admin/*"
+    }
+  ]
+}

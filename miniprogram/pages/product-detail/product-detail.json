@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "商品详情",
+  "navigationStyle": "custom",
+  "backgroundColor": "#FDF8F3",
+  "enableShareAppMessage": true,
+  "usingComponents": {}
+}

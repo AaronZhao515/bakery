@@ -1,0 +1,56 @@
+<!-- 轻提示组件 -->
+<view 
+  wx:if="{{isShowing}}"
+  class="toast-wrapper toast-{{position}}"
+  catchtouchmove="stopPropagation"
+>
+  <!-- 遮罩层 -->
+  <view wx:if="{{mask}}" class="toast-mask" bindtap="close"></view>
+
+  <!-- 提示内容 -->
+  <view 
+    class="toast-content toast-{{icon}}"
+    animation="{{animationData}}"
+    style="{{customStyle}}"
+  >
+    <!-- 图标区域 -->
+    <view class="toast-icon-wrapper">
+      <!-- 自定义图片 -->
+      <image 
+        wx:if="{{image}}"
+        class="toast-image"
+        src="{{image}}"
+        mode="aspectFit"
+      />
+      
+      <!-- 成功图标 -->
+      <view wx:elif="{{icon === 'success'}}" class="toast-icon icon-success">
+        <view class="success-check"></view>
+      </view>
+      
+      <!-- 错误图标 -->
+      <view wx:elif="{{icon === 'error'}}" class="toast-icon icon-error">
+        <view class="error-line line-1"></view>
+        <view class="error-line line-2"></view>
+      </view>
+      
+      <!-- 加载图标 -->
+      <view wx:elif="{{icon === 'loading'}}" class="toast-icon icon-loading">
+        <view class="loading-spinner"></view>
+      </view>
+      
+      <!-- 警告图标 -->
+      <view wx:elif="{{icon === 'warning'}}" class="toast-icon icon-warning">
+        <text>!</text>
+      </view>
+    </view>
+
+    <!-- 文字区域 -->
+    <view wx:if="{{title}}" class="toast-text-wrapper">
+      <text class="toast-text">{{title}}</text>
+    </view>
+
+    <!-- 自定义内容插槽 -->
+    <slot></slot>
+  </view>
+</view>

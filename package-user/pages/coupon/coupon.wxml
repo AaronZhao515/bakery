@@ -1,0 +1,125 @@
+<!-- 优惠券中心 - 匹配Figma设计稿 -->
+<view class="coupon-center-container">
+  <!-- 顶部导航栏 -->
+  <view class="header-bar">
+    <view class="header-content">
+      <view class="back-btn" bindtap="onBackTap">
+        <image class="back-icon" src="{{icons.chevronLeft}}" mode="aspectFit"/>
+      </view>
+      <text class="header-title">优惠券中心</text>
+      <view class="header-right"></view>
+    </view>
+  </view>
+
+  <!-- 选择模式提示 -->
+  <view class="select-mode-tips" wx:if="{{isSelectMode}}">
+    <text class="tips-icon">👆</text>
+    <text class="tips-text">请选择要使用的优惠券</text>
+    <text class="tips-amount" wx:if="{{orderAmount > 0}}">订单金额：¥{{orderAmount}}</text>
+  </view>
+
+  <!-- Tab 切换 -->
+  <view class="tab-bar {{isSelectMode ? 'select-mode' : ''}}">
+    <view class="tab-item {{activeTab === 'available' ? 'active' : ''}}" bindtap="onTabChange" data-tab="available">
+      <text class="tab-text">可领取</text>
+      <view class="tab-line" wx:if="{{activeTab === 'available'}}"></view>
+    </view>
+    <view class="tab-item {{activeTab === 'unused' ? 'active' : ''}}" bindtap="onTabChange" data-tab="unused">
+      <text class="tab-text">未使用</text>
+      <view class="tab-line" wx:if="{{activeTab === 'unused'}}"></view>
+    </view>
+    <view class="tab-item {{activeTab === 'used' ? 'active' : ''}}" bindtap="onTabChange" data-tab="used">
+      <text class="tab-text">已使用/已过期</text>
+      <view class="tab-line" wx:if="{{activeTab === 'used'}}"></view>
+    </view>
+  </view>
+
+  <!-- 优惠券列表 -->
+  <scroll-view class="coupon-list" scroll-y enhanced show-scrollbar="{{false}}">
+    <!-- 加载中 -->
+    <view class="loading-state" wx:if="{{isLoading}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!isLoading && coupons.length === 0}}">
+      <view class="empty-icon-wrap">
+        <text class="empty-icon">🎫</text>
+      </view>
+      <text class="empty-text">{{emptyText}}</text>
+      <text class="empty-tip" wx:if="{{activeTab === 'available'}}">暂无可用优惠券，请稍后查看</text>
+      <text class="empty-tip" wx:if="{{activeTab === 'unused'}}">您还没有未使用的优惠券</text>
+      <text class="empty-tip" wx:if="{{activeTab === 'used'}}">暂无已使用或过期的优惠券</text>
+    </view>
+
+    <!-- 优惠券卡片列表 -->
+    <view class="coupon-cards" wx:if="{{!isLoading && coupons.length > 0}}">
+      <view class="coupon-card {{item.status !== undefined ? 'user-coupon' : ''}} {{item.status === 1 || item.status === 2 ? 'disabled' : ''}} {{isSelectMode && activeTab === 'unused' ? 'selectable' : ''}}"
+             wx:for="{{coupons}}"
+             wx:key="_id"
+             bindtap="{{isSelectMode && activeTab === 'unused' ? 'onSelectCouponForOrder' : ''}}"
+             data-id="{{item._id}}">
+        <!-- 左侧金额区 -->
+        <view class="coupon-left" style="--bg-color: {{item.bgColor || '#B08860'}}; --bg-color-dark: {{item.bgColorDark || '#9B7355'}};">
+          <block wx:if="{{item.discountType === 'discount' || item.type === 1}}">
+            <text class="coupon-value">{{item.displayAmount}}</text>
+            <text class="coupon-symbol" style="margin-left: 4rpx;">折</text>
+          </block>
+          <block wx:else>
+            <text class="coupon-symbol">¥</text>
+            <text class="coupon-value">{{item.displayAmount}}</text>
+          </block>
+          <text class="coupon-condition">满{{item.displayMinAmount}}可用</text>
+        </view>
+
+        <!-- 中间内容区 -->
+        <view class="coupon-middle">
+          <text class="coupon-title">{{item.displayTitle}}</text>
+          <text class="coupon-desc">{{item.displayDesc}}</text>
+          <text class="coupon-time">有效期至 {{item.endTimeStr}}</text>
+        </view>
+
+        <!-- 右侧操作区 -->
+        <view class="coupon-right">
+          <!-- 可领取状态 -->
+          <block wx:if="{{activeTab === 'available'}}">
+            <view class="coupon-action-btn {{item.received ? 'received' : ''}}" bindtap="onReceive" data-id="{{item._id}}">
+              <text>{{item.received ? '已领取' : '立即领取'}}</text>
+            </view>
+            <text class="coupon-remain" wx:if="{{!item.received}}">剩{{item.totalCount - item.receivedCount}}张</text>
+          </block>
+
+          <!-- 未使用状态 -->
+          <block wx:if="{{activeTab === 'unused'}}">
+            <view class="coupon-status-badge active">
+              <text>未使用</text>
+            </view>
+            <!-- 选择模式下显示"点击选择"，否则显示"去使用" -->
+            <block wx:if="{{isSelectMode}}">
+              <text class="coupon-btn-text select" bindtap="onSelectCouponForOrder" data-id="{{item._id}}">点击选择</text>
+            </block>
+            <block wx:else>
+              <text class="coupon-btn-text" bindtap="goToUse">去使用</text>
+            </block>
+          </block>
+
+          <!-- 已使用/已过期状态 -->
+          <block wx:if="{{activeTab === 'used'}}">
+            <view class="coupon-status-badge {{item.status === 1 ? 'used' : 'expired'}}">
+              <text>{{item.status === 1 ? '已使用' : '已过期'}}</text>
+            </view>
+          </block>
+        </view>
+
+        <!-- 已使用/已过期遮罩 - 只在未使用和已使用标签显示 -->
+        <view class="coupon-mask" wx:if="{{activeTab !== 'available' && (item.status === 1 || item.status === 2)}}">
+          <text class="mask-text">{{item.status === 1 ? '已使用' : '已过期'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部间距 -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
+</view>
