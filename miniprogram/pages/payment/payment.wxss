@@ -279,6 +279,23 @@ page {
   background: linear-gradient(135deg, #8B7355 0%, #6B4423 100%);
 }
 
+/* ========== 禁用状态 ========== */
+.method-item.disabled {
+  opacity: 0.5;
+}
+
+.method-item.disabled .method-desc {
+  color: #E57373;
+}
+
+.disabled-tag {
+  font-size: 22rpx;
+  color: #E57373;
+  background-color: #FFEBEE;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
 /* ========== 安全提示 ========== */
 .security-tips {
   display: flex;

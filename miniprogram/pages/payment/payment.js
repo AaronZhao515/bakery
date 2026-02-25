@@ -87,6 +87,16 @@ Page({
    */
   selectMethod(e) {
     const method = e.currentTarget.dataset.method;
+
+    // 如果积分不足，不允许选择积分支付
+    if (method === 'points' && !this.data.hasEnoughPoints) {
+      wx.showToast({
+        title: '积分不足',
+        icon: 'none'
+      });
+      return;
+    }
+
     this.setData({ selectedMethod: method });
   },
 

@@ -25,20 +25,21 @@
   <view class="pay-method-section">
     <text class="section-title">选择支付方式</text>
     <view class="method-list">
-      <!-- 积分支付（积分足够时显示） -->
-      <view wx:if="{{hasEnoughPoints}}" class="method-item {{selectedMethod === 'points' ? 'active' : ''}}" bindtap="selectMethod" data-method="points">
+      <!-- 积分支付 -->
+      <view class="method-item {{selectedMethod === 'points' ? 'active' : ''}} {{!hasEnoughPoints ? 'disabled' : ''}}" bindtap="selectMethod" data-method="points">
         <view class="method-icon">
           <text class="icon">⭐</text>
         </view>
         <view class="method-info">
           <text class="method-name">积分支付</text>
-          <text class="method-desc">使用 {{requiredPoints}} 积分支付</text>
+          <text class="method-desc">{{hasEnoughPoints ? '使用 ' + requiredPoints + ' 积分支付' : '积分不足（需要 ' + requiredPoints + ' 积分）'}}</text>
         </view>
         <view class="check-icon" wx:if="{{selectedMethod === 'points'}}">✓</view>
+        <view class="disabled-tag" wx:if="{{!hasEnoughPoints}}">不可用</view>
       </view>
 
-      <!-- 线下支付（积分不足时显示） -->
-      <view wx:if="{{!hasEnoughPoints}}" class="method-item {{selectedMethod === 'offline' ? 'active' : ''}}" bindtap="selectMethod" data-method="offline">
+      <!-- 线下支付 -->
+      <view class="method-item {{selectedMethod === 'offline' ? 'active' : ''}}" bindtap="selectMethod" data-method="offline">
         <view class="method-icon">
           <text class="icon">🏪</text>
         </view>

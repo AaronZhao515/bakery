@@ -35,7 +35,11 @@
       "Bash(pip install:*)",
       "Bash(echo:*)",
       "mcp__cloudbase__callCloudApi",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(git remote:*)",
+      "Bash(gh auth:*)",
+      "Bash(echo 需要手动处理冲突:*)",
+      "Bash(git add:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
