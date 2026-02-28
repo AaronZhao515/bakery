@@ -43,6 +43,7 @@
         "pages/dashboard/dashboard",
         "pages/product-manage/product-manage",
         "pages/order-manage/order-manage",
+        "pages/pickup-manage/pickup-manage",
         "pages/order-detail/order-detail",
         "pages/statistics/statistics",
         "pages/login/login",

@@ -103,6 +103,10 @@ exports.main = async (event, context) => {
         return await checkAdmin(OPENID) && await categoryManage(data)
       case 'deleteCloudFile':
         return await checkAdmin(OPENID) && await deleteCloudFile(data)
+      case 'getPickupStatistics':
+        return await checkAdmin(OPENID) && await getPickupStatistics(data)
+      case 'sendPickupNotify':
+        return await checkAdmin(OPENID) && await sendPickupNotify(data)
       default:
         return { code: -1, message: `未知操作: ${action}` }
     }
@@ -344,20 +348,22 @@ async function orderManage(data) {
   switch (operation) {
     case 'list':
       // 获取订单列表
-      const { 
-        page = 1, 
-        pageSize = 20, 
-        status, 
-        orderNo, 
+      const {
+        page = 1,
+        pageSize = 20,
+        status,
+        orderNo,
         userId,
         startDate,
-        endDate
+        endDate,
+        deliveryType
       } = data
 
       const where = {}
       if (status !== undefined) where.status = status
       if (orderNo) where.orderNo = orderNo
       if (userId) where.userId = userId
+      if (deliveryType !== undefined) where.deliveryType = deliveryType
       if (startDate && endDate) {
         // 将日期字符串转换为 Date 对象
         // startDate 格式: YYYY-MM-DD
@@ -3115,6 +3121,140 @@ async function deleteCloudFile(data) {
     if (err.message && err.message.includes('not exist')) {
       return { code: 0, message: '文件不存在' }
     }
+    return { code: -1, message: err.message }
+  }
+}
+
+/**
+ * 获取自取订单统计
+ * @param {Object} data - 请求参数
+ */
+async function getPickupStatistics(data) {
+  const { today } = data
+
+  try {
+    // 1. 今日自取订单统计
+    let todayCount = 0
+    let todayAmount = 0
+    if (today) {
+      const todayStart = new Date(today + 'T00:00:00.000+08:00')
+      const todayEnd = new Date(today + 'T23:59:59.999+08:00')
+
+      const todayResult = await db.collection('orders')
+        .where({
+          deliveryType: 0,  // 自取订单
+          createTime: _.gte(todayStart).lte(todayEnd)
+        })
+        .get()
+
+      todayCount = todayResult.data.length
+      todayAmount = todayResult.data.reduce((sum, order) => sum + (order.payAmount || 0), 0)
+    }
+
+    // 2. 制作中订单数
+    const preparingResult = await db.collection('orders')
+      .where({
+        deliveryType: 0,
+        status: ORDER_STATUS.PREPARING
+      })
+      .count()
+
+    // 3. 待取货订单数
+    const readyResult = await db.collection('orders')
+      .where({
+        deliveryType: 0,
+        status: 6  // 待取货状态
+      })
+      .count()
+
+    // 4. 全部自取订单数
+    const totalResult = await db.collection('orders')
+      .where({
+        deliveryType: 0
+      })
+      .count()
+
+    return {
+      code: 0,
+      message: 'success',
+      data: {
+        todayCount,
+        todayAmount: todayAmount.toFixed(2),
+        preparingCount: preparingResult.total,
+        readyCount: readyResult.total,
+        total: totalResult.total
+      }
+    }
+  } catch (err) {
+    console.error('[getPickupStatistics] 失败:', err)
+    return { code: -1, message: err.message }
+  }
+}
+
+/**
+ * 发送取货通知
+ * @param {Object} data - 请求参数
+ */
+async function sendPickupNotify(data) {
+  const { orderId, pickupCode } = data
+
+  if (!orderId) {
+    return { code: -1, message: '订单ID不能为空' }
+  }
+
+  try {
+    // 获取订单信息
+    const orderResult = await db.collection('orders').doc(orderId).get()
+    if (!orderResult.data) {
+      return { code: -1, message: '订单不存在' }
+    }
+
+    const order = orderResult.data
+
+    // 获取用户信息
+    const userResult = await db.collection('users').doc(order.userId).get()
+    if (!userResult.data) {
+      return { code: -1, message: '用户不存在' }
+    }
+
+    const user = userResult.data
+
+    // 获取店铺设置
+    const settingResult = await db.collection('settings').doc('shop').get()
+    const shopName = settingResult.data?.name || '暖心烘焙'
+
+    // 构建取货码（使用后4位订单号）
+    const code = pickupCode || order.orderNo?.slice(-4) || '****'
+
+    // 记录通知日志
+    await db.collection('notifications').add({
+      data: {
+        type: 'pickup_ready',
+        userId: order.userId,
+        orderId: orderId,
+        orderNo: order.orderNo,
+        pickupCode: code,
+        content: `您的订单已制作完成，取货码：${code}，请到门店取货。`,
+        createTime: db.serverDate(),
+        status: 'sent'
+      }
+    })
+
+    // 如果用户有openid，尝试发送服务通知
+    if (user._openid) {
+      console.log(`[sendPickupNotify] 准备通知用户 ${user.nickName}, 取货码: ${code}`)
+    }
+
+    return {
+      code: 0,
+      message: '通知已记录',
+      data: {
+        pickupCode: code,
+        notifyTime: new Date().toISOString()
+      }
+    }
+  } catch (err) {
+    console.error('[sendPickupNotify] 失败:', err)
     return { code: -1, message: err.message }
   }
 }

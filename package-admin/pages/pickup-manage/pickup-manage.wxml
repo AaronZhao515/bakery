@@ -1,0 +1,257 @@
+<!-- 自取订单管理页面 -->
+<view class="pickup-manage-container">
+  <!-- 统计卡片 -->
+  <view class="stats-cards">
+    <view class="stat-card primary" bindtap="filterToday">
+      <view class="stat-icon">📅</view>
+      <view class="stat-info">
+        <text class="stat-value">{{orderStats.todayCount}}</text>
+        <text class="stat-label">今日订单</text>
+      </view>
+    </view>
+    <view class="stat-card warning" bindtap="filterPreparing">
+      <view class="stat-icon">🍳</view>
+      <view class="stat-info">
+        <text class="stat-value">{{orderStats.preparingCount}}</text>
+        <text class="stat-label">制作中</text>
+      </view>
+    </view>
+    <view class="stat-card success" bindtap="filterReady">
+      <view class="stat-icon">📦</view>
+      <view class="stat-info">
+        <text class="stat-value">{{orderStats.readyCount}}</text>
+        <text class="stat-label">待取货</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 筛选栏 -->
+  <view class="filter-section">
+    <!-- 日期筛选 -->
+    <view class="date-filter">
+      <picker mode="date" value="{{startDate}}" bindchange="onStartDateChange">
+        <view class="date-picker {{startDate ? 'active' : ''}}">
+          {{startDate || '开始日期'}}
+        </view>
+      </picker>
+      <text class="date-separator">至</text>
+      <picker mode="date" value="{{endDate}}" bindchange="onEndDateChange">
+        <view class="date-picker {{endDate ? 'active' : ''}}">
+          {{endDate || '结束日期'}}
+        </view>
+      </picker>
+      <view class="filter-btn" bindtap="applyDateFilter">筛选</view>
+      <view class="reset-btn" bindtap="resetFilter" wx:if="{{startDate || endDate || status}}">重置</view>
+    </view>
+
+    <!-- 状态筛选 -->
+    <scroll-view class="status-filter" scroll-x>
+      <view class="status-list">
+        <view class="status-item {{status === '' ? 'active' : ''}}" bindtap="filterByStatus" data-status="">
+          全部
+        </view>
+        <view class="status-item {{status === '1' ? 'active' : ''}}" bindtap="filterByStatus" data-status="1">
+          已支付
+        </view>
+        <view class="status-item {{status === '2' ? 'active' : ''}}" bindtap="filterByStatus" data-status="2">
+          制作中
+        </view>
+        <view class="status-item {{status === '6' ? 'active' : ''}}" bindtap="filterByStatus" data-status="6">
+          待取货
+        </view>
+        <view class="status-item {{status === '4' ? 'active' : ''}}" bindtap="filterByStatus" data-status="4">
+          已完成
+        </view>
+        <view class="status-item {{status === '-1' ? 'active' : ''}}" bindtap="filterByStatus" data-status="-1">
+          已取消
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 统计信息 -->
+  <view class="stats-bar" wx:if="{{orderStats.total > 0}}">
+    <text class="stats-text">共 <text>{{orderStats.total}}</text> 单</text>
+    <text class="stats-text" wx:if="{{orderStats.totalAmount > 0}}">合计 <text>¥{{orderStats.totalAmount}}</text></text>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list">
+    <view class="order-card" wx:for="{{orderList}}" wx:key="_id" bindtap="viewOrderDetail" data-id="{{item._id}}">
+      <!-- 订单头部 -->
+      <view class="order-header">
+        <view class="order-info">
+          <text class="order-no">{{item.orderNo}}</text>
+          <text class="order-time">{{item.createTime}}</text>
+        </view>
+        <view class="order-status {{item.statusClass}}">{{item.statusText}}</view>
+      </view>
+
+      <!-- 取货码（仅待取货状态显示） -->
+      <view class="pickup-code-section" wx:if="{{item.status === 6}}">
+        <view class="pickup-code-label">取货码</view>
+        <view class="pickup-code-value">{{item.pickupCode}}</view>
+      </view>
+
+      <!-- 商品信息 -->
+      <view class="product-section">
+        <view class="product-list">
+          <view class="product-item" wx:for="{{item.products}}" wx:key="index" wx:for-item="product">
+            <image class="product-image" src="{{product.image || '/images/default-product.png'}}" mode="aspectFill" lazy-load></image>
+            <view class="product-detail">
+              <text class="product-name">{{product.name}}</text>
+              <text class="product-spec" wx:if="{{product.spec}}">{{product.spec}}</text>
+              <view class="product-price-row">
+                <text class="product-price">¥{{product.price}}</text>
+                <text class="product-quantity">x{{product.quantity}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view class="more-products" wx:if="{{item.productCount > 2}}">
+          等共 {{item.productCount}} 件商品
+        </view>
+      </view>
+
+      <!-- 订单金额 -->
+      <view class="amount-section">
+        <text class="amount-label">实付金额</text>
+        <text class="amount-value">¥{{item.payAmount}}</text>
+      </view>
+
+      <!-- 用户信息 -->
+      <view class="user-section" wx:if="{{item.userInfo}}">
+        <image class="user-avatar" src="{{item.userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill" lazy-load></image>
+        <text class="user-name">{{item.userInfo.nickName || '未知用户'}}</text>
+        <text class="user-phone" wx:if="{{item.userInfo.phone}}">{{item.userInfo.phone}}</text>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="action-section">
+        <button class="action-btn secondary" size="mini" catchtap="contactCustomer" data-id="{{item._id}}">联系客户</button>
+        <!-- 已支付状态 - 显示开始制作 -->
+        <button class="action-btn primary" size="mini" catchtap="processOrder" data-id="{{item._id}}" wx:if="{{item.status === 1}}">开始制作</button>
+        <!-- 制作中状态 - 显示制作完成 -->
+        <button class="action-btn success" size="mini" catchtap="processOrder" data-id="{{item._id}}" wx:elif="{{item.status === 2}}">制作完成</button>
+        <!-- 待取货状态 - 显示确认取货 -->
+        <button class="action-btn primary" size="mini" catchtap="processOrder" data-id="{{item._id}}" wx:elif="{{item.status === 6}}">确认取货</button>
+        <!-- 其他状态 - 显示查看详情 -->
+        <button class="action-btn secondary" size="mini" catchtap="viewOrderDetail" data-id="{{item._id}}" wx:else>查看详情</button>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{orderList.length === 0 && !isLoading}}">
+      <image class="empty-image" src="/images/empty-order.png" mode="aspectFit"></image>
+      <text class="empty-text">暂无自取订单</text>
+      <text class="empty-subtext">{{startDate || endDate || status ? '尝试调整筛选条件' : '还没有收到自取订单'}}</text>
+    </view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{orderList.length > 0}}">
+    <text wx:if="{{isLoading}}">加载中...</text>
+    <text wx:elif="{{hasMore}}">上拉加载更多</text>
+    <text wx:else>— 已经到底了 —</text>
+  </view>
+</view>
+
+<!-- 处理订单弹窗 -->
+<view class="process-modal" wx:if="{{showProcessModal}}">
+  <view class="modal-mask" bindtap="hideProcessModal"></view>
+  <view class="modal-content" catchtap="onModalContentTap">
+    <view class="modal-header">
+      <text class="modal-title">处理自取订单</text>
+      <text class="close-btn" catchtap="hideProcessModal">×</text>
+    </view>
+
+    <view class="modal-body">
+      <!-- 订单进度步骤（自取专用流程） -->
+      <view class="process-steps">
+        <view class="step-item {{currentOrder.status >= 1 ? 'completed' : ''}} {{currentOrder.status === 1 ? 'active' : ''}}">
+          <view class="step-icon">
+            <text class="iconfont icon-check" wx:if="{{currentOrder.status > 1}}">✓</text>
+            <text wx:else>1</text>
+          </view>
+          <text class="step-text">已支付</text>
+        </view>
+        <view class="step-line {{currentOrder.status >= 2 ? 'completed' : ''}}"></view>
+        <view class="step-item {{currentOrder.status >= 2 ? 'completed' : ''}} {{currentOrder.status === 2 ? 'active' : ''}}">
+          <view class="step-icon">
+            <text class="iconfont icon-check" wx:if="{{currentOrder.status > 2}}">✓</text>
+            <text wx:else>2</text>
+          </view>
+          <text class="step-text">制作中</text>
+        </view>
+        <view class="step-line {{currentOrder.status >= 6 ? 'completed' : ''}}"></view>
+        <view class="step-item {{currentOrder.status >= 6 ? 'completed' : ''}} {{currentOrder.status === 6 ? 'active' : ''}}">
+          <view class="step-icon">
+            <text class="iconfont icon-check" wx:if="{{currentOrder.status > 6}}">✓</text>
+            <text wx:else>3</text>
+          </view>
+          <text class="step-text">待取货</text>
+        </view>
+        <view class="step-line {{currentOrder.status === 4 ? 'completed' : ''}}"></view>
+        <view class="step-item {{currentOrder.status === 4 ? 'completed' : ''}} {{currentOrder.status === 4 ? 'active' : ''}}">
+          <view class="step-icon">
+            <text wx:if="{{currentOrder.status === 4}}">✓</text>
+            <text wx:else>4</text>
+          </view>
+          <text class="step-text">已完成</text>
+        </view>
+      </view>
+
+      <!-- 取货码显示（仅在待取货或已完成状态） -->
+      <view class="pickup-code-display" wx:if="{{currentOrder.status >= 6}}">
+        <text class="code-label">取货码</text>
+        <text class="code-value">{{currentOrder.pickupCode}}</text>
+      </view>
+
+      <!-- 操作按钮区域 -->
+      <view class="process-actions">
+        <view class="action-title">选择操作</view>
+        <view class="action-grid">
+          <!-- 开始制作 -->
+          <view class="process-action {{currentOrder.status === 1 ? 'enabled' : 'disabled'}}" bindtap="updateOrderStatus" data-status="2" wx:if="{{currentOrder.status <= 2}}">
+            <text class="action-icon">🍳</text>
+            <text class="action-name">开始制作</text>
+          </view>
+          <!-- 制作完成 -->
+          <view class="process-action {{currentOrder.status === 2 ? 'enabled' : 'disabled'}}" bindtap="updateOrderStatus" data-status="6" wx:if="{{currentOrder.status <= 6}}">
+            <text class="action-icon">✅</text>
+            <text class="action-name">制作完成</text>
+            <text class="action-desc">生成取货码</text>
+          </view>
+          <!-- 确认取货 -->
+          <view class="process-action {{currentOrder.status === 6 ? 'enabled' : 'disabled'}}" bindtap="updateOrderStatus" data-status="4">
+            <text class="action-icon">📦</text>
+            <text class="action-name">确认取货</text>
+            <text class="action-desc">核对取货码</text>
+          </view>
+          <!-- 取消订单 -->
+          <view class="process-action cancel enabled" bindtap="cancelOrder" wx:if="{{currentOrder.status <= 2}}">
+            <text class="action-icon">❌</text>
+            <text class="action-name">取消订单</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 备注区域 -->
+      <view class="remark-section">
+        <text class="section-label">备注（选填）</text>
+        <input
+          class="remark-input"
+          placeholder="添加订单处理备注..."
+          value="{{processRemark}}"
+          bindinput="onRemarkInput"
+          maxlength="200"
+          placeholder-class="placeholder-style"
+        />
+      </view>
+    </view>
+
+    <view class="modal-footer">
+      <button class="btn-secondary" bindtap="hideProcessModal">关闭</button>
+    </view>
+  </view>
+</view>

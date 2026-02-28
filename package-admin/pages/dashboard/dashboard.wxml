@@ -136,6 +136,14 @@
         <text class="menu-desc">打包与配送</text>
       </view>
 
+      <view class="menu-item" bindtap="goToPickupManage">
+        <view class="menu-icon-wrap">
+          <image class="menu-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNENBRjUwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTMgOXY2Ii8+PHBhdGggZD0iTTkgMjlWNWEyIDIgMCAwIDEgMi0yaDRhMiAyIDAgMCAxIDIgMnYxNCIvPjxwYXRoIGQ9Ik0xNSA5djEyYTIgMiAwIDAgMS0yIDJIOWEyIDIgMCAwIDEtMi0ydi0xMiIvPjxwYXRoIGQ9Ik0xNSA5aDJhMiAyIDAgMCAxIDIgMnY2YTIgMiAwIDAgMS0yIDJoLTIiLz48L3N2Zz4=" mode="aspectFit"/>
+        </view>
+        <text class="menu-label">自取管理</text>
+        <text class="menu-desc">自提订单处理</text>
+      </view>
+
       <view class="menu-item" bindtap="goToStatistics">
         <view class="menu-icon-wrap">
           <image class="menu-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzQ0OTVFIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PGxpbmUgeDE9IjE4IiB5MT0iMjAiIHgyPSIxOCIgeTI9IjEwIj48L2xpbmU+PGxpbmUgeDE9IjEyIiB5MT0iMjAiIHgyPSIxMiIgeTI9IjQiPjwvbGluZT48bGluZSB4MT0iNiIgeTE9IjIwIiB4Mj0iNiIgeTI9IjE0Ij48L2xpbmU+PC9zdmc+" mode="aspectFit"/>

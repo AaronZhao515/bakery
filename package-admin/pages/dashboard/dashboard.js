@@ -348,6 +348,13 @@ Page({
     });
   },
 
+  // 前往自取管理
+  goToPickupManage() {
+    wx.navigateTo({
+      url: '/package-admin/pages/pickup-manage/pickup-manage'
+    });
+  },
+
   // 前往数据统计
   goToStatistics() {
     wx.navigateTo({
