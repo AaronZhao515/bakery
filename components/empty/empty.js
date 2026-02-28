@@ -2,16 +2,18 @@
  * 空状态组件
  * @module components/empty
  * @description 页面无数据时显示的空状态组件
- * 
+ *
  * @property {string} type - 空状态类型：default/search/order/cart/network/error
  * @property {string} image - 自定义图片URL
  * @property {string} title - 标题文字
  * @property {string} description - 描述文字
  * @property {string} buttonText - 按钮文字
  * @property {boolean} showButton - 是否显示按钮
- * 
+ *
  * @event buttonTap - 点击按钮时触发
  */
+
+const icons = require('../../utils/icons.js');
 
 Component({
   options: {
@@ -64,6 +66,9 @@ Component({
   },
 
   data: {
+    // 默认图标
+    defaultIcon: icons.packageEmpty,
+
     // 预设的空状态配置
     presets: {
       default: {

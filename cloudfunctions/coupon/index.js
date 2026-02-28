@@ -56,10 +56,16 @@ async function getList(data) {
   }
 
   // 根据类型筛选
+  // newcomer: 专属礼包优惠券 (scope: 'gift')
+  // limited: 普通优惠券 (scope: 'all' 或 'product'，或没有scope字段)
   if (type === 'newcomer') {
-    where.type = 'newcomer'
+    where.scope = 'gift'
   } else if (type === 'limited') {
-    where.type = 'limited'
+    // 普通优惠券：scope为'all'或'product'，或没有scope字段（默认为all）
+    where.scope = _.or([
+      _.in(['all', 'product']),
+      _.exists(false)
+    ])
   }
 
   console.log('[coupon/getList] 查询条件:', where)
@@ -367,12 +373,13 @@ async function check(openid, data) {
       return
     }
 
-    // 检查最低消费
-    if (totalAmount < coupon.minAmount) {
+    // 检查最低消费（兼容 minSpend 和 minAmount 两种字段名）
+    const minAmount = coupon.minSpend || coupon.minAmount || 0
+    if (totalAmount < minAmount) {
       unavailableList.push({
         ...uc,
         coupon: coupon,
-        reason: `满${coupon.minAmount}元可用`
+        reason: `满${minAmount}元可用`
       })
       return
     }

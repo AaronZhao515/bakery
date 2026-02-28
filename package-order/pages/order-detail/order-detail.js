@@ -10,15 +10,15 @@ const icons = require('../../../utils/icons.js');
 
 // 订单状态映射
 const ORDER_STATUS = {
-  0: { text: '待支付', color: '#FF6B6B', bgColor: '#FFF0F0', icon: '⏰' },
-  1: { text: '已支付', color: '#4ECDC4', bgColor: '#E8F8F7', icon: '✅' },
-  2: { text: '备餐中', color: '#D4A96A', bgColor: '#FFF8EE', icon: '👨‍🍳' },
-  3: { text: '配送中', color: '#9B7355', bgColor: '#F5EDE6', icon: '🚚' },
-  4: { text: '已完成', color: '#52C41A', bgColor: '#F0F9EB', icon: '🎉' },
-  5: { text: '线下支付', color: '#D4A96A', bgColor: '#FFF8EE', icon: '💰' },
-  '-1': { text: '已取消', color: '#999999', bgColor: '#F5F5F5', icon: '❌' },
-  '-2': { text: '退款中', color: '#FAAD14', bgColor: '#FFFBE6', icon: '💰' },
-  '-3': { text: '已退款', color: '#999999', bgColor: '#F5F5F5', icon: '↩️' }
+  0: { text: '待支付', color: '#FF6B6B', bgColor: '#FFF0F0', icon: icons.statusPending },
+  1: { text: '已支付', color: '#4ECDC4', bgColor: '#E8F8F7', icon: icons.statusPaid },
+  2: { text: '制作中', color: '#AB47BC', bgColor: '#F3E5F5', icon: icons.statusCooking },
+  3: { text: '配送中', color: '#9B7355', bgColor: '#F5EDE6', icon: icons.statusDelivering },
+  4: { text: '已完成', color: '#52C41A', bgColor: '#F0F9EB', icon: icons.statusCompleted },
+  5: { text: '线下支付', color: '#D4A96A', bgColor: '#FFF8EE', icon: icons.statusOffline },
+  '-1': { text: '已取消', color: '#999999', bgColor: '#F5F5F5', icon: icons.statusCancelled },
+  '-2': { text: '退款中', color: '#FAAD14', bgColor: '#FFFBE6', icon: icons.statusRefunding },
+  '-3': { text: '已退款', color: '#999999', bgColor: '#F5F5F5', icon: icons.statusRefunded }
 };
 
 Page({
@@ -115,6 +115,10 @@ Page({
         // 格式化订单数据
         const formattedOrder = this.formatOrderData(order);
 
+        // 加载产品图片
+        const productsWithImages = await this.loadProductImages(formattedOrder.products);
+        formattedOrder.products = productsWithImages;
+
         this.setData({
           order: formattedOrder,
           isLoading: false
@@ -130,6 +134,58 @@ Page({
       console.error('[订单详情] 加载失败:', error);
       wx.showToast({ title: '加载失败', icon: 'none' });
       this.setData({ isLoading: false });
+    }
+  },
+
+  /**
+   * 加载产品图片（实时从 products 集合获取）
+   */
+  async loadProductImages(orderProducts) {
+    if (!orderProducts || orderProducts.length === 0) {
+      return orderProducts;
+    }
+
+    try {
+      // 提取 productIds
+      const productIds = orderProducts.map(p => p.productId).filter(Boolean);
+
+      if (productIds.length === 0) {
+        return orderProducts;
+      }
+
+      // 批量获取产品信息
+      const { result } = await wx.cloud.callFunction({
+        name: 'product',
+        data: {
+          action: 'getList',
+          page: 1,
+          pageSize: 100
+        }
+      });
+
+      if (result.code !== 0 || !result.data || !result.data.list) {
+        console.warn('[订单详情] 获取产品信息失败');
+        return orderProducts;
+      }
+
+      // 构建 productId -> image 映射
+      const productMap = {};
+      result.data.list.forEach(product => {
+        let image = product.image || (product.images && product.images[0]);
+        if (image) {
+          productMap[product._id] = image;
+        }
+      });
+
+      // 为订单产品添加图片
+      return orderProducts.map(item => ({
+        ...item,
+        image: productMap[item.productId] || ''
+      }));
+
+    } catch (error) {
+      console.error('[订单详情] 加载产品图片失败:', error);
+      return orderProducts;
     }
   },
 
@@ -159,7 +215,9 @@ Page({
       // 是否可以支付
       canPay: order.status === 0,
       // 是否可以取消（已完成、已取消、退款中、已退款的订单不能取消）
-      canCancel: ![4, -1, -2, -3].includes(order.status),
+      // 制作中(2)和配送中(3)不允许用户取消，需联系客服
+      canCancel: [0, 1].includes(order.status),
+      cannotCancelReason: [2, 3].includes(order.status) ? '商品已经制作，如需取消，请联系客服' : '',
       // 是否已完成
       isCompleted: order.status === 4,
       // 是否已取消
@@ -352,8 +410,8 @@ Page({
   onCancelOrder() {
     const { order } = this.data;
 
+    // 不能取消的订单直接返回（页面上已显示提示）
     if (!order.canCancel) {
-      wx.showToast({ title: '订单状态不支持取消', icon: 'none' });
       return;
     }
 

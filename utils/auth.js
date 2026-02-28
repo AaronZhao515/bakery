@@ -181,7 +181,7 @@ function getWxUserInfo(withCredentials = true) {
 }
 
 /**
- * 执行登录流程
+ * 执行登录流程（传统方式 - 仅获取 OpenID）
  * @returns {Promise} 登录结果
  */
 async function doLogin() {
@@ -245,6 +245,122 @@ async function doLogin() {
 }
 
 /**
+ * 手机号一键登录
+ * @param {Object} options - 登录选项
+ * @param {String} options.phoneCode - 手机号授权凭证
+ * @param {Object} options.userInfo - 用户信息（昵称、头像）
+ * @returns {Promise} 登录结果
+ */
+async function doLoginWithPhone(options = {}) {
+  const { phoneCode, userInfo = {} } = options;
+
+  if (!phoneCode) {
+    return {
+      success: false,
+      error: '手机号授权凭证不能为空'
+    };
+  }
+
+  try {
+    console.log('[Auth] 开始手机号一键登录');
+
+    // 调用云函数进行手机号登录
+    const { result } = await wx.cloud.callFunction({
+      name: 'user',
+      data: {
+        action: 'loginWithPhone',
+        data: {
+          phoneCode: phoneCode,
+          userInfo: userInfo
+        }
+      }
+    });
+
+    console.log('[Auth] 手机号登录返回:', result);
+
+    // 处理 API 返回格式
+    const response = result.result || result;
+
+    if ((response.code === 0 || response.code === 200) && response.data) {
+      const userInfoData = response.data.userInfo || {};
+
+      // 构建完整的用户信息
+      const userInfo = {
+        userId: response.data.userId,
+        nickName: userInfoData.nickName || userInfo.nickName || '',
+        avatarUrl: userInfoData.avatarUrl || userInfo.avatarUrl || '',
+        phone: response.data.phone || userInfoData.phone || '',
+        memberLevel: userInfoData.memberLevel || 0,
+        points: userInfoData.points || 0
+      };
+
+      // 保存认证信息
+      const authInfo = {
+        isLogin: true,
+        token: response.data.token,
+        openid: response.data.openid,
+        phone: response.data.phone,
+        userInfo: userInfo,
+        role: response.data.role || 'customer',
+        expireTime: response.data.expireTime || Date.now() + 7 * 24 * 60 * 60 * 1000
+      };
+
+      setAuthInfo(authInfo);
+
+      return {
+        success: true,
+        data: {
+          ...response.data,
+          userInfo: userInfo
+        },
+        isNewUser: response.data.isNewUser
+      };
+    } else {
+      throw new Error(response.message || '登录失败');
+    }
+  } catch (error) {
+    console.error('[Auth] 手机号登录失败:', error);
+    return {
+      success: false,
+      error: error.message || '登录失败'
+    };
+  }
+}
+
+/**
+ * 获取微信用户信息（昵称、头像）
+ * 需要用户点击触发
+ * @returns {Promise} 用户信息
+ */
+function getWxUserProfile() {
+  return new Promise((resolve, reject) => {
+    wx.getUserProfile({
+      desc: '用于完善用户资料',
+      success: (res) => {
+        resolve({
+          success: true,
+          data: {
+            nickName: res.userInfo.nickName,
+            avatarUrl: res.userInfo.avatarUrl,
+            gender: res.userInfo.gender,
+            city: res.userInfo.city,
+            province: res.userInfo.province,
+            country: res.userInfo.country
+          }
+        });
+      },
+      fail: (err) => {
+        console.error('[Auth] 获取用户信息失败:', err);
+        resolve({
+          success: false,
+          error: err.errMsg || '获取用户信息失败'
+        });
+      }
+    });
+  });
+}
+
+/**
  * 执行退出登录
  * @returns {Promise} 退出结果
  */
@@ -258,13 +374,61 @@ async function doLogout() {
   } catch (error) {
     console.error('[Auth] 服务器退出失败:', error);
   } finally {
-    // 清除本地认证信息
-    clearAuthInfo();
-    
+    // 清除所有用户相关的本地存储数据
+    clearAllUserData();
+
     return {
       success: true
     };
   }
+}
+
+/**
+ * 清除所有用户相关的本地存储数据
+ */
+function clearAllUserData() {
+  // 用户认证信息
+  clearAuthInfo();
+
+  // 购物车相关数据
+  wx.removeStorageSync('cartData');
+  wx.removeStorageSync('cart');
+  wx.removeStorageSync('cart_data');
+
+  // 管理员信息
+  wx.removeStorageSync('admin_info');
+
+  // 用户信息
+  wx.removeStorageSync('user_info');
+  wx.removeStorageSync('userInfo');
+
+  // 优惠券相关
+  wx.removeStorageSync('claimed_coupons');
+  wx.removeStorageSync('selectedCouponForOrder');
+
+  // 地址信息
+  wx.removeStorageSync('selectedAddressForOrder');
+
+  // 订单相关
+  wx.removeStorageSync('currentOrder');
+  wx.removeStorageSync('checkoutData');
+  wx.removeStorageSync('orderType');
+
+  // 其他用户相关数据
+  wx.removeStorageSync('openid');
+  wx.removeStorageSync('redirect_url');
+  wx.removeStorageSync('couponSelectionMade');
+
+  // 地址列表和订单历史
+  wx.removeStorageSync('address_list');
+  wx.removeStorageSync('order_history');
+  wx.removeStorageSync('user_coupons');
+
+  // 收藏和搜索历史
+  wx.removeStorageSync('collects');
+  wx.removeStorageSync('searchHistory');
+
+  console.log('[Auth] 所有用户相关数据已清除');
 }
 
 /**
@@ -456,6 +620,7 @@ module.exports = {
   setAuthInfo,
   setUserInfo,
   clearAuthInfo,
+  clearAllUserData,
 
   // 登录状态检查
   isLogin,
@@ -473,7 +638,9 @@ module.exports = {
   // 登录操作
   wxLogin,
   getWxUserInfo,
-  doLogin,
+  getWxUserProfile,  // 获取微信用户信息（昵称、头像）
+  doLogin,           // 传统登录
+  doLoginWithPhone,  // 手机号一键登录
   doLogout,
   updateUserInfo,
   getPhoneNumber,

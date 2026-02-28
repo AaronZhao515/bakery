@@ -54,9 +54,13 @@ Page({
         const order = result.data;
         const statusInfo = STATUS_MAP[order.status] || {};
 
+        // 加载产品图片（实时从 products 获取）
+        const goodsListWithImages = await this.loadProductImages(order.goodsList || order.items || order.products || []);
+
         this.setData({
           order: {
             ...order,
+            goodsList: goodsListWithImages,
             statusText: statusInfo.text,
             createTime: this.formatTime(order.createTime),
             payTime: order.payTime ? this.formatTime(order.payTime) : ''
@@ -78,6 +82,57 @@ Page({
       this.loadMockData();
     } finally {
       this.setData({ isLoading: false });
+    }
+  },
+
+  // 加载产品图片（实时从 products 集合获取）
+  async loadProductImages(orderItems) {
+    if (!orderItems || orderItems.length === 0) {
+      return orderItems;
+    }
+
+    try {
+      // 提取 productIds（可能是 id、productId 或 _id）
+      const productIds = orderItems.map(item => item.productId || item.id || item._id).filter(Boolean);
+
+      if (productIds.length === 0) {
+        return orderItems;
+      }
+
+      // 批量获取产品信息（包括下架商品，用于显示历史订单图片）
+      const { result } = await wx.cloud.callFunction({
+        name: 'product',
+        data: {
+          action: 'getList',
+          page: 1,
+          pageSize: 100,
+          status: null  // null 表示查询所有状态的产品
+        }
+      });
+
+      if (result.code !== 0 || !result.data || !result.data.list) {
+        console.warn('[订单详情] 获取产品信息失败');
+        return orderItems;
+      }
+
+      // 构建 productId -> image 映射
+      const productMap = {};
+      result.data.list.forEach(product => {
+        const image = product.image || (product.images && product.images[0]);
+        if (image) {
+          productMap[product._id] = image;
+        }
+      });
+
+      // 为订单产品添加图片
+      return orderItems.map(item => ({
+        ...item,
+        image: productMap[item.productId || item.id || item._id] || item.image || ''
+      }));
+
+    } catch (error) {
+      console.error('[订单详情] 加载产品图片失败:', error);
+      return orderItems;
     }
   },
 

@@ -23,12 +23,32 @@ page {
   z-index: 50;
   padding: 80rpx 24rpx 24rpx;
   box-sizing: border-box;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 表头隐藏状态 */
+.orders-header.header-hidden {
+  transform: translateY(-120%);
+  opacity: 0;
 }
 
 .header-content {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
   gap: 16rpx;
+  flex: 1;
+}
+
+.header-right {
+  flex: 1;
 }
 
 .header-title {
@@ -39,7 +59,6 @@ page {
 }
 
 .order-count-badge {
-  margin-left: auto;
   background: #D4A96A;
   color: #fff;
   border-radius: 999rpx;
@@ -48,20 +67,47 @@ page {
   font-weight: 700;
 }
 
-/* Status Tabs */
-.status-tabs {
+/* 当月提示 */
+.month-tip {
   display: flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: center;
+  gap: 12rpx;
+  margin-top: 16rpx;
+  padding: 12rpx 20rpx;
+  background: rgba(245, 237, 216, 0.15);
+  border-radius: 999rpx;
+}
+
+.month-tip-icon {
+  width: 32rpx;
+  height: 32rpx;
+  flex-shrink: 0;
+}
+
+.month-tip-text {
+  font-size: 24rpx;
+  color: rgba(245, 237, 216, 0.85);
+}
+
+/* Status Tabs - 3列2行网格布局 */
+.status-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx 20rpx;
   margin-top: 24rpx;
   padding-top: 16rpx;
   border-top: 2rpx solid rgba(245, 237, 216, 0.2);
 }
 
 .tab-item {
-  padding: 12rpx 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 0;
   border-radius: 999rpx;
   transition: all 0.3s;
+  background: rgba(245, 237, 216, 0.1);
 }
 
 .tab-item.active {
@@ -79,13 +125,20 @@ page {
   font-weight: 700;
 }
 
-/* Scrollable Content */
+/* Scrollable Content - 增加 padding-top 以避免被固定头部遮盖 */
 .orders-content {
   flex: 1;
   padding: 0 24rpx;
-  padding-top: 320rpx;
-  padding-bottom: 160rpx;
+  padding-top: 480rpx;
+  padding-bottom: 240rpx;
   box-sizing: border-box;
+  min-height: 100vh;
+  transition: padding-top 0.3s ease;
+}
+
+/* 表头隐藏时内容区保持不变，避免跳动 */
+.orders-content.content-expanded {
+  padding-top: 480rpx;
 }
 
 /* Empty State */
@@ -342,9 +395,9 @@ page {
   to { transform: rotate(360deg); }
 }
 
-/* Bottom Spacer */
+/* Bottom Spacer - 增加高度以避免被底部tabBar遮挡 */
 .bottom-spacer {
-  height: 40rpx;
+  height: 120rpx;
 }
 
 /* Icon Styles */
@@ -358,4 +411,78 @@ page {
   width: 28rpx;
   height: 28rpx;
   filter: brightness(0) invert(0.95);
+}
+
+/* Order Actions */
+.order-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16rpx;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx solid #F5EDD8;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 32rpx;
+  border-radius: 32rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+  border: 2rpx solid #D4A96A;
+  color: #8B6347;
+  background: #FFFFFF;
+  transition: all 0.3s ease;
+}
+
+.action-btn:active {
+  background: #F5EDE0;
+  transform: scale(0.98);
+}
+
+.action-btn.disabled {
+  border-color: #D9D9D9;
+  color: #B8B8B8;
+  background: #F5F5F5;
+  opacity: 0.8;
+}
+
+.action-btn.disabled:active {
+  transform: none;
+  background: #F5F5F5;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #8B6347 0%, #D4A574 100%);
+  color: #FFFFFF;
+  border: none;
+}
+
+.action-btn.primary:active {
+  opacity: 0.9;
+}
+
+/* Cannot Cancel Tip - 顶部提示样式 */
+.order-card > .cannot-cancel-tip {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 24rpx;
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+  border-bottom: 2rpx solid #FFE082;
+}
+
+.order-card > .cannot-cancel-tip .tip-icon {
+  font-size: 28rpx;
+  flex-shrink: 0;
+}
+
+.order-card > .cannot-cancel-tip .tip-text {
+  font-size: 24rpx;
+  color: #8B6914;
+  line-height: 1.4;
+  font-weight: 500;
 }

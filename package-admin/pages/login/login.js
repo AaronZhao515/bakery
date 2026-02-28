@@ -6,17 +6,14 @@ const app = getApp();
 
 Page({
   data: {
-    account: '',
-    password: '',
-    rememberMe: false,
     isLoading: false,
     isAuthorized: false,
     userInfo: null
   },
 
   onLoad(options) {
-    // 检查本地存储的登录信息
-    this.checkLocalLogin();
+    // 页面加载时检查登录状态
+    this.checkLoginStatus();
   },
 
   onShow() {
@@ -24,23 +21,10 @@ Page({
     this.checkLoginStatus();
   },
 
-  // 检查本地存储的登录信息
-  checkLocalLogin() {
-    const savedAccount = wx.getStorageSync('admin_account');
-    const savedRemember = wx.getStorageSync('admin_remember');
-    
-    if (savedRemember && savedAccount) {
-      this.setData({
-        account: savedAccount,
-        rememberMe: true
-      });
-    }
-  },
-
   // 检查登录状态
   checkLoginStatus() {
     const adminInfo = wx.getStorageSync('admin_info');
-    if (adminInfo && adminInfo.token) {
+    if (adminInfo && adminInfo.isAdmin) {
       this.setData({
         isAuthorized: true,
         userInfo: adminInfo
@@ -48,84 +32,24 @@ Page({
     }
   },
 
-  // 账号输入
-  onAccountInput(e) {
-    this.setData({
-      account: e.detail.value
-    });
-  },
-
-  // 密码输入
-  onPasswordInput(e) {
-    this.setData({
-      password: e.detail.value
-    });
-  },
-
-  // 切换记住账号
-  toggleRemember() {
-    this.setData({
-      rememberMe: !this.data.rememberMe
-    });
-  },
-
-  // 忘记密码
-  forgotPassword() {
-    wx.showModal({
-      title: '找回密码',
-      content: '请联系超级管理员重置密码',
-      showCancel: false
-    });
-  },
-
-  // 账号密码登录
+  // 管理员登录验证（通过openid）
   async handleLogin() {
-    const { account, password, rememberMe } = this.data;
-
-    // 表单验证
-    if (!account.trim()) {
-      wx.showToast({
-        title: '请输入账号',
-        icon: 'none'
-      });
-      return;
-    }
-
-    if (!password.trim()) {
-      wx.showToast({
-        title: '请输入密码',
-        icon: 'none'
-      });
-      return;
-    }
-
     this.setData({ isLoading: true });
 
     try {
-      // 调用云函数进行登录验证
+      // 调用云函数进行登录验证（通过openid自动验证）
       const result = await wx.cloud.callFunction({
         name: 'admin',
         data: {
-          action: 'login',
-          account: account.trim(),
-          password: password.trim()
+          action: 'login'
         }
       });
 
       if (result.result.code === 0) {
         const adminInfo = result.result.data;
-        
+
         // 保存登录信息
         wx.setStorageSync('admin_info', adminInfo);
-        
-        // 记住账号
-        if (rememberMe) {
-          wx.setStorageSync('admin_account', account.trim());
-          wx.setStorageSync('admin_remember', true);
-        } else {
-          wx.removeStorageSync('admin_account');
-          wx.removeStorageSync('admin_remember');
-        }
 
         wx.showToast({
           title: '登录成功',
@@ -135,7 +59,7 @@ Page({
         // 延迟跳转到首页
         setTimeout(() => {
           wx.redirectTo({
-            url: '/pages/admin/dashboard/dashboard'
+            url: '/package-admin/pages/dashboard/dashboard'
           });
         }, 1000);
       } else {
@@ -155,81 +79,43 @@ Page({
     }
   },
 
-  // 微信一键登录
-  async handleWxLogin(e) {
-    if (e.detail.errMsg !== 'getPhoneNumber:ok') {
-      wx.showToast({
-        title: '需要授权手机号才能登录',
-        icon: 'none'
-      });
-      return;
-    }
-
-    this.setData({ isLoading: true });
-
-    try {
-      // 获取登录凭证
-      const loginRes = await wx.login();
-      
-      // 调用云函数进行微信登录
-      const result = await wx.cloud.callFunction({
-        name: 'admin',
-        data: {
-          action: 'wxLogin',
-          code: loginRes.code,
-          encryptedData: e.detail.encryptedData,
-          iv: e.detail.iv
-        }
-      });
-
-      if (result.result.code === 0) {
-        const adminInfo = result.result.data;
-        
-        // 保存登录信息
-        wx.setStorageSync('admin_info', adminInfo);
-
-        wx.showToast({
-          title: '登录成功',
-          icon: 'success'
-        });
-
-        setTimeout(() => {
-          wx.redirectTo({
-            url: '/pages/admin/dashboard/dashboard'
-          });
-        }, 1000);
-      } else {
-        wx.showToast({
-          title: result.result.message || '登录失败',
-          icon: 'none'
-        });
-      }
-    } catch (error) {
-      console.error('微信登录失败:', error);
-      wx.showToast({
-        title: '登录失败，请重试',
-        icon: 'none'
-      });
-    } finally {
-      this.setData({ isLoading: false });
-    }
-  },
-
   // 进入管理后台
   enterDashboard() {
     wx.redirectTo({
-      url: '/pages/admin/dashboard/dashboard'
+      url: '/package-admin/pages/dashboard/dashboard'
     });
   },
 
-  // 切换账号
-  switchAccount() {
-    wx.removeStorageSync('admin_info');
+  // 切换账号（退出登录）
+  async switchAccount() {
+    const { confirm } = await wx.showModal({
+      title: '退出登录',
+      content: '确定要退出登录吗？',
+      confirmColor: '#f44336'
+    });
+
+    if (!confirm) return;
+
+    // 使用 auth 模块的 clearAllUserData 清除所有用户相关数据
+    const auth = require('../../../utils/auth');
+    auth.clearAllUserData();
+
     this.setData({
       isAuthorized: false,
-      userInfo: null,
-      account: '',
-      password: ''
+      userInfo: null
     });
+
+    wx.showToast({
+      title: '已退出登录',
+      icon: 'none'
+    });
+
+    // 关闭所有其他页面，只保留登录页
+    // 使用 reLaunch 重新启动到登录页
+    setTimeout(() => {
+      wx.reLaunch({
+        url: '/package-admin/pages/login/login'
+      });
+    }, 500);
   }
 });

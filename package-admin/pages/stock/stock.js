@@ -44,8 +44,26 @@ Page({
   },
 
   onLoad(options) {
+    console.log('[库存] 页面加载');
     this.loadStockStats();
     this.loadStockList();
+  },
+
+  onShow() {
+    // 检查管理员权限
+    const adminInfo = wx.getStorageSync('admin_info');
+    if (!adminInfo || !adminInfo.isAdmin) {
+      wx.redirectTo({
+        url: '/package-admin/pages/login/login'
+      });
+      return;
+    }
+
+    console.log('[库存] 页面显示, currentTab:', this.data.currentTab);
+    // 如果列表为空，重新加载
+    if (this.data.stockList.length === 0 && this.data.currentTab !== 'record') {
+      this.loadStockList();
+    }
   },
 
   onPullDownRefresh() {
@@ -79,27 +97,30 @@ Page({
   // 加载库存统计
   async loadStockStats() {
     try {
+      // 使用 admin 云函数获取统计数据
       const result = await wx.cloud.callFunction({
-        name: 'stock',
+        name: 'admin',
         data: {
-          action: 'getStockStats'
+          action: 'getStatistics'
         }
       });
 
-      if (result.result.code === 0) {
+      console.log('[库存] 统计数据:', result);
+
+      if (result.result && result.result.code === 0) {
         this.setData({
-          totalProducts: result.result.data.totalProducts,
-          lowStockCount: result.result.data.lowStockCount,
-          outOfStockCount: result.result.data.outOfStockCount
+          totalProducts: result.result.data.productCount,
+          lowStockCount: result.result.data.stockWarningCount,
+          outOfStockCount: result.result.data.outOfStockCount || 0
         });
       }
     } catch (error) {
-      console.error('加载库存统计失败:', error);
+      console.error('[库存] 加载统计失败:', error);
       // 使用模拟数据
       this.setData({
-        totalProducts: 56,
-        lowStockCount: 5,
-        outOfStockCount: 2
+        totalProducts: 10,
+        lowStockCount: 6,
+        outOfStockCount: 0
       });
     }
   },
@@ -107,32 +128,64 @@ Page({
   // 加载库存列表
   async loadStockList() {
     this.setData({ isLoading: true, page: 1 });
+    console.log('[库存] 开始加载库存列表, currentTab:', this.data.currentTab);
 
     try {
+      // 使用 admin 云函数获取商品列表
       const result = await wx.cloud.callFunction({
-        name: 'stock',
+        name: 'admin',
         data: {
-          action: 'getStockList',
+          action: 'productCRUD',
+          operation: 'list',
           page: 1,
-          pageSize: this.data.pageSize,
-          type: this.data.currentTab
+          pageSize: this.data.pageSize
         }
       });
 
-      if (result.result.code === 0) {
+      console.log('[库存] API返回:', result);
+
+      if (result.result && result.result.code === 0) {
         const { list, total } = result.result.data;
+        console.log('[库存] 获取商品列表:', list.length, '个商品, total:', total);
+        console.log('[库存] 第一个商品:', list[0]);
+
+        // 转换数据格式以适应库存显示，处理缺失字段
+        const stockList = list.map(item => {
+          const stock = typeof item.stock === 'number' ? item.stock : 0;
+          const warningStock = typeof item.stockWarning === 'number' ? item.stockWarning : 10;
+          return {
+            id: item._id,
+            name: item.name,
+            stock: stock,
+            warningStock: warningStock,
+            image: item.image || (item.images && item.images[0]) || ''
+          };
+        });
+
+        console.log('[库存] 转换后的数据:', stockList);
+
+        // 如果当前是预警标签，过滤低库存商品
+        const filteredList = this.data.currentTab === 'warning'
+          ? stockList.filter(item => item.stock <= item.warningStock)
+          : stockList;
+
+        console.log('[库存] 过滤后显示:', filteredList.length, '个商品');
+
         this.setData({
-          stockList: list,
+          stockList: filteredList,
           hasMore: list.length < total,
           isLoading: false
+        }, () => {
+          console.log('[库存] setData完成, stockList长度:', this.data.stockList.length);
         });
+      } else {
+        console.error('[库存] API返回错误:', result.result);
+        this.setData({ stockList: [], isLoading: false });
       }
     } catch (error) {
-      console.error('加载库存列表失败:', error);
+      console.error('[库存] 加载库存列表失败:', error);
       // 使用模拟数据
       this.setMockStockData();
-    } finally {
-      this.setData({ isLoading: false });
     }
   },
 
@@ -143,21 +196,40 @@ Page({
 
     try {
       const result = await wx.cloud.callFunction({
-        name: 'stock',
+        name: 'admin',
         data: {
-          action: 'getStockList',
+          action: 'productCRUD',
+          operation: 'list',
           page: nextPage,
-          pageSize: this.data.pageSize,
-          type: this.data.currentTab
+          pageSize: this.data.pageSize
         }
       });
 
       if (result.result.code === 0) {
         const { list, total } = result.result.data;
+        // 转换数据格式，处理缺失字段
+        const newStockList = list.map(item => {
+          const stock = typeof item.stock === 'number' ? item.stock : 0;
+          const warningStock = typeof item.stockWarning === 'number' ? item.stockWarning : 10;
+          return {
+            id: item._id,
+            name: item.name,
+            stock: stock,
+            warningStock: warningStock,
+            image: item.image || (item.images && item.images[0]) || ''
+          };
+        });
+
+        const allList = [...this.data.stockList, ...newStockList];
+        // 如果当前是预警标签，过滤低库存商品
+        const filteredList = this.data.currentTab === 'warning'
+          ? allList.filter(item => item.stock <= item.warningStock)
+          : allList;
+
         this.setData({
-          stockList: [...this.data.stockList, ...list],
+          stockList: filteredList,
           page: nextPage,
-          hasMore: this.data.stockList.length + list.length < total,
+          hasMore: allList.length < total,
           isLoading: false
         });
       }
@@ -193,9 +265,10 @@ Page({
 
     try {
       const result = await wx.cloud.callFunction({
-        name: 'stock',
+        name: 'admin',
         data: {
-          action: 'getStockRecords',
+          action: 'stockRecordManage',
+          operation: 'list',
           page: 1,
           pageSize: this.data.pageSize,
           startDate: this.data.startDate,
@@ -205,19 +278,57 @@ Page({
 
       if (result.result.code === 0) {
         const { list, total } = result.result.data;
+        // 转换数据格式
+        const stockRecords = list.map(item => ({
+          id: item._id,
+          productName: item.productName,
+          type: item.type,
+          typeName: this.getOperationTypeName(item.operationType),
+          quantity: item.quantity,
+          createTime: this.formatDateTime(item.createTime),
+          remark: item.remark
+        }));
+
         this.setData({
-          stockRecords: list,
+          stockRecords: stockRecords,
           hasMore: list.length < total,
           isLoading: false
         });
+      } else {
+        // 使用模拟数据
+        this.setMockRecordData();
       }
     } catch (error) {
       console.error('加载库存记录失败:', error);
-      // 使用模拟数据
       this.setMockRecordData();
     } finally {
       this.setData({ isLoading: false });
     }
+  },
+
+  // 获取操作类型名称
+  getOperationTypeName(type) {
+    const typeMap = {
+      'purchase': '采购入库',
+      'return': '退货入库',
+      'adjust': '盘点调整',
+      'other': '其他',
+      'sale': '销售出库',
+      'loss': '损耗出库'
+    };
+    return typeMap[type] || type;
+  },
+
+  // 格式化日期时间
+  formatDateTime(date) {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hour = String(d.getHours()).padStart(2, '0');
+    const minute = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day} ${hour}:${minute}`;
   },
 
   // 加载更多记录
@@ -227,9 +338,10 @@ Page({
 
     try {
       const result = await wx.cloud.callFunction({
-        name: 'stock',
+        name: 'admin',
         data: {
-          action: 'getStockRecords',
+          action: 'stockRecordManage',
+          operation: 'list',
           page: nextPage,
           pageSize: this.data.pageSize,
           startDate: this.data.startDate,
@@ -239,16 +351,29 @@ Page({
 
       if (result.result.code === 0) {
         const { list, total } = result.result.data;
+        const newRecords = list.map(item => ({
+          id: item._id,
+          productName: item.productName,
+          type: item.type,
+          typeName: this.getOperationTypeName(item.operationType),
+          quantity: item.quantity,
+          createTime: this.formatDateTime(item.createTime),
+          remark: item.remark
+        }));
+
+        const allRecords = [...this.data.stockRecords, ...newRecords];
         this.setData({
-          stockRecords: [...this.data.stockRecords, ...list],
+          stockRecords: allRecords,
           recordPage: nextPage,
-          hasMore: this.data.stockRecords.length + list.length < total,
+          hasMore: allRecords.length < total,
           isLoading: false
         });
+      } else {
+        this.setData({ hasMore: false, isLoading: false });
       }
     } catch (error) {
       console.error('加载更多记录失败:', error);
-      this.setData({ isLoading: false, hasMore: false });
+      this.setData({ hasMore: false, isLoading: false });
     }
   },
 
@@ -270,22 +395,29 @@ Page({
   // 切换Tab
   switchTab(e) {
     const tab = e.currentTarget.dataset.tab;
+    console.log('[库存] 切换tab到:', tab);
+
+    // 先更新tab，然后在回调中加载数据
     this.setData({
       currentTab: tab,
       page: 1,
       recordPage: 1,
-      hasMore: true
-    });
+      hasMore: true,
+      stockList: []  // 清空列表避免显示旧数据
+    }, () => {
+      // setData完成后的回调
+      console.log('[库存] setData完成, currentTab现在是:', this.data.currentTab);
 
-    if (tab === 'record') {
-      // 设置默认日期范围（最近7天）
-      const endDate = this.formatDate(new Date());
-      const startDate = this.formatDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
-      this.setData({ startDate, endDate });
-      this.loadStockRecords();
-    } else {
-      this.loadStockList();
-    }
+      if (tab === 'record') {
+        // 设置默认日期范围（最近7天）
+        const endDate = this.formatDate(new Date());
+        const startDate = this.formatDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+        this.setData({ startDate, endDate });
+        this.loadStockRecords();
+      } else {
+        this.loadStockList();
+      }
+    });
   },
 
   // 格式化日期
@@ -314,10 +446,29 @@ Page({
 
   // 显示库存调整弹窗
   showStockModal(e) {
+    console.log('[库存] 显示弹窗, e:', e);
     const { type, id, name } = e.currentTarget.dataset;
-    
+    console.log('[库存] 弹窗参数:', { type, id, name });
+
+    // 检查参数
+    if (!id) {
+      console.error('[库存] 商品ID为空');
+      wx.showToast({ title: '商品信息有误', icon: 'none' });
+      return;
+    }
+
+    // 获取当前商品库存
+    const currentProduct = this.data.stockList.find(item => item.id === id);
+    const currentStock = currentProduct ? currentProduct.stock : 0;
+
+    // 出库时检查库存是否为0
+    if (type === 'out' && currentStock <= 0) {
+      wx.showToast({ title: '库存为0，无法出库', icon: 'none' });
+      return;
+    }
+
     // 根据类型设置操作类型选项
-    const operationTypes = type === 'in' 
+    const operationTypes = type === 'in'
       ? [
           { id: 'purchase', name: '采购入库' },
           { id: 'return', name: '退货入库' },
@@ -340,12 +491,20 @@ Page({
       modalRemark: '',
       operationTypeIndex: 0,
       operationTypes
+    }, () => {
+      console.log('[库存] 弹窗已显示, showModal:', this.data.showModal);
     });
   },
 
   // 隐藏弹窗
   hideModal() {
+    console.log('[库存] 隐藏弹窗');
     this.setData({ showModal: false });
+  },
+
+  // 阻止弹窗内部点击事件冒泡
+  onModalTap() {
+    console.log('[库存] 点击弹窗内容，阻止关闭');
   },
 
   // 数量输入
@@ -365,7 +524,7 @@ Page({
 
   // 确认库存操作
   async confirmStockOperation() {
-    const { modalType, modalProductId, modalQuantity, modalRemark, operationTypes, operationTypeIndex } = this.data;
+    const { modalType, modalProductId, modalProductName, modalQuantity, modalRemark, stockList, operationTypeIndex, operationTypes } = this.data;
 
     if (!modalQuantity || parseInt(modalQuantity) <= 0) {
       wx.showToast({ title: '请输入正确的数量', icon: 'none' });
@@ -375,16 +534,55 @@ Page({
     wx.showLoading({ title: '处理中' });
 
     try {
-      const result = await wx.cloud.callFunction({
-        name: 'stock',
+      // 获取当前商品库存（重新查询，确保最新）
+      const productResult = await wx.cloud.callFunction({
+        name: 'admin',
         data: {
-          action: 'adjustStock',
+          action: 'productCRUD',
+          operation: 'get',
+          productId: modalProductId
+        }
+      });
+
+      let currentStock = 0;
+      if (productResult.result.code === 0 && productResult.result.data) {
+        currentStock = productResult.result.data.stock || 0;
+      }
+
+      // 计算新库存
+      const quantity = parseInt(modalQuantity);
+
+      // 出库时检查库存是否为0
+      if (modalType === 'out' && currentStock <= 0) {
+        wx.showToast({ title: '库存为0，无法出库', icon: 'none' });
+        wx.hideLoading();
+        return;
+      }
+
+      // 出库时检查库存是否足够
+      if (modalType === 'out' && quantity > currentStock) {
+        wx.showToast({ title: '库存不足，无法出库', icon: 'none' });
+        wx.hideLoading();
+        return;
+      }
+
+      const newStock = modalType === 'in'
+        ? currentStock + quantity
+        : Math.max(0, currentStock - quantity);
+
+      // 获取操作类型
+      const recordType = operationTypes[operationTypeIndex]?.id || (modalType === 'in' ? 'adjust' : 'sale');
+
+      // 使用 admin 云函数更新库存
+      const result = await wx.cloud.callFunction({
+        name: 'admin',
+        data: {
+          action: 'updateStock',
           productId: modalProductId,
-          type: modalType,
-          quantity: parseInt(modalQuantity),
-          operationType: operationTypes[operationTypeIndex].id,
-          operationTypeName: operationTypes[operationTypeIndex].name,
-          remark: modalRemark
+          stock: newStock,
+          recordType: recordType,
+          recordRemark: modalRemark,
+          operator: '管理员'
         }
       });
 

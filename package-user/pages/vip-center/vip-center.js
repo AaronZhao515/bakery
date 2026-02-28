@@ -237,24 +237,69 @@ Page({
    */
   async loadPointsHistory() {
     try {
-      // 从本地存储获取积分历史
-      const history = wx.getStorageSync('points_history') || [];
+      // 调用API获取积分明细
+      const result = await api.points.getList({ pageSize: 5 });
+      console.log('[会员中心] 积分明细API返回:', result);
 
-      // 如果没有历史记录，创建一些示例数据
-      if (history.length === 0 && this.data.isLogin) {
-        const demoHistory = [
-          { id: 1, label: '订单消费', date: '2024-01-15', pts: '+50', color: '#7A9B55', bgColor: '#E8F5E9', icon: icons.star },
-          { id: 2, label: '每日签到', date: '2024-01-14', pts: '+10', color: '#7A9B55', bgColor: '#E3F2FD', icon: icons.clock },
-          { id: 3, label: '完善资料', date: '2024-01-10', pts: '+50', color: '#7A9B55', bgColor: '#FFF8E1', icon: icons.user },
-          { id: 4, label: '兑换优惠券', date: '2024-01-08', pts: '-100', color: '#D4A96A', bgColor: '#FFF3E0', icon: icons.gift }
-        ];
-        this.setData({ pointsHistory: demoHistory });
+      if (result && result.success && result.data && result.data.list) {
+        const list = result.data.list;
+
+        // 格式化积分明细数据
+        const pointsHistory = list.map((item, index) => {
+          const isEarn = item.type === 'earn' || item.points > 0;
+          const pts = item.points > 0 ? `+${item.points}` : `${item.points}`;
+
+          // 根据类型选择图标和颜色
+          let icon = icons.star;
+          let bgColor = '#E8F5E9';
+          let color = '#7A9B55';
+
+          if (item.label && item.label.includes('签到')) {
+            icon = icons.clock;
+            bgColor = '#E3F2FD';
+          } else if (item.label && item.label.includes('兑换')) {
+            icon = icons.gift;
+            bgColor = '#FFF3E0';
+            color = '#D4A96A';
+          } else if (item.label && item.label.includes('完善')) {
+            icon = icons.user;
+            bgColor = '#FFF8E1';
+          }
+
+          return {
+            id: item._id || index,
+            label: item.label || (isEarn ? '积分获取' : '积分使用'),
+            date: this.formatDate(item.createTime || item.date),
+            pts: pts,
+            color: color,
+            bgColor: bgColor,
+            icon: icon
+          };
+        });
+
+        this.setData({ pointsHistory });
       } else {
-        this.setData({ pointsHistory: history });
+        // API返回失败或空数据，显示空状态
+        this.setData({ pointsHistory: [] });
       }
     } catch (error) {
       console.error('[会员中心] 加载积分历史失败:', error);
+      this.setData({ pointsHistory: [] });
     }
+  },
+
+  /**
+   * 格式化日期
+   */
+  formatDate(dateStr) {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr;
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   },
 
   /**
@@ -264,7 +309,9 @@ Page({
     try {
       wx.showLoading({ title: '加载中...', mask: true });
 
-      // 获取新人优惠和限时优惠的优惠券
+      // 获取专属礼包和限时优惠的优惠券
+      // type: 'newcomer' 获取专属礼包 (scope: 'gift')
+      // type: 'limited' 获取普通优惠券 (scope: 'all' 或 'product')
       const [newcomerRes, limitedRes] = await Promise.all([
         api.coupon.getList({ type: 'newcomer', pageSize: 10 }),
         api.coupon.getList({ type: 'limited', pageSize: 10 })
@@ -286,13 +333,33 @@ Page({
 
       console.log('[会员中心] 加载到的优惠券:', coupons);
 
-      // 检查用户是否已领取（仅登录用户）
-      if (this.data.isLogin) {
-        const claimedCoupons = wx.getStorageSync('claimed_coupons') || [];
-        coupons = coupons.map(coupon => ({
-          ...coupon,
-          claimed: claimedCoupons.includes(coupon.id)
-        }));
+      // 检查用户是否已领取（仅登录用户）- 从CloudBase查询
+      if (this.data.isLogin && coupons.length > 0) {
+        try {
+          // 获取用户已领取的所有优惠券
+          const userCouponsRes = await api.coupon.getUserCoupons();
+          if (userCouponsRes.success && userCouponsRes.data && userCouponsRes.data.list) {
+            const claimedCouponIds = userCouponsRes.data.list.map(uc => uc.couponId);
+            console.log('[会员中心] 用户已领取的优惠券ID:', claimedCouponIds);
+
+            // 标记已领取的优惠券
+            coupons = coupons.map(coupon => ({
+              ...coupon,
+              claimed: claimedCouponIds.includes(coupon.id)
+            }));
+
+            // 同步到本地存储（保持数据一致性）
+            wx.setStorageSync('claimed_coupons', claimedCouponIds);
+          }
+        } catch (err) {
+          console.error('[会员中心] 查询用户已领取优惠券失败:', err);
+          // 降级使用本地存储
+          const claimedCoupons = wx.getStorageSync('claimed_coupons') || [];
+          coupons = coupons.map(coupon => ({
+            ...coupon,
+            claimed: claimedCoupons.includes(coupon.id)
+          }));
+        }
       }
 
       this.setData({ newCoupons: coupons });
@@ -308,29 +375,33 @@ Page({
    * 格式化优惠券数据
    */
   formatCoupon(item, type) {
-    // 根据优惠类型生成显示金额
+    // 根据优惠类型生成显示金额（兼容 minSpend 和 minAmount 两种字段名）
+    const minAmount = item.minAmount || item.minSpend || 0;
     let amountText = '';
     if (item.discountType === 'amount') {
-      amountText = `满${item.minAmount}减${item.amount}`;
+      amountText = `满${minAmount}减${item.amount}`;
     } else if (item.discountType === 'discount') {
       amountText = `${item.amount}折`;
     }
+
+    // 专属礼包使用特殊标签
+    const isGift = type === 'newcomer' || item.scope === 'gift';
 
     return {
       id: item._id,
       title: item.title,
       amount: amountText,
       desc: item.desc,
-      tag: item.tag,
+      tag: isGift ? '新人专属' : (item.tag || '限时优惠'),
       icon: icons.gift,
-      iconColor: item.iconColor || '#D4A96A',
-      iconBg: item.iconBg || '#FFF8E1',
-      tagColor: item.tagColor || '#D4A96A',
-      tagBg: item.tagBg || '#FFF8E1',
-      amountColor: item.amountColor || '#D4A96A',
+      iconColor: isGift ? '#E91E63' : (item.iconColor || '#D4A96A'),
+      iconBg: isGift ? '#FCE4EC' : (item.iconBg || '#FFF8E1'),
+      tagColor: isGift ? '#E91E63' : (item.tagColor || '#D4A96A'),
+      tagBg: isGift ? '#FCE4EC' : (item.tagBg || '#FFF8E1'),
+      amountColor: isGift ? '#E91E63' : (item.amountColor || '#D4A96A'),
       claimed: false,
       type: type,
-      minAmount: item.minAmount,
+      minAmount: minAmount,
       discountType: item.discountType,
       discountValue: item.amount
     };
@@ -472,7 +543,14 @@ Page({
    * 查看全部积分历史
    */
   viewAllHistory() {
-    util.showToast('功能开发中', 'none');
+    if (!this.data.isLogin) {
+      util.showToast('请先登录', 'none');
+      return;
+    }
+    const points = this.data.userInfo.points || 0;
+    wx.navigateTo({
+      url: `/package-user/pages/points-history/points-history?points=${points}`
+    });
   },
 
   /**

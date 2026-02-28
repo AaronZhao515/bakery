@@ -52,10 +52,51 @@ Page({
     console.log('[首页] 页面显示');
     // 检查登录状态
     this.checkLoginStatus();
-    // 更新购物车数量
-    this.updateCartCount();
+    // 更新购物车数量（未登录时清空显示）
+    const isLogin = auth.isLogin();
+    if (!isLogin) {
+      this.setData({ cartCount: 0 });
+      // 清空全局 store 中的购物车数据
+      const cartStore = app.store && app.store.cartStore;
+      if (cartStore) {
+        cartStore.set('items', []);
+        cartStore.set('totalPrice', 0);
+        cartStore.set('totalCount', 0);
+      }
+    } else {
+      this.updateCartCount();
+    }
     // 设置自定义 tabBar 选中状态
     this.setTabBarSelected();
+
+    // 检查是否需要刷新商品数据（从商品编辑页返回）
+    const needRefresh = wx.getStorageSync('home_products_need_refresh');
+    if (needRefresh) {
+      console.log('[首页] 检测到商品更新，刷新推荐商品');
+      this.refreshProducts();
+      wx.removeStorageSync('home_products_need_refresh');
+    }
+  },
+
+  /**
+   * 刷新商品数据
+   */
+  async refreshProducts() {
+    try {
+      const [recommendRes, newRes] = await Promise.all([
+        this.loadRecommendProducts(),
+        this.loadNewProducts()
+      ]);
+
+      this.setData({
+        recommendProducts: recommendRes,
+        newProducts: newRes
+      });
+
+      console.log('[首页] 商品数据刷新完成');
+    } catch (error) {
+      console.error('[首页] 刷新商品数据失败', error);
+    }
   },
 
   /**
@@ -222,7 +263,24 @@ Page({
    */
   async loadRecommendProducts() {
     const { result } = await api.product.getRecommend(10);
-    return (result && result.data) || [];
+    const products = (result && result.data) || [];
+
+    // 云存储图片直接使用原路径（文件名已包含时间戳）
+    return products.map(item => {
+      let imageUrl = '';
+      if (item.images && item.images.length > 0) {
+        imageUrl = item.images[0];
+      } else if (item.image) {
+        imageUrl = item.image;
+      } else if (item.coverImage) {
+        imageUrl = item.coverImage;
+      }
+
+      return {
+        ...item,
+        images: imageUrl ? [imageUrl] : (item.images || [])
+      };
+    });
   },
 
   /**

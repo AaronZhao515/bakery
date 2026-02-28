@@ -1,7 +1,11 @@
 {
   "description": "暖心烘焙小程序",
   "packOptions": {
-    "ignore": [],
+    "ignore": [
+      { "type": "folder", "value": "scripts" },
+      { "type": "folder", "value": "test" },
+      { "type": "folder", "value": "docs" }
+    ],
     "include": []
   },
   "setting": {

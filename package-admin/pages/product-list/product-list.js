@@ -34,10 +34,26 @@ Page({
   },
 
   onShow() {
+    // 检查管理员权限
+    const adminInfo = wx.getStorageSync('admin_info');
+    if (!adminInfo || !adminInfo.isAdmin) {
+      wx.redirectTo({
+        url: '/package-admin/pages/login/login'
+      });
+      return;
+    }
+
     // 从编辑页返回时刷新列表
     if (this.data.needRefresh) {
       this.refreshList();
       this.setData({ needRefresh: false });
+    } else {
+      // 检查全局刷新标记（从任意编辑页返回都需要刷新）
+      const needRefreshGlobal = wx.getStorageSync('product_list_need_refresh');
+      if (needRefreshGlobal) {
+        this.refreshList();
+        wx.removeStorageSync('product_list_need_refresh');
+      }
     }
   },
 
@@ -65,29 +81,40 @@ Page({
   async loadCategories() {
     try {
       const result = await wx.cloud.callFunction({
-        name: 'product',
+        name: 'admin',
         data: {
-          action: 'getCategories'
+          action: 'categoryManage',
+          operation: 'list',
+          status: 1
         }
       });
 
       if (result.result.code === 0) {
-        this.setData({
-          categories: result.result.data
-        });
+        const categories = result.result.data.list.map(cat => ({
+          id: cat._id,
+          name: cat.name
+        }));
+        this.setData({ categories });
+      } else {
+        // 使用默认分类
+        this.setDefaultCategories();
       }
     } catch (error) {
       console.error('加载分类失败:', error);
-      // 使用模拟数据
-      this.setData({
-        categories: [
-          { id: 'bread', name: '面包' },
-          { id: 'cake', name: '蛋糕' },
-          { id: 'pastry', name: '点心' },
-          { id: 'drink', name: '饮品' }
-        ]
-      });
+      this.setDefaultCategories();
     }
+  },
+
+  // 设置默认分类
+  setDefaultCategories() {
+    this.setData({
+      categories: [
+        { id: 'bread', name: '面包' },
+        { id: 'cake', name: '蛋糕' },
+        { id: 'pastry', name: '点心' },
+        { id: 'drink', name: '饮品' }
+      ]
+    });
   },
 
   // 加载商品列表
@@ -97,30 +124,65 @@ Page({
     this.setData({ isLoading: true, page: 1 });
 
     try {
+      // 构建查询参数
+      const params = {
+        action: 'productCRUD',
+        operation: 'list',
+        page: 1,
+        pageSize: this.data.pageSize,
+        keyword: this.data.searchKeyword,
+        categoryId: this.data.currentCategory === 'all' ? '' : this.data.currentCategory
+      };
+
+      // 状态筛选：all=全部, on=上架(1), off=下架(0)
+      if (this.data.statusFilter !== 'all') {
+        params.status = this.data.statusFilter === 'on' ? 1 : 0;
+      }
+
+      console.log('加载商品列表参数:', params);
+
       const result = await wx.cloud.callFunction({
-        name: 'product',
-        data: {
-          action: 'getProductList',
-          page: 1,
-          pageSize: this.data.pageSize,
-          keyword: this.data.searchKeyword,
-          category: this.data.currentCategory === 'all' ? '' : this.data.currentCategory,
-          status: this.data.statusFilter === 'all' ? '' : this.data.statusFilter
-        }
+        name: 'admin',
+        data: params
       });
+
+      console.log('加载商品列表结果:', result);
 
       if (result.result.code === 0) {
         const { list, total } = result.result.data;
+        // 确保商品数据有 id 字段（兼容 _id），并转换状态格式
+        const products = list.map(item => {
+          // 处理图片路径 - 优先使用 images[0]，其次是 coverImage/mainImage
+          let displayImage = item.images && item.images.length > 0 && item.images[0]
+            ? item.images[0]
+            : (item.coverImage || item.mainImage || '');
+
+          // 注意：云存储路径 cloud:// 不支持查询参数，直接使用原路径
+          // 云存储文件名本身已包含时间戳，具有唯一性
+
+          return {
+            ...item,
+            id: item._id || item.id,
+            status: item.status === 1 ? 'on' : 'off', // 转换为前端格式
+            selected: false,
+            displayImage: displayImage || '/images/default-product.png'
+          };
+        });
         this.setData({
-          products: list.map(item => ({ ...item, selected: false })),
+          products,
+          total: total || list.length,
           hasMore: list.length < total,
           isLoading: false
         });
+      } else {
+        console.error('加载商品列表失败:', result.result.message);
+        this.setData({ products: [], total: 0, hasMore: false });
       }
     } catch (error) {
       console.error('加载商品列表失败:', error);
-      // 使用模拟数据
-      this.setMockData();
+      // 使用模拟数据（仅开发时使用）
+      // this.setMockData();
+      this.setData({ products: [], total: 0, hasMore: false });
     } finally {
       this.setData({ isLoading: false });
     }
@@ -134,26 +196,54 @@ Page({
     this.setData({ isLoading: true });
 
     try {
+      // 构建查询参数
+      const params = {
+        action: 'productCRUD',
+        operation: 'list',
+        page: nextPage,
+        pageSize: this.data.pageSize,
+        keyword: this.data.searchKeyword,
+        categoryId: this.data.currentCategory === 'all' ? '' : this.data.currentCategory
+      };
+
+      // 状态筛选
+      if (this.data.statusFilter !== 'all') {
+        params.status = this.data.statusFilter === 'on' ? 1 : 0;
+      }
+
       const result = await wx.cloud.callFunction({
-        name: 'product',
-        data: {
-          action: 'getProductList',
-          page: nextPage,
-          pageSize: this.data.pageSize,
-          keyword: this.data.searchKeyword,
-          category: this.data.currentCategory === 'all' ? '' : this.data.currentCategory,
-          status: this.data.statusFilter === 'all' ? '' : this.data.statusFilter
-        }
+        name: 'admin',
+        data: params
       });
 
       if (result.result.code === 0) {
         const { list, total } = result.result.data;
+        // 确保商品数据有 id 字段（兼容 _id），并转换状态格式
+        const newProducts = list.map(item => {
+          // 处理图片路径 - 优先使用 images[0]，其次是 coverImage/mainImage
+          let displayImage = item.images && item.images.length > 0 && item.images[0]
+            ? item.images[0]
+            : (item.coverImage || item.mainImage || '');
+
+          // 注意：云存储路径 cloud:// 不支持查询参数，直接使用原路径
+          // 云存储文件名本身已包含时间戳，具有唯一性
+
+          return {
+            ...item,
+            id: item._id || item.id,
+            status: item.status === 1 ? 'on' : 'off',
+            selected: false,
+            displayImage: displayImage || '/images/default-product.png'
+          };
+        });
         this.setData({
-          products: [...this.data.products, ...list.map(item => ({ ...item, selected: false }))],
+          products: [...this.data.products, ...newProducts],
           page: nextPage,
           hasMore: this.data.products.length + list.length < total,
           isLoading: false
         });
+      } else {
+        this.setData({ isLoading: false, hasMore: false });
       }
     } catch (error) {
       console.error('加载更多商品失败:', error);
@@ -329,23 +419,36 @@ Page({
     wx.showLoading({ title: '处理中' });
 
     try {
-      const result = await wx.cloud.callFunction({
-        name: 'product',
-        data: {
-          action: 'batchUpdateStatus',
-          ids: selectedProducts,
-          status
-        }
-      });
+      // 批量更新商品状态 - 使用 admin 云函数逐个更新
+      const updatePromises = selectedProducts.map(id =>
+        wx.cloud.callFunction({
+          name: 'admin',
+          data: {
+            action: 'productCRUD',
+            operation: 'update',
+            productId: id,
+            productData: { status: status === 'on' ? 1 : 0 }
+          }
+        })
+      );
+      const results = await Promise.all(updatePromises);
 
-      if (result.result.code === 0) {
+      // 检查是否全部成功
+      const failedCount = results.filter(r => r.result.code !== 0).length;
+
+      if (failedCount === 0) {
         wx.showToast({
           title: status === 'on' ? '上架成功' : '下架成功',
           icon: 'success'
         });
-        this.exitBatchMode();
-        this.refreshList();
+      } else {
+        wx.showToast({
+          title: `${selectedProducts.length - failedCount}个成功，${failedCount}个失败`,
+          icon: 'none'
+        });
       }
+      this.exitBatchMode();
+      this.refreshList();
     } catch (error) {
       console.error('批量更新失败:', error);
       wx.showToast({ title: '操作失败', icon: 'none' });
@@ -377,19 +480,22 @@ Page({
     wx.showLoading({ title: '删除中' });
 
     try {
-      const result = await wx.cloud.callFunction({
-        name: 'product',
-        data: {
-          action: 'batchDeleteProducts',
-          ids: this.data.selectedProducts
-        }
-      });
+      // 使用 admin 云函数逐个删除
+      const deletePromises = this.data.selectedProducts.map(id =>
+        wx.cloud.callFunction({
+          name: 'admin',
+          data: {
+            action: 'productCRUD',
+            operation: 'delete',
+            productId: id
+          }
+        })
+      );
+      await Promise.all(deletePromises);
 
-      if (result.result.code === 0) {
-        wx.showToast({ title: '删除成功', icon: 'success' });
-        this.exitBatchMode();
-        this.refreshList();
-      }
+      wx.showToast({ title: '删除成功', icon: 'success' });
+      this.exitBatchMode();
+      this.refreshList();
     } catch (error) {
       console.error('批量删除失败:', error);
       wx.showToast({ title: '删除失败', icon: 'none' });
@@ -409,28 +515,29 @@ Page({
   editProduct(e) {
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({
-      url: `/pages/admin/product-edit/product-edit?id=${id}`
+      url: `/package-admin/pages/product-edit/product-edit?id=${id}`
     });
   },
 
   // 切换商品状态
   async toggleStatus(e) {
     const { id, status } = e.currentTarget.dataset;
-    const newStatus = status === 'on' ? 'off' : 'on';
+    const newStatus = status === 'on' ? 0 : 1;
 
     try {
       const result = await wx.cloud.callFunction({
-        name: 'product',
+        name: 'admin',
         data: {
-          action: 'updateProductStatus',
-          id,
-          status: newStatus
+          action: 'productCRUD',
+          operation: 'update',
+          productId: id,
+          productData: { status: newStatus }
         }
       });
 
       if (result.result.code === 0) {
         wx.showToast({
-          title: newStatus === 'on' ? '上架成功' : '下架成功',
+          title: newStatus === 1 ? '上架成功' : '下架成功',
           icon: 'success'
         });
         this.refreshList();
@@ -462,10 +569,11 @@ Page({
 
     try {
       const result = await wx.cloud.callFunction({
-        name: 'product',
+        name: 'admin',
         data: {
-          action: 'deleteProduct',
-          id
+          action: 'productCRUD',
+          operation: 'delete',
+          productId: id
         }
       });
 
@@ -482,7 +590,7 @@ Page({
   // 新增商品
   addProduct() {
     wx.navigateTo({
-      url: '/pages/admin/product-edit/product-edit'
+      url: '/package-admin/pages/product-edit/product-edit'
     });
   },
 
@@ -495,5 +603,17 @@ Page({
   },
 
   // 阻止事件冒泡
-  stopPropagation() {}
+  stopPropagation() {},
+
+  // 图片加载失败处理
+  onImageError(e) {
+    const index = e.currentTarget.dataset.index;
+    const { products } = this.data;
+
+    // 更新该商品的图片为默认图片
+    if (products[index] && products[index].displayImage !== '/images/default-product.png') {
+      products[index].displayImage = '/images/default-product.png';
+      this.setData({ products });
+    }
+  }
 });

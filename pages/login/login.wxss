@@ -107,7 +107,107 @@ page {
   display: block;
 }
 
-/* 用户卡片 */
+/* ========== 新版头像昵称填写区域 ========== */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32rpx;
+  margin-bottom: 48rpx;
+}
+
+/* 头像选择器 */
+.avatar-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: none;
+  line-height: normal;
+}
+
+.avatar-wrapper::after {
+  border: none;
+}
+
+.avatar-img {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  border: 4rpx solid #EAD9BB;
+  background: #F5F5F5;
+  box-shadow: 0 8rpx 32rpx rgba(155, 115, 85, 0.15);
+  transition: all 0.3s ease;
+}
+
+.avatar-badge {
+  position: relative;
+  margin-top: -40rpx;
+  margin-bottom: 8rpx;
+  width: 56rpx;
+  height: 56rpx;
+  background: #9B7355;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4rpx solid #FFFFFF;
+  box-shadow: 0 4rpx 12rpx rgba(155, 115, 85, 0.3);
+}
+
+.avatar-badge-icon {
+  font-size: 28rpx;
+}
+
+.avatar-tip {
+  font-size: 24rpx;
+  color: #9B7355;
+  font-weight: 500;
+}
+
+/* 昵称输入区域 */
+.nickname-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.input-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #5C3D1E;
+  padding-left: 16rpx;
+}
+
+.nickname-input {
+  width: 100%;
+  height: 96rpx;
+  background: #FAFAFA;
+  border: 2rpx solid #EAD9BB;
+  border-radius: 24rpx;
+  padding: 0 32rpx;
+  font-size: 30rpx;
+  color: #5C3D1E;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.nickname-input:focus {
+  background: #FFFFFF;
+  border-color: #9B7355;
+  box-shadow: 0 4rpx 16rpx rgba(155, 115, 85, 0.1);
+}
+
+.input-hint {
+  font-size: 22rpx;
+  color: #B08860;
+  padding-left: 16rpx;
+}
+
+/* 兼容旧版用户卡片（已登录状态） */
 .user-card {
   display: flex;
   flex-direction: column;
@@ -187,6 +287,18 @@ page {
 .btn-phone {
   background: linear-gradient(135deg, #9B7355 0%, #7A5533 100%);
   color: #FFFFFF;
+}
+
+.btn-link {
+  background: transparent;
+  color: #999;
+  font-size: 28rpx;
+  border: none;
+  box-shadow: none;
+}
+
+.btn-link::after {
+  border: none;
 }
 
 .btn-icon {

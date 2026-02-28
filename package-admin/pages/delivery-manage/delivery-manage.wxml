@@ -1,0 +1,249 @@
+<!-- 配送管理页 -->
+<view class="delivery-manage-container">
+  <!-- 顶部统计 -->
+  <view class="header-stats">
+    <view class="stat-card">
+      <text class="stat-value">{{stats.pendingPack}}</text>
+      <text class="stat-label">待打包</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-value">{{stats.pendingDelivery}}</text>
+      <text class="stat-label">待配送</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-value">{{stats.delivering}}</text>
+      <text class="stat-label">配送中</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-value">{{stats.completedToday}}</text>
+      <text class="stat-label">今日完成</text>
+    </view>
+  </view>
+
+  <!-- 标签切换 -->
+  <view class="tabs-section">
+    <view class="tab {{currentTab === 'pending' ? 'active' : ''}}" bindtap="switchTab" data-tab="pending">
+      待处理
+      <text class="badge" wx:if="{{stats.pendingPack + stats.pendingDelivery > 0}}">{{stats.pendingPack + stats.pendingDelivery}}</text>
+    </view>
+    <view class="tab {{currentTab === 'delivering' ? 'active' : ''}}" bindtap="switchTab" data-tab="delivering">
+      配送中
+    </view>
+    <view class="tab {{currentTab === 'completed' ? 'active' : ''}}" bindtap="switchTab" data-tab="completed">
+      已完成
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list">
+    <view class="order-card {{item.status}} {{item.highlighted ? 'highlighted' : ''}} order-item" wx:for="{{orders}}" wx:key="_id" data-id="{{item._id}}" bindtap="showOrderDetail">
+      <!-- 订单头部 -->
+      <view class="order-header">
+        <view class="order-info">
+          <text class="order-no">{{item.orderNo}}</text>
+          <text class="order-time">{{item.createTime}}</text>
+        </view>
+        <view class="status-tag {{item.statusClass}}">{{item.statusText}}</view>
+      </view>
+
+      <!-- 商品列表 -->
+      <view class="product-list">
+        <view class="product-item" wx:for="{{item.products}}" wx:key="id" wx:for-item="product">
+          <image class="product-image" src="{{product.image || '/images/default-product.png'}}" mode="aspectFill"/>
+          <view class="product-detail">
+            <text class="product-name">{{product.name}}</text>
+            <text class="product-spec" wx:if="{{product.spec}}">{{product.spec}}</text>
+            <view class="product-price-row">
+              <text class="product-price">¥{{product.price}}</text>
+              <text class="product-quantity">x{{product.quantity}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 配送信息 -->
+      <view class="delivery-info">
+        <view class="info-row">
+          <text class="iconfont icon-user"></text>
+          <text class="info-text">{{item.userName}} {{item.userPhone}}</text>
+        </view>
+        <view class="info-row" wx:if="{{item.deliveryType === 'delivery'}}">
+          <text class="iconfont icon-location"></text>
+          <text class="info-text">{{item.address}}</text>
+        </view>
+        <view class="info-row" wx:if="{{item.deliveryType === 'pickup'}}">
+          <text class="iconfont icon-store"></text>
+          <text class="info-text">到店自提 - {{item.pickupTime}}</text>
+        </view>
+        <view class="info-row" wx:if="{{item.remark}}">
+          <text class="iconfont icon-note"></text>
+          <text class="info-text remark">备注: {{item.remark}}</text>
+        </view>
+      </view>
+
+      <!-- 订单金额 -->
+      <view class="order-amount">
+        <text class="amount-label">订单金额</text>
+        <text class="amount-value">¥{{item.payAmount}}</text>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="action-buttons">
+        <!-- 待打包状态 -->
+        <block wx:if="{{item.status === 1}}">
+          <button class="btn-secondary" bindtap="printOrder" data-id="{{item._id}}">
+            <text class="iconfont icon-print"></text>
+            打印
+          </button>
+          <button class="btn-primary" bindtap="startPack" data-id="{{item._id}}">
+            开始打包
+          </button>
+        </block>
+
+        <!-- 打包中状态 -->
+        <block wx:if="{{item.status === 2}}">
+          <button class="btn-secondary" bindtap="printOrder" data-id="{{item._id}}">
+            补打标签
+          </button>
+          <button class="btn-primary" bindtap="finishPack" data-id="{{item._id}}">
+            完成打包
+          </button>
+        </block>
+
+        <!-- 待配送状态 -->
+        <block wx:if="{{item.status === 3}}">
+          <button class="btn-secondary" bindtap="contactUser" data-phone="{{item.userPhone}}">
+            联系顾客
+          </button>
+          <button class="btn-primary" bindtap="startDelivery" data-id="{{item._id}}">
+            开始配送
+          </button>
+        </block>
+
+        <!-- 配送中状态 -->
+        <block wx:if="{{item.status === 4}}">
+          <button class="btn-secondary" bindtap="contactUser" data-phone="{{item.userPhone}}">
+            联系顾客
+          </button>
+          <button class="btn-primary" bindtap="completeDelivery" data-id="{{item._id}}">
+            完成配送
+          </button>
+        </block>
+
+        <!-- 已完成状态 -->
+        <block wx:if="{{item.status === 5}}">
+          <button class="btn-secondary" bindtap="viewDetail" data-id="{{item._id}}">
+            查看详情
+          </button>
+          <text class="complete-time">完成于 {{item.completeTime}}</text>
+        </block>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{orders.length === 0 && !isLoading}}">
+      <text class="empty-icon">📦</text>
+      <text class="empty-text">暂无{{currentTab === 'pending' ? '待处理' : currentTab === 'delivering' ? '配送中' : '已完成'}}订单</text>
+      <text class="empty-subtext">配送订单将显示在这里</text>
+    </view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{orders.length > 0}}">
+    <text wx:if="{{isLoading}}">加载中...</text>
+    <text wx:elif="{{hasMore}}">上拉加载更多</text>
+    <text wx:else>没有更多订单了</text>
+  </view>
+
+  <!-- 配送员选择弹窗（已禁用） -->
+
+  <!-- 订单详情弹窗 -->
+  <view class="detail-modal {{showOrderDetailModal ? 'show' : ''}}" wx:if="{{showOrderDetailModal}}">
+    <view class="detail-modal-mask" bindtap="hideOrderDetail"></view>
+    <view class="detail-modal-content">
+      <view class="detail-modal-header">
+        <text class="detail-modal-title">订单详情</text>
+        <text class="detail-modal-close" bindtap="hideOrderDetail">×</text>
+      </view>
+
+      <scroll-view class="detail-modal-body" scroll-y>
+        <block wx:if="{{currentOrder}}">
+          <!-- 订单状态 -->
+          <view class="detail-section">
+            <view class="detail-status-row">
+              <text class="detail-status-tag {{currentOrder.statusClass}}">{{currentOrder.statusText}}</text>
+              <text class="detail-order-no">订单号：{{currentOrder.orderNo}}</text>
+            </view>
+            <text class="detail-order-time">下单时间：{{currentOrder.createTime}}</text>
+          </view>
+
+          <!-- 商品信息 -->
+          <view class="detail-section">
+            <view class="detail-section-title">商品信息</view>
+            <view class="detail-product-list">
+              <view class="detail-product-item" wx:for="{{currentOrder.products}}" wx:key="id" wx:for-item="product">
+                <image class="detail-product-image" src="{{product.image || '/images/default-product.png'}}" mode="aspectFill"/>
+                <view class="detail-product-info">
+                  <text class="detail-product-name">{{product.name}}</text>
+                  <text class="detail-product-spec" wx:if="{{product.spec}}">{{product.spec}}</text>
+                  <view class="detail-product-meta">
+                    <text class="detail-product-price">¥{{product.price}}</text>
+                    <text class="detail-product-quantity">×{{product.quantity}}</text>
+                  </view>
+                </view>
+                <text class="detail-product-total">¥{{product.totalAmount}}</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 配送信息 -->
+          <view class="detail-section">
+            <view class="detail-section-title">配送信息</view>
+            <view class="detail-info-list">
+              <view class="detail-info-item">
+                <text class="detail-info-label">收货人</text>
+                <text class="detail-info-value">{{currentOrder.userName || '未知用户'}} {{currentOrder.userPhone}}</text>
+              </view>
+              <view class="detail-info-item">
+                <text class="detail-info-label">配送地址</text>
+                <text class="detail-info-value">{{currentOrder.address || '暂无地址信息'}}</text>
+              </view>
+              <view class="detail-info-item" wx:if="{{currentOrder.remark}}">
+                <text class="detail-info-label">订单备注</text>
+                <text class="detail-info-value remark">{{currentOrder.remark}}</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 金额信息 -->
+          <view class="detail-section">
+            <view class="detail-section-title">金额明细</view>
+            <view class="detail-amount-list">
+              <view class="detail-amount-item">
+                <text class="detail-amount-label">商品总额</text>
+                <text class="detail-amount-value">¥{{currentOrder.totalAmount}}</text>
+              </view>
+              <view class="detail-amount-item" wx:if="{{currentOrder.deliveryFee > 0}}">
+                <text class="detail-amount-label">配送费</text>
+                <text class="detail-amount-value">+¥{{currentOrder.deliveryFee}}</text>
+              </view>
+              <view class="detail-amount-item" wx:if="{{currentOrder.discountAmount > 0}}">
+                <text class="detail-amount-label">优惠金额</text>
+                <text class="detail-amount-value discount">-¥{{currentOrder.discountAmount}}</text>
+              </view>
+              <view class="detail-amount-divider"></view>
+              <view class="detail-amount-item total">
+                <text class="detail-amount-label">实付金额</text>
+                <text class="detail-amount-value total">¥{{currentOrder.payAmount}}</text>
+              </view>
+            </view>
+          </view>
+        </block>
+      </scroll-view>
+
+      <view class="detail-modal-footer">
+        <button class="detail-btn-close" bindtap="hideOrderDetail">关闭</button>
+      </view>
+    </view>
+  </view>
+</view>

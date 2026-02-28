@@ -1,0 +1,13 @@
+{
+  "name": "image-compress",
+  "version": "1.0.0",
+  "description": "图片压缩云函数",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "wx-server-sdk": "latest",
+    "jimp": "^0.22.10"
+  }
+}

@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "新鲜预定",
   "navigationStyle": "custom",
+  "enablePullDownRefresh": true,
   "backgroundColor": "#FDF8F3",
   "usingComponents": {
     "nav-bar": "/components/nav-bar/nav-bar",

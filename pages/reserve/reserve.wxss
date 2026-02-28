@@ -14,7 +14,7 @@
   position: fixed;
   top: 12rpx;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(0);
   width: calc(100% - 24rpx);
   max-width: 702rpx;
   background: linear-gradient(135deg, #8B6347 0%, #7A5533 100%);
@@ -22,6 +22,14 @@
   z-index: 50;
   padding: 80rpx 32rpx 0;
   box-sizing: border-box;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  opacity: 1;
+}
+
+/* 表头隐藏状态 */
+.reserve-header.header-hidden {
+  transform: translateX(-50%) translateY(-120%);
+  opacity: 0;
 }
 
 /* 顶部返回行 */
@@ -132,12 +140,19 @@
   margin-top: 4rpx;
 }
 
-/* 可滚动内容区 */
+/* 可滚动内容区 - 改为页面滚动 */
 .reserve-content {
-  flex: 1;
   padding: 0 24rpx;
   padding-top: 352rpx;
-  padding-bottom: 200rpx;
+  padding-bottom: 320rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+  transition: padding-top 0.3s ease;
+}
+
+/* 表头隐藏时内容区保持不变，避免跳动 */
+.reserve-content.content-expanded {
+  padding-top: 352rpx;
 }
 
 /* 优惠券横幅 */
@@ -420,9 +435,9 @@
   filter: brightness(0) invert(1);
 }
 
-/* 底部间隔 */
+/* 底部间隔 - 增加高度以避免被底部固定元素遮挡 */
 .bottom-spacer {
-  height: 160rpx;
+  height: 280rpx;
 }
 
 /* 购物车浮标 */

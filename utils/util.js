@@ -530,6 +530,104 @@ function timeAgo(date) {
   return formatDate(d, 'YYYY-MM-DD');
 }
 
+/**
+ * 为图片 URL 添加时间戳，防止缓存
+ * @param {string} url - 原始图片 URL
+ * @param {number} timestamp - 时间戳，默认当前时间
+ * @returns {string} 带时间戳的图片 URL
+ *
+ * @example
+ * addImageTimestamp('cloud://xxx.jpg') // 'cloud://xxx.jpg' (云存储路径不添加时间戳)
+ * addImageTimestamp('https://xxx.jpg') // 'https://xxx.jpg?t=1234567890'
+ */
+function addImageTimestamp(url, timestamp = Date.now()) {
+  if (!url) return url;
+
+  // 云存储路径 cloud:// 不支持查询参数，直接返回原路径
+  // 云存储文件名本身已包含时间戳，具有唯一性
+  if (url.startsWith('cloud://')) {
+    return url;
+  }
+
+  // 检查是否已经带有时间戳
+  if (url.includes('?t=') || url.includes('&t=')) {
+    // 替换已有的时间戳
+    return url.replace(/([?&])t=\d+/, `$1t=${timestamp}`);
+  }
+
+  // 添加新的时间戳参数
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}t=${timestamp}`;
+}
+
+/**
+ * 获取带时间戳的商品图片 URL
+ * @param {Object} product - 商品对象
+ * @param {number} index - 图片索引，默认 0
+ * @param {number} timestamp - 时间戳
+ * @returns {string} 带时间戳的图片 URL
+ */
+function getProductImageUrl(product, index = 0, timestamp = Date.now()) {
+  if (!product) return '';
+
+  // 按优先级获取图片 URL
+  let url = '';
+  if (product.images && product.images.length > index) {
+    url = product.images[index];
+  } else if (product.coverImage) {
+    url = product.coverImage;
+  } else if (product.mainImage) {
+    url = product.mainImage;
+  } else if (product.image) {
+    url = product.image;
+  }
+
+  return addImageTimestamp(url, timestamp);
+}
+
+/**
+ * 从云存储 fileID 提取文件路径
+ * @param {string} fileID - 云存储 fileID
+ * @returns {string} 文件路径
+ *
+ * @example
+ * extractCloudPath('cloud://env-id.bucket/products/xxx.jpg') // 'products/xxx.jpg'
+ */
+function extractCloudPath(fileID) {
+  if (!fileID) return '';
+
+  // 检查是否为 fileID 格式
+  if (!fileID.startsWith('cloud://')) {
+    return fileID;
+  }
+
+  // 提取路径部分
+  // cloud://env-id.bucket/products/xxx.jpg -> products/xxx.jpg
+  const match = fileID.match(/cloud:\/\/[^/]+\.[^/]+\/(.*)/);
+  return match ? match[1] : fileID;
+}
+
+/**
+ * 解析云存储 fileID 的各个部分
+ * @param {string} fileID - 云存储 fileID
+ * @returns {Object|null} 解析后的对象
+ */
+function parseCloudFileID(fileID) {
+  if (!fileID || !fileID.startsWith('cloud://')) {
+    return null;
+  }
+
+  // cloud://env-id.bucket/path/to/file.jpg
+  const match = fileID.match(/cloud:\/\/([^/]+)\.([^/]+)\/(.+)/);
+  if (!match) return null;
+
+  return {
+    env: match[1],
+    bucket: match[2],
+    path: match[3]
+  };
+}
+
 module.exports = {
   formatDate,
   formatPrice,
@@ -561,5 +659,9 @@ module.exports = {
   safeJSONParse,
   uniqueArray,
   groupBy,
-  timeAgo
+  timeAgo,
+  addImageTimestamp,
+  getProductImageUrl,
+  extractCloudPath,
+  parseCloudFileID
 };

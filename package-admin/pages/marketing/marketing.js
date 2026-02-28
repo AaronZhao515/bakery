@@ -57,6 +57,17 @@ Page({
     this.loadMemberLevels();
   },
 
+  onShow() {
+    // 检查管理员权限
+    const adminInfo = wx.getStorageSync('admin_info');
+    if (!adminInfo || !adminInfo.isAdmin) {
+      wx.redirectTo({
+        url: '/package-admin/pages/login/login'
+      });
+      return;
+    }
+  },
+
   onPullDownRefresh() {
     Promise.all([
       this.loadBanners(),
@@ -75,104 +86,58 @@ Page({
 
   // 加载轮播图
   async loadBanners() {
-    try {
-      const result = await wx.cloud.callFunction({
-        name: 'marketing',
-        data: {
-          action: 'getBanners'
-        }
-      });
-
-      if (result.result.code === 0) {
-        this.setData({
-          banners: result.result.data
-        });
-      }
-    } catch (error) {
-      console.error('加载轮播图失败:', error);
-      // 使用模拟数据
-      this.setData({
-        banners: [
-          { id: '1', image: '', linkType: 'product', linkTypeName: '商品详情', linkValue: 'product_001' },
-          { id: '2', image: '', linkType: 'category', linkTypeName: '商品分类', linkValue: 'bread' }
-        ]
-      });
-    }
+    // admin 云函数暂无轮播图功能，使用模拟数据
+    this.setData({
+      banners: [
+        { id: '1', image: '', linkType: 'product', linkTypeName: '商品详情', linkValue: 'product_001' },
+        { id: '2', image: '', linkType: 'category', linkTypeName: '商品分类', linkValue: 'bread' }
+      ]
+    });
   },
 
   // 加载优惠券
   async loadCoupons() {
     try {
       const result = await wx.cloud.callFunction({
-        name: 'marketing',
+        name: 'admin',
         data: {
-          action: 'getCoupons'
+          action: 'couponManage',
+          operation: 'list',
+          page: 1,
+          pageSize: 100
         }
       });
 
       if (result.result.code === 0) {
-        this.setData({
-          coupons: result.result.data
-        });
+        const coupons = result.result.data.list.map(item => ({
+          ...item,
+          id: item._id,
+          minAmount: item.minSpend,
+          statusText: this.getCouponStatusText(item)
+        }));
+        this.setData({ coupons });
       }
     } catch (error) {
       console.error('加载优惠券失败:', error);
-      // 使用模拟数据
-      this.setData({
-        coupons: [
-          {
-            id: '1',
-            name: '新用户专享券',
-            type: 'amount',
-            value: 10,
-            minAmount: 50,
-            totalCount: 1000,
-            receivedCount: 356,
-            usedCount: 128,
-            startTime: '2024-01-01',
-            endTime: '2024-12-31',
-            status: 'active',
-            statusText: '进行中'
-          },
-          {
-            id: '2',
-            name: '满100减20',
-            type: 'amount',
-            value: 20,
-            minAmount: 100,
-            totalCount: 500,
-            receivedCount: 280,
-            usedCount: 95,
-            startTime: '2024-01-15',
-            endTime: '2024-02-15',
-            status: 'active',
-            statusText: '进行中'
-          }
-        ]
-      });
+      this.setData({ coupons: [] });
     }
+  },
+
+  // 获取优惠券状态文本
+  getCouponStatusText(coupon) {
+    const now = new Date();
+    const startTime = new Date(coupon.startTime);
+    const endTime = new Date(coupon.endTime);
+    if (now < startTime) return '未开始';
+    if (now > endTime) return '已结束';
+    return '进行中';
   },
 
   // 加载会员等级
   async loadMemberLevels() {
-    try {
-      const result = await wx.cloud.callFunction({
-        name: 'marketing',
-        data: {
-          action: 'getMemberLevels'
-        }
-      });
-
-      if (result.result.code === 0) {
-        this.setData({
-          memberLevels: result.result.data
-        });
-      }
-    } catch (error) {
-      console.error('加载会员等级失败:', error);
-      // 使用模拟数据
-      this.setData({
-        memberLevels: [
+    // admin 云函数暂无会员等级功能，使用模拟数据
+    this.setData({
+      memberLevels: [
           {
             id: '1',
             name: '普通会员',
@@ -211,7 +176,6 @@ Page({
           }
         ]
       });
-    }
   },
 
   // ========== 轮播图操作 ==========
@@ -255,23 +219,10 @@ Page({
       confirmColor: '#f44336',
       success: async (res) => {
         if (res.confirm) {
-          try {
-            const result = await wx.cloud.callFunction({
-              name: 'marketing',
-              data: {
-                action: 'deleteBanner',
-                id
-              }
-            });
-
-            if (result.result.code === 0) {
-              wx.showToast({ title: '删除成功', icon: 'success' });
-              this.loadBanners();
-            }
-          } catch (error) {
-            console.error('删除轮播图失败:', error);
-            wx.showToast({ title: '删除失败', icon: 'none' });
-          }
+          // 本地删除轮播图（admin 云函数暂不支持）
+          const banners = this.data.banners.filter(b => b.id !== id);
+          this.setData({ banners });
+          wx.showToast({ title: '删除成功', icon: 'success' });
         }
       }
     });
@@ -286,12 +237,29 @@ Page({
         sourceType: ['album', 'camera']
       });
 
-      wx.showLoading({ title: '上传中' });
+      wx.showLoading({ title: '压缩上传中...' });
+
+      const file = res.tempFiles[0];
+      let uploadPath = file.tempFilePath;
+
+      // 压缩图片
+      try {
+        const compressedRes = await wx.compressImage({
+          src: file.tempFilePath,
+          quality: 75, // 压缩质量 0-100，75平衡画质和体积
+          compressedWidth: 1080 // 压缩后的最大宽度，高度自动等比缩放
+        });
+        uploadPath = compressedRes.tempFilePath;
+        console.log('轮播图压缩成功');
+      } catch (compressError) {
+        console.error('图片压缩失败，使用原图上传:', compressError);
+        // 压缩失败时使用原图
+      }
 
       const cloudPath = `banners/${Date.now()}_${Math.random().toString(36).substr(2)}.jpg`;
       const uploadRes = await wx.cloud.uploadFile({
         cloudPath,
-        filePath: res.tempFiles[0].tempFilePath
+        filePath: uploadPath
       });
 
       this.setData({
@@ -299,8 +267,10 @@ Page({
       });
 
       wx.hideLoading();
+      wx.showToast({ title: '上传成功', icon: 'success' });
     } catch (error) {
       console.error('上传图片失败:', error);
+      wx.hideLoading();
       wx.showToast({ title: '上传失败', icon: 'none' });
     }
   },
@@ -323,9 +293,9 @@ Page({
     });
   },
 
-  // 保存轮播图
+  // 保存轮播图（本地模式，admin 云函数暂不支持）
   async saveBanner() {
-    const { bannerForm, editingBannerId } = this.data;
+    const { bannerForm, editingBannerId, banners } = this.data;
 
     if (!bannerForm.image) {
       wx.showToast({ title: '请上传轮播图图片', icon: 'none' });
@@ -335,20 +305,23 @@ Page({
     wx.showLoading({ title: '保存中' });
 
     try {
-      const result = await wx.cloud.callFunction({
-        name: 'marketing',
-        data: {
-          action: editingBannerId ? 'updateBanner' : 'createBanner',
-          id: editingBannerId,
-          data: bannerForm
+      if (editingBannerId) {
+        // 更新现有轮播图
+        const index = banners.findIndex(b => b.id === editingBannerId);
+        if (index >= 0) {
+          banners[index] = { ...banners[index], ...bannerForm };
         }
-      });
-
-      if (result.result.code === 0) {
-        wx.showToast({ title: '保存成功', icon: 'success' });
-        this.hideModal();
-        this.loadBanners();
+      } else {
+        // 添加新轮播图
+        banners.push({
+          id: Date.now().toString(),
+          ...bannerForm
+        });
       }
+
+      this.setData({ banners });
+      wx.showToast({ title: '保存成功', icon: 'success' });
+      this.hideModal();
     } catch (error) {
       console.error('保存轮播图失败:', error);
       wx.showToast({ title: '保存失败', icon: 'none' });
@@ -407,10 +380,11 @@ Page({
         if (res.confirm) {
           try {
             const result = await wx.cloud.callFunction({
-              name: 'marketing',
+              name: 'admin',
               data: {
-                action: 'deleteCoupon',
-                id
+                action: 'couponManage',
+                operation: 'delete',
+                couponId: id
               }
             });
 
@@ -485,17 +459,26 @@ Page({
     wx.showLoading({ title: '保存中' });
 
     try {
+      const saveData = {
+        name: couponForm.name.trim(),
+        type: couponForm.type,
+        value: parseFloat(couponForm.value),
+        minSpend: parseFloat(couponForm.minAmount) || 0,
+        totalCount: parseInt(couponForm.totalCount) || 0,
+        limitPerUser: 1,
+        startTime: couponForm.startTime,
+        endTime: couponForm.endTime,
+        scope: 'all',
+        description: ''
+      };
+
       const result = await wx.cloud.callFunction({
-        name: 'marketing',
+        name: 'admin',
         data: {
-          action: editingCouponId ? 'updateCoupon' : 'createCoupon',
-          id: editingCouponId,
-          data: {
-            ...couponForm,
-            value: parseFloat(couponForm.value),
-            minAmount: parseFloat(couponForm.minAmount) || 0,
-            totalCount: parseInt(couponForm.totalCount) || 0
-          }
+          action: 'couponManage',
+          operation: editingCouponId ? 'update' : 'create',
+          couponId: editingCouponId,
+          ...saveData
         }
       });
 
@@ -503,6 +486,8 @@ Page({
         wx.showToast({ title: '保存成功', icon: 'success' });
         this.hideModal();
         this.loadCoupons();
+      } else {
+        wx.showToast({ title: result.result.message || '保存失败', icon: 'none' });
       }
     } catch (error) {
       console.error('保存优惠券失败:', error);

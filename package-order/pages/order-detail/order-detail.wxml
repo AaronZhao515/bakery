@@ -23,10 +23,16 @@
   <!-- 页面内容 -->
   <scroll-view class="page-content" scroll-y enhanced show-scrollbar="{{false}}" wx:if="{{!isLoading && order}}">
 
+    <!-- 不能取消时的提示（制作中/配送中）- 放在顶部 -->
+    <view class="cannot-cancel-tip-top" wx:if="{{order.cannotCancelReason}}">
+      <image class="tip-icon-svg" src="{{icons.info}}" mode="aspectFit"/>
+      <text class="tip-text">{{order.cannotCancelReason}}</text>
+    </view>
+
     <!-- 订单状态卡片 -->
     <view class="status-card">
       <view class="status-header" style="background: {{order.statusInfo.bgColor}};">
-        <text class="status-icon">{{order.statusInfo.icon}}</text>
+        <image class="status-icon" src="{{order.statusInfo.icon}}" mode="aspectFit" />
         <view class="status-info">
           <text class="status-text" style="color: {{order.statusInfo.color}};">{{order.statusInfo.text}}</text>
           <text class="status-desc" wx:if="{{order.status === 0}}">请在30分钟内完成支付</text>
@@ -66,7 +72,7 @@
     <view class="info-card">
       <view class="info-header">
         <view class="info-icon-wrap" style="background: {{order.deliveryType === 1 ? '#E8F4FD' : '#FFF8EE'}};">
-          <text class="info-icon">{{order.deliveryType === 1 ? '🚚' : '🏪'}}</text>
+          <image class="info-icon" src="{{order.deliveryType === 1 ? icons.truckFill : icons.storeFill}}" mode="aspectFit" />
         </view>
         <view class="info-title-wrap">
           <text class="info-title">{{order.deliveryType === 1 ? '配送上门' : '到店自取'}}</text>
@@ -196,7 +202,7 @@
   <view class="action-bar" wx:if="{{!isLoading && order && (order.canPay || order.canCancel)}}">
     <view class="action-content">
       <!-- 取消按钮 - 所有可取消状态都显示 -->
-      <button class="action-btn secondary" bindtap="onCancelOrder">取消订单</button>
+      <button class="action-btn secondary {{order.canCancel ? '' : 'disabled'}}" bindtap="{{order.canCancel ? 'onCancelOrder' : ''}}">取消订单</button>
       <!-- 待支付状态显示支付按钮 -->
       <block wx:if="{{order.canPay}}">
         <!-- 积分足够：显示积分支付按钮 -->

@@ -43,12 +43,19 @@
         "pages/dashboard/dashboard",
         "pages/product-manage/product-manage",
         "pages/order-manage/order-manage",
+        "pages/order-detail/order-detail",
         "pages/statistics/statistics",
         "pages/login/login",
         "pages/product-list/product-list",
         "pages/product-edit/product-edit",
         "pages/stock/stock",
-        "pages/marketing/marketing"
+        "pages/marketing/marketing",
+        "pages/coupon-manage/coupon-manage",
+        "pages/points-manage/points-manage",
+        "pages/delivery-manage/delivery-manage",
+        "pages/user-manage/user-manage",
+        "pages/user-edit/user-edit",
+        "pages/image-tools/image-tools"
       ]
     }
   ],

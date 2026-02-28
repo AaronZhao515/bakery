@@ -69,12 +69,16 @@ Page({
     // 清除临时存储的选中优惠券和标记
     wx.removeStorageSync('selectedCouponForOrder');
     wx.removeStorageSync('couponSelectionMade');
+    // 清除临时存储的选中地址
+    wx.removeStorageSync('selectedAddressForOrder');
   },
 
   onShow() {
     console.log('[订单确认] 页面显示');
     // 检查是否有从优惠券页面返回的选中优惠券
     this.checkSelectedCouponFromStorage();
+    // 检查是否有从地址页面返回的选中地址
+    this.checkSelectedAddressFromStorage();
   },
 
   /**
@@ -143,6 +147,31 @@ Page({
       // 用户选择了"不使用优惠券"
       console.log('[订单确认] 用户选择不使用优惠券');
       this.cancelSelectCoupon();
+    }
+  },
+
+  /**
+   * 检查从地址页面返回的选中地址
+   */
+  checkSelectedAddressFromStorage() {
+    const selectedAddress = wx.getStorageSync('selectedAddressForOrder');
+    if (selectedAddress) {
+      console.log('[订单确认] 从地址页面返回，选中地址:', selectedAddress);
+
+      // 格式化地址数据 - 只显示详细地址（地区已隐藏）
+      const formattedAddress = {
+        id: selectedAddress.id,
+        name: selectedAddress.name,
+        phone: selectedAddress.phone,
+        address: selectedAddress.detail || selectedAddress.address || ''
+      };
+
+      this.setData({
+        selectedAddress: formattedAddress
+      });
+
+      // 清除存储的选中地址
+      wx.removeStorageSync('selectedAddressForOrder');
     }
   },
 
@@ -219,11 +248,11 @@ Page({
         id: userCouponId,
         couponId: item.couponId,
         title: coupon.title || coupon.name || '优惠券',
-        desc: coupon.desc || coupon.description || `满${coupon.minAmount || 0}元可用`,
+        desc: coupon.desc || coupon.description || `满${coupon.minAmount || coupon.minSpend || 0}元可用`,
         amount: parseFloat(discountAmount),
         displayValue,
         displayType,
-        minAmount: coupon.minAmount || 0,
+        minAmount: coupon.minAmount || coupon.minSpend || 0,
         endTime: coupon.endTime,
         endTimeStr: this.formatCouponTime(coupon.endTime),
         // 不可用原因
@@ -295,7 +324,8 @@ Page({
               id: defaultAddress._id,
               name: defaultAddress.name,
               phone: defaultAddress.phone,
-              address: `${defaultAddress.province}${defaultAddress.city}${defaultAddress.district}${defaultAddress.address}`
+              // 只显示详细地址（地区已隐藏）
+              address: defaultAddress.address || ''
             }
           });
         }

@@ -165,7 +165,7 @@ async function create(openid, data) {
       productId: item.productId,
       specId: item.specId || '',
       name: product.name,
-      image: product.images && product.images[0] ? product.images[0] : '',
+      // 不存储图片，实时从 products 获取
       specName: specName,
       price: price,
       quantity: item.quantity,
@@ -208,8 +208,9 @@ async function create(openid, data) {
           const coupon = couponResult.data
           const now = new Date()
 
-          // 检查有效期和最低消费
-          if (now >= new Date(coupon.startTime) && now <= new Date(coupon.endTime) && totalAmount >= coupon.minAmount) {
+          // 检查有效期和最低消费（兼容 minSpend 和 minAmount 两种字段名）
+          const minAmount = coupon.minSpend || coupon.minAmount || 0
+          if (now >= new Date(coupon.startTime) && now <= new Date(coupon.endTime) && totalAmount >= minAmount) {
             if (coupon.type === 0 || coupon.discountType === 'amount') {
               // 满减券
               discountAmount = coupon.amount
@@ -367,31 +368,69 @@ async function create(openid, data) {
  * @param {String} openid - 用户openid
  * @param {Object} data - 请求参数
  * @param {Number} data.status - 订单状态
+ * @param {Object} data.filter - 复合筛选条件 { status, deliveryType, statusList }
  * @param {Number} data.page - 页码
  * @param {Number} data.pageSize - 每页数量
  */
 async function getList(openid, data) {
-  const { status, page = 1, pageSize = 10 } = data
+  const { status, filter, startDate, endDate, page = 1, pageSize = 10 } = data
 
   const where = {
     userId: openid
   }
 
-  if (status !== undefined) {
+  // 支持复合筛选条件
+  if (filter) {
+    if (filter.status !== undefined) {
+      where.status = filter.status
+    }
+    if (filter.statusList && Array.isArray(filter.statusList)) {
+      where.status = _.in(filter.statusList)
+    }
+    if (filter.deliveryType !== undefined) {
+      where.deliveryType = filter.deliveryType
+    }
+  } else if (status !== undefined) {
     where.status = status
   }
 
-  // 查询总数
-  const countResult = await db.collection('orders').where(where).count()
-  const total = countResult.total
+  // 支持日期范围筛选
+  if (startDate || endDate) {
+    const timeCondition = {}
+    if (startDate) {
+      timeCondition.$gte = new Date(startDate)
+    }
+    if (endDate) {
+      timeCondition.$lte = new Date(endDate)
+    }
+    where.createTime = timeCondition
+  }
 
-  // 查询列表
-  const listResult = await db.collection('orders')
-    .where(where)
-    .orderBy('createTime', 'desc')
-    .skip((page - 1) * pageSize)
-    .limit(pageSize)
-    .get()
+  // 查询总数
+  let total = 0
+  try {
+    const countResult = await db.collection('orders').where(where).count()
+    total = countResult.total
+  } catch (countErr) {
+    console.error('查询订单数量失败:', countErr)
+    total = 0
+  }
+
+  // 查询列表 - 添加最大限制防止超时
+  const safePageSize = Math.min(pageSize, 100)
+  let listResult = { data: [] }
+
+  try {
+    listResult = await db.collection('orders')
+      .where(where)
+      .orderBy('createTime', 'desc')
+      .skip((page - 1) * safePageSize)
+      .limit(safePageSize)
+      .get()
+  } catch (listErr) {
+    console.error('查询订单列表失败:', listErr)
+    throw listErr
+  }
 
   return {
     code: 0,
@@ -465,14 +504,21 @@ async function cancel(openid, data) {
     return { code: -1, message: '无权限操作' }
   }
 
-  // 已完成、已取消、退款中、已退款的订单不能取消
+  // 制作中、配送中、已完成、已取消、退款中、已退款的订单不能取消
+  // 制作中后需联系客服取消
   const cannotCancelStatuses = [
-    ORDER_STATUS.COMPLETED,
-    ORDER_STATUS.CANCELLED,
-    ORDER_STATUS.REFUNDING,
-    ORDER_STATUS.REFUNDED
+    ORDER_STATUS.PREPARING,    // 2 制作中
+    ORDER_STATUS.DELIVERING,   // 3 配送中
+    ORDER_STATUS.COMPLETED,    // 4 已完成
+    ORDER_STATUS.CANCELLED,    // -1 已取消
+    ORDER_STATUS.REFUNDING,    // -2 退款中
+    ORDER_STATUS.REFUNDED      // -3 已退款
   ]
   if (cannotCancelStatuses.includes(order.status)) {
+    // 制作中和配送中给用户特殊提示
+    if (order.status === ORDER_STATUS.PREPARING || order.status === ORDER_STATUS.DELIVERING) {
+      return { code: -1, message: '商品已经制作，如需取消，请联系客服' }
+    }
     return { code: -1, message: '订单状态不允许取消' }
   }
 

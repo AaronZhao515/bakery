@@ -47,8 +47,8 @@
             <view class="default-badge" wx:if="{{item.isDefault}}">默认</view>
           </view>
 
-          <!-- 完整地址 -->
-          <text class="address-text">{{item.province}} {{item.city}} {{item.district}} {{item.detail}}</text>
+          <!-- 完整地址 (地区部分已隐藏) -->
+          <text class="address-text">{{item.detail}}</text>
         </view>
 
         <!-- 操作栏 -->

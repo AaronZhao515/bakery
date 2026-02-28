@@ -27,6 +27,9 @@ Page({
     // 页面来源，登录成功后返回
     from: '',
 
+    // 是否显示传统登录方式
+    canUseOldLogin: false,
+
     // 图标
     icons: icons
   },
@@ -76,7 +79,109 @@ Page({
   },
 
   /**
-   * 微信一键登录
+   * 手机号一键登录
+   * 通过微信 getPhoneNumber 能力获取手机号，并作为用户唯一标识
+   */
+  async onPhoneLogin(e) {
+    console.log('[登录] 手机号登录事件:', e);
+
+    if (this.data.isLoading) return;
+
+    // 检查是否同意协议
+    if (!this.data.agreed) {
+      util.showToast('请先同意用户协议', 'none');
+      return;
+    }
+
+    const { code, errMsg } = e.detail;
+
+    // 检查用户是否拒绝授权
+    if (!code || (errMsg && errMsg.includes('deny'))) {
+      util.showToast('需要授权手机号才能登录', 'none');
+      return;
+    }
+
+    this.setData({ isLoading: true });
+    wx.showLoading({ title: '登录中...' });
+
+    try {
+      // 调用手机号一键登录
+      const result = await auth.doLoginWithPhone({
+        phoneCode: code,
+        userInfo: {
+          nickName: this.data.userInfo.nickName || '',
+          avatarUrl: this.data.userInfo.avatarUrl || ''
+        }
+      });
+
+      console.log('[登录] 手机号登录结果:', result);
+      wx.hideLoading();
+
+      if (result.success) {
+        const isNewUser = result.isNewUser;
+        util.showToast(isNewUser ? '注册成功' : '登录成功', 'success');
+
+        // 更新页面状态
+        this.setData({
+          isLogin: true,
+          userInfo: result.data.userInfo || {},
+          'userInfo.phoneNumber': result.data.phone || ''
+        });
+
+        // 同步更新全局 store
+        const app = getApp();
+        if (app.store && app.store.userStore) {
+          app.store.userStore.update({
+            isLogin: true,
+            userInfo: result.data.userInfo || result.data,
+            phone: result.data.phone,
+            openid: result.data.openid,
+            role: result.data.role || 'customer'
+          });
+          console.log('[登录] 已同步更新全局 store');
+        }
+
+        // 延迟返回
+        setTimeout(() => {
+          this.goBack();
+        }, 1500);
+      } else {
+        util.showToast(result.error || '登录失败', 'none');
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('[登录] 手机号登录失败:', error);
+      util.showToast('登录失败，请重试', 'none');
+    } finally {
+      this.setData({ isLoading: false });
+    }
+  },
+
+  /**
+   * 获取微信用户信息（昵称、头像）
+   */
+  async onGetUserProfile() {
+    try {
+      const result = await auth.getWxUserProfile();
+      console.log('[登录] 获取用户信息结果:', result);
+
+      if (result.success) {
+        this.setData({
+          'userInfo.nickName': result.data.nickName,
+          'userInfo.avatarUrl': result.data.avatarUrl
+        });
+        util.showToast('获取成功', 'success');
+      } else {
+        util.showToast(result.error || '获取失败', 'none');
+      }
+    } catch (error) {
+      console.error('[登录] 获取用户信息失败:', error);
+      util.showToast('获取失败', 'none');
+    }
+  },
+
+  /**
+   * 微信传统登录（备用方式）
    */
   async onWechatLogin() {
     if (this.data.isLoading) return;
@@ -130,18 +235,56 @@ Page({
   },
 
   /**
-   * 选择头像
+   * 选择头像 - 使用微信2022新版 chooseAvatar
    */
   onChooseAvatar(e) {
     console.log('[登录] 选择头像:', e);
     const { avatarUrl } = e.detail;
 
+    if (!avatarUrl) {
+      console.log('[登录] 未选择头像');
+      return;
+    }
+
     this.setData({
       'userInfo.avatarUrl': avatarUrl
     });
 
-    // 上传到云存储并更新用户信息
-    this.uploadAvatar(avatarUrl);
+    // 可选：上传到云存储
+    // this.uploadAvatar(avatarUrl);
+
+    wx.showToast({
+      title: '头像已选择',
+      icon: 'success',
+      duration: 1500
+    });
+  },
+
+  /**
+   * 昵称输入变化 - 使用微信2022新版 nickname input
+   */
+  onNickNameChange(e) {
+    console.log('[登录] 昵称输入:', e);
+    const { value } = e.detail;
+
+    this.setData({
+      'userInfo.nickName': value
+    });
+  },
+
+  /**
+   * 昵称审核回调 - 微信自动审核昵称合规性
+   */
+  onNickNameReview(e) {
+    console.log('[登录] 昵称审核:', e);
+    const { pass, timeout } = e.detail;
+
+    if (!pass && !timeout) {
+      wx.showToast({
+        title: '昵称可能不合规，请修改',
+        icon: 'none'
+      });
+    }
   },
 
   /**
@@ -149,11 +292,25 @@ Page({
    */
   async uploadAvatar(filePath) {
     try {
+      // 压缩头像图片
+      let uploadPath = filePath;
+      try {
+        const compressedRes = await wx.compressImage({
+          src: filePath,
+          quality: 70, // 头像质量可以稍低
+          compressedWidth: 400 // 头像尺寸较小
+        });
+        uploadPath = compressedRes.tempFilePath;
+        console.log('头像压缩成功');
+      } catch (compressError) {
+        console.error('头像压缩失败，使用原图:', compressError);
+      }
+
       const cloudPath = `avatars/${Date.now()}-${Math.random().toString(36).substr(2, 6)}.jpg`;
 
       const uploadResult = await wx.cloud.uploadFile({
         cloudPath: cloudPath,
-        filePath: filePath
+        filePath: uploadPath
       });
 
       console.log('[登录] 头像上传成功:', uploadResult);
@@ -225,7 +382,7 @@ Page({
   },
 
   /**
-   * 获取手机号
+   * 绑定手机号（已登录用户）
    * 支持新版 code 方式（推荐）和旧版 encryptedData 方式
    */
   async onGetPhoneNumber(e) {
@@ -317,7 +474,7 @@ Page({
    */
   onPrivacyPolicyTap() {
     wx.navigateTo({
-      url: '/pages/webview/webview?url=' + encodeURIComponent('https://example.com/privacy-policy')
+      url: '/package-user/pages/privacy/privacy'
     });
   },
 

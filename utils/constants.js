@@ -28,6 +28,15 @@ const ORDER_STATUS = {
     bgColor: '#FFF8EE',
     icon: 'dollar-sign'
   },
+  // 已支付
+  PAID: {
+    code: 11,
+    name: 'paid',
+    label: '已支付',
+    color: '#4ECDC4',
+    bgColor: '#E0F7FA',
+    icon: 'check-circle'
+  },
   // 待确认
   PENDING_CONFIRM: {
     code: 15,
@@ -125,7 +134,7 @@ const ORDER_STATUS = {
  * @param {number} code - 状态码
  * @returns {Object} 订单状态对象
  */
-function getOrderStatusByCode(code) {
+function getOrderStatusByCode(code, deliveryType) {
   // 处理云函数状态码与 constants 状态码的映射
   const statusMap = {
     0: ORDER_STATUS.PENDING_PAYMENT,   // 待支付
@@ -138,6 +147,11 @@ function getOrderStatusByCode(code) {
     '-2': ORDER_STATUS.REFUNDING,      // 退款中
     '-3': ORDER_STATUS.REFUNDED        // 已退款
   };
+
+  // status=1(已支付) 时，根据 deliveryType 区分待自取和待配送
+  if (code === 1 && deliveryType === 0) {
+    return ORDER_STATUS.PENDING_PICKUP;
+  }
 
   return statusMap[code] || ORDER_STATUS.PENDING_PAYMENT;
 }

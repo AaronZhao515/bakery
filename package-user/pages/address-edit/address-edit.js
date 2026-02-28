@@ -259,9 +259,10 @@ Page({
       errors.phone = '请填写正确的手机号';
     }
 
-    if (!form.province || !form.city || !form.district) {
-      errors.province = '请选择所在地区';
-    }
+    // 地区选择暂时隐藏，不验证
+    // if (!form.province || !form.city || !form.district) {
+    //   errors.province = '请选择所在地区';
+    // }
 
     if (!form.detail.trim()) {
       errors.detail = '请填写详细地址';
@@ -291,9 +292,10 @@ Page({
       const addressData = {
         name: form.name,
         phone: form.phone,
-        province: form.province,
-        city: form.city,
-        district: form.district,
+        // 地区暂时隐藏，使用默认值
+        province: form.province || '上海市',
+        city: form.city || '上海市',
+        district: form.district || '浦东新区',
         address: form.detail,
         isDefault: form.isDefault
       };

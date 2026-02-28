@@ -1,0 +1,144 @@
+<!-- 用户管理页面 -->
+<view class="user-manage-container">
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <view class="header-content">
+      <text class="page-title">用户管理</text>
+      <text class="page-subtitle">共 {{total}} 位用户</text>
+    </view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-section">
+    <view class="search-box {{searchFocus ? 'focus' : ''}}">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        type="text"
+        placeholder="搜索昵称、手机号"
+        value="{{keyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearchConfirm"
+        bindfocus="onSearchFocus"
+        bindblur="onSearchBlur"
+      />
+      <view class="search-clear" wx:if="{{keyword}}" bindtap="clearSearch">
+        <text>×</text>
+      </view>
+    </view>
+    <view class="add-btn" bindtap="showAddUser">
+      <text class="add-icon">+</text>
+      <text class="add-text">添加</text>
+    </view>
+  </view>
+
+  <!-- 角色筛选 -->
+  <view class="role-filter-section">
+    <scroll-view class="role-scroll" scroll-x enable-flex>
+      <view class="role-list">
+        <view
+          class="role-item {{currentRole === item.value ? 'active' : ''}}"
+          wx:for="{{roleOptions}}"
+          wx:key="value"
+          data-role="{{item.value}}"
+          bindtap="switchRoleFilter"
+        >
+          {{item.name}}
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 状态筛选 -->
+  <view class="role-filter-section">
+    <scroll-view class="role-scroll" scroll-x enable-flex>
+      <view class="role-list">
+        <view
+          class="role-item {{currentStatus === item.value ? 'active' : ''}}"
+          wx:for="{{statusOptions}}"
+          wx:key="value"
+          data-status="{{item.value}}"
+          bindtap="switchStatusFilter"
+        >
+          {{item.name}}
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 用户列表 -->
+  <view class="user-list">
+    <view
+      class="user-card"
+      wx:for="{{users}}"
+      wx:key="_id"
+      data-id="{{item._id}}"
+      bindtap="showEditUser"
+    >
+      <!-- 用户信息 -->
+      <view class="user-main">
+        <image class="user-avatar {{item.status === 'disabled' ? 'disabled' : ''}}" src="{{item.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"/>
+        <view class="user-info">
+          <view class="user-name-row">
+            <text class="user-name {{item.status === 'disabled' ? 'disabled' : ''}}">{{item.nickName || '未设置昵称'}}</text>
+            <view class="role-tag {{item.isAdmin === true ? 'admin' : 'user'}}">
+              {{item.isAdmin === true ? '管理员' : '普通用户'}}
+            </view>
+            <view class="status-tag {{item.status === 'active' ? 'active' : 'disabled'}}">
+              {{item.status === 'active' ? '正常' : '已禁用'}}
+            </view>
+          </view>
+          <text class="user-phone">{{item.phone || '未绑定手机'}}</text>
+          <view class="user-stats-row">
+            <text class="user-stat">积分: {{item.points || 0}}</text>
+            <text class="user-stat-dot">·</text>
+            <text class="user-stat">余额: ¥{{item.balance || 0}}</text>
+          </view>
+          <text class="user-time">注册: {{item.createTime}}</text>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="user-actions" catchtap="preventBubble">
+        <button
+          class="action-btn secondary"
+          catchtap="makePhoneCall"
+          data-phone="{{item.phone}}"
+          disabled="{{!item.phone}}"
+        >
+          拨打电话
+        </button>
+        <button
+          class="action-btn {{item.status === 'disabled' ? 'success' : 'warning'}}"
+          catchtap="toggleUserStatus"
+          data-id="{{item._id}}"
+          data-status="{{item.status}}"
+          data-name="{{item.nickName}}"
+        >
+          {{item.status === 'disabled' ? '启用' : '禁用'}}
+        </button>
+        <button
+          class="action-btn primary"
+          catchtap="showEditUser"
+          data-id="{{item._id}}"
+        >
+          编辑
+        </button>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{users.length === 0 && !isLoading}}">
+      <text class="empty-icon">👥</text>
+      <text class="empty-text">暂无用户数据</text>
+      <text class="empty-subtext">{{keyword ? '换个关键词试试' : '用户将显示在这里'}}</text>
+    </view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{users.length > 0}}">
+    <text wx:if="{{isLoading}}">加载中...</text>
+    <text wx:elif="{{hasMore}}">上拉加载更多</text>
+    <text wx:else>没有更多用户了</text>
+  </view>
+</view>

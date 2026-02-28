@@ -1,6 +1,7 @@
 /**
  * 用户相关云函数
  * - login: 用户登录（获取openid）
+ * - loginWithPhone: 手机号一键登录
  * - getInfo: 获取用户信息
  * - updateInfo: 更新用户信息
  * - getPhone: 获取用户手机号
@@ -18,7 +19,7 @@ const _ = db.command
 exports.main = async (event, context) => {
   const { action, data = {} } = event
   const { OPENID, UNIONID } = cloud.getWXContext()
-  
+
   if (!OPENID) {
     return { code: -1, message: '获取用户身份失败' }
   }
@@ -27,6 +28,8 @@ exports.main = async (event, context) => {
     switch (action) {
       case 'login':
         return await login(OPENID, UNIONID, data)
+      case 'loginWithPhone':
+        return await loginWithPhone(OPENID, UNIONID, data)
       case 'checkLogin':
         return await checkLogin(OPENID, data.token)
       case 'getInfo':
@@ -37,6 +40,7 @@ exports.main = async (event, context) => {
       case 'updateProfile':
         return await updateInfo(OPENID, data)
       case 'getPhone':
+      case 'getPhoneNumber':
         return await getPhone(data)
       case 'logout':
         return await logout(OPENID)
@@ -125,6 +129,149 @@ function generateToken(openid) {
   const timestamp = Date.now()
   const random = Math.random().toString(36).substr(2, 8)
   return `${openid}_${timestamp}_${random}`
+}
+
+/**
+ * 手机号一键登录
+ * @param {String} openid - 用户openid
+ * @param {String} unionid - 用户unionid
+ * @param {Object} data - 请求参数
+ * @param {String} data.phoneCode - 手机号获取凭证
+ * @param {Object} data.userInfo - 用户信息（昵称、头像）
+ */
+async function loginWithPhone(openid, unionid, data) {
+  const { phoneCode, userInfo = {} } = data
+
+  if (!phoneCode) {
+    return { code: -1, message: '手机号授权凭证不能为空' }
+  }
+
+  try {
+    // 1. 获取手机号
+    const phoneResult = await cloud.openapi.phonenumber.getPhoneNumber({
+      code: phoneCode
+    })
+
+    if (!phoneResult || !phoneResult.phoneNumber) {
+      return { code: -1, message: '获取手机号失败' }
+    }
+
+    const phoneNumber = phoneResult.phoneNumber
+    const purePhoneNumber = phoneResult.purePhoneNumber || phoneNumber
+    const countryCode = phoneResult.countryCode || '86'
+
+    const now = db.serverDate()
+    const token = generateToken(openid)
+    const expireTime = Date.now() + 7 * 24 * 60 * 60 * 1000 // 7天有效期
+
+    // 2. 查询手机号是否已存在
+    const userResult = await db.collection('users')
+      .where({
+        phone: purePhoneNumber
+      })
+      .get()
+
+    let userId
+    let isNewUser = false
+    let finalUserInfo = {}
+
+    if (userResult.data.length > 0) {
+      // 用户已存在，更新信息
+      const user = userResult.data[0]
+      userId = user._id
+
+      const updateData = {
+        openid: openid,
+        updateTime: now,
+        lastLoginTime: now,
+        token: token,
+        tokenExpireTime: expireTime
+      }
+
+      // 更新用户信息（如果有提供）
+      if (userInfo.nickName) {
+        updateData.nickName = userInfo.nickName
+      }
+      if (userInfo.avatarUrl) {
+        updateData.avatarUrl = userInfo.avatarUrl
+      }
+
+      // 合并现有信息
+      finalUserInfo = {
+        userId: userId,
+        nickName: userInfo.nickName || user.nickName || '',
+        avatarUrl: userInfo.avatarUrl || user.avatarUrl || '',
+        phone: purePhoneNumber,
+        memberLevel: user.memberLevel || 0,
+        points: user.points || 0
+      }
+
+      await db.collection('users').doc(userId).update({
+        data: updateData
+      })
+
+      console.log('[User] 已有用户登录:', purePhoneNumber)
+    } else {
+      // 新用户，创建用户记录
+      isNewUser = true
+
+      const newUser = {
+        phone: purePhoneNumber,
+        openid: openid,
+        unionid: unionid || '',
+        nickName: userInfo.nickName || '',
+        avatarUrl: userInfo.avatarUrl || '',
+        memberLevel: 0,
+        points: 0,
+        balance: 0,
+        isAdmin: false,
+        token: token,
+        tokenExpireTime: expireTime,
+        createTime: now,
+        updateTime: now,
+        lastLoginTime: now
+      }
+
+      const addResult = await db.collection('users').add({
+        data: newUser
+      })
+
+      userId = addResult._id
+      finalUserInfo = {
+        userId: userId,
+        nickName: newUser.nickName,
+        avatarUrl: newUser.avatarUrl,
+        phone: purePhoneNumber,
+        memberLevel: 0,
+        points: 0
+      }
+
+      console.log('[User] 新用户注册:', purePhoneNumber)
+    }
+
+    // 3. 返回登录结果
+    return {
+      code: 0,
+      message: isNewUser ? '注册成功' : '登录成功',
+      data: {
+        userId: userId,
+        phone: purePhoneNumber,
+        openid: openid,
+        token: token,
+        expireTime: expireTime,
+        isNewUser: isNewUser,
+        role: 'customer',
+        userInfo: finalUserInfo
+      }
+    }
+
+  } catch (err) {
+    console.error('[User] 手机号登录失败:', err)
+    return {
+      code: -1,
+      message: '登录失败: ' + (err.message || '未知错误')
+    }
+  }
 }
 
 async function login(openid, unionid, data) {

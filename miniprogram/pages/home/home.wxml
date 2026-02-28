@@ -4,7 +4,7 @@
   <view class="custom-nav" style="height: {{navBarHeight}}px; padding-top: {{statusBarHeight}}px;">
     <view class="nav-content">
       <view class="location" bindtap="onLocationTap">
-        <text class="location-icon">📍</text>
+        <image class="location-icon" src="{{icons.mapPin}}" mode="aspectFit"/>
         <text class="location-text">{{location || '请选择位置'}}</text>
         <text class="location-arrow">▼</text>
       </view>
@@ -14,7 +14,7 @@
   <!-- 搜索栏 -->
   <view class="search-section" style="margin-top: {{navBarHeight}}px;">
     <view class="search-bar" bindtap="onSearchTap">
-      <text class="search-icon">🔍</text>
+      <image class="search-icon-svg" src="{{icons.search}}" mode="aspectFit"/>
       <text class="search-placeholder">搜索美味的面包...</text>
     </view>
   </view>
@@ -36,7 +36,7 @@
   <view class="quick-entry-section card">
     <view class="quick-entry-item" wx:for="{{quickEntries}}" wx:key="id" bindtap="onQuickEntryTap" data-item="{{item}}">
       <view class="quick-entry-icon" style="background: {{item.bgColor}};">
-        <text>{{item.icon}}</text>
+        <image class="quick-entry-icon-img" src="{{item.icon}}" mode="aspectFit"/>
       </view>
       <text class="quick-entry-text">{{item.name}}</text>
     </view>
@@ -50,23 +50,23 @@
     </view>
     <view class="delivery-options">
       <view class="delivery-option {{deliveryType === 'pickup' ? 'active' : ''}}" bindtap="onDeliveryTypeChange" data-type="pickup">
-        <view class="option-icon">🏪</view>
+        <image class="option-icon" src="{{icons.storeFill}}" mode="aspectFit"/>
         <view class="option-info">
           <text class="option-name">预定自取</text>
           <text class="option-desc">到店即取 免排队</text>
         </view>
         <view class="option-check {{deliveryType === 'pickup' ? 'active' : ''}}">
-          <text wx:if="{{deliveryType === 'pickup'}}">✓</text>
+          <image wx:if="{{deliveryType === 'pickup'}}" class="check-icon" src="{{icons.check}}" mode="aspectFit"/>
         </view>
       </view>
       <view class="delivery-option {{deliveryType === 'delivery' ? 'active' : ''}}" bindtap="onDeliveryTypeChange" data-type="delivery">
-        <view class="option-icon">🚚</view>
+        <image class="option-icon" src="{{icons.truckFill}}" mode="aspectFit"/>
         <view class="option-info">
           <text class="option-name">预定配送</text>
           <text class="option-desc">新鲜直达 准时送达</text>
         </view>
         <view class="option-check {{deliveryType === 'delivery' ? 'active' : ''}}">
-          <text wx:if="{{deliveryType === 'delivery'}}">✓</text>
+          <image wx:if="{{deliveryType === 'delivery'}}" class="check-icon" src="{{icons.check}}" mode="aspectFit"/>
         </view>
       </view>
     </view>
@@ -76,7 +76,7 @@
   <view class="recommend-section">
     <view class="section-header">
       <view class="section-title">
-        <text class="title-icon">⭐</text>
+        <image class="title-icon" src="{{icons.star}}" mode="aspectFit"/>
         <text>今日推荐</text>
       </view>
       <view class="section-more" bindtap="onMoreTap">

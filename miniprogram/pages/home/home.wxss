@@ -33,7 +33,8 @@
 }
 
 .location-icon {
-  font-size: 24rpx;
+  width: 28rpx;
+  height: 28rpx;
   margin-right: 8rpx;
 }
 
@@ -69,10 +70,10 @@
   box-shadow: var(--shadow);
 }
 
-.search-icon {
-  font-size: 28rpx;
+.search-icon-svg {
+  width: 32rpx;
+  height: 32rpx;
   margin-right: 16rpx;
-  color: var(--text-light);
 }
 
 .search-placeholder {
@@ -143,10 +144,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 44rpx;
   margin-bottom: 16rpx;
   box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
+}
+
+.quick-entry-icon-img {
+  width: 48rpx;
+  height: 48rpx;
 }
 
 .quick-entry-item:active .quick-entry-icon {
@@ -208,7 +213,8 @@
 }
 
 .option-icon {
-  font-size: 48rpx;
+  width: 48rpx;
+  height: 48rpx;
   margin-right: 20rpx;
 }
 
@@ -238,9 +244,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22rpx;
-  color: var(--white);
   transition: all 0.3s ease;
+}
+
+.option-check .check-icon {
+  width: 24rpx;
+  height: 24rpx;
 }
 
 .option-check.active {
@@ -269,6 +278,8 @@
 }
 
 .title-icon {
+  width: 36rpx;
+  height: 36rpx;
   margin-right: 12rpx;
 }
 

@@ -1,7 +1,7 @@
 <!-- 预定自取页面 - 严格按照Figma设计稿 -->
 <view class="reserve-container">
   <!-- Fixed Header -->
-  <view class="reserve-header">
+  <view class="reserve-header {{headerHidden ? 'header-hidden' : ''}}">
     <!-- Back Row -->
     <view class="header-top">
       <view class="back-btn" bindtap="onBackTap">
@@ -22,7 +22,7 @@
   </view>
 
   <!-- Scrollable Content -->
-  <scroll-view class="reserve-content" scroll-y enhanced show-scrollbar="{{false}}">
+  <view class="reserve-content {{headerHidden ? 'content-expanded' : ''}}">
     <!-- Coupon Banner -->
     <view class="coupon-banner">
       <view class="coupon-left">
@@ -71,7 +71,7 @@
     <view class="product-grid" wx:if="{{!isLoading && products.length > 0}}">
       <view class="product-card" wx:for="{{products}}" wx:key="_id" wx:for-item="product">
         <view class="product-image-wrap">
-          <image class="product-image" src="{{product.image || product.images[0] || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png'}}" mode="aspectFill" lazy-load/>
+          <image class="product-image" src="{{product.image}}" mode="aspectFill" lazy-load data-index="{{index}}" binderror="onImageError"/>
           <view class="product-overlay"></view>
         </view>
 
@@ -92,7 +92,7 @@
 
     <!-- Bottom Spacer -->
     <view class="bottom-spacer"></view>
-  </scroll-view>
+  </view>
 
   <!-- Floating Cart Button -->
   <view class="floating-cart-btn" bindtap="onGoToCart" wx:if="{{cartCount > 0}}">
@@ -127,7 +127,7 @@
 
       <!-- Product Info -->
       <view class="modal-product" wx:if="{{selectedProduct}}">
-        <image class="modal-product-image" src="{{selectedProduct.image || selectedProduct.images[0] || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png'}}" mode="aspectFill"/>
+        <image class="modal-product-image" src="{{selectedProduct.image}}" mode="aspectFill" binderror="onModalImageError"/>
         <view class="modal-product-info">
           <text class="modal-product-name">{{selectedProduct.name}}</text>
           <text class="modal-product-desc">{{selectedProduct.description || selectedProduct.desc}}</text>

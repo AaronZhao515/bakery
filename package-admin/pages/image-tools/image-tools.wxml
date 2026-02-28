@@ -1,0 +1,167 @@
+<!-- 图片工具页 -->
+<view class="image-tools-container">
+  <!-- Header - 与 Dashboard 统一 -->
+  <view class="page-header">
+    <text class="page-title">图片压缩工具</text>
+    <text class="page-subtitle">批量压缩并替换云存储中的产品图片</text>
+  </view>
+
+  <!-- 内容区域 -->
+  <view class="content-section">
+    <!-- 警告卡片 -->
+    <view class="warning-card">
+      <view class="warning-icon">⚠️</view>
+      <view class="warning-content">
+        <text class="warning-title">操作警告</text>
+        <text class="warning-text">压缩后的图片将直接替换云存储上的原图，此操作不可撤销</text>
+      </view>
+    </view>
+
+    <!-- 阈值选择卡片 -->
+    <view class="card threshold-card" wx:if="{{!isCompressing}}">
+      <text class="section-title">压缩设置</text>
+      <view class="card-body">
+        <text class="threshold-label">文件大小阈值</text>
+        <picker mode="selector" range="{{thresholdOptions}}" range-key="label" bindchange="onThresholdChange">
+          <view class="threshold-picker">
+            <text class="threshold-value">> {{sizeThreshold}} KB</text>
+            <text class="threshold-arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+      <text class="threshold-hint">只压缩大于此阈值的图片，避免重复压缩已优化的小图</text>
+    </view>
+
+    <!-- 加载状态 -->
+    <view class="card loading-state" wx:if="{{isLoading}}">
+      <view class="loading-indicator">
+        <view class="loading-dot"></view>
+        <view class="loading-dot"></view>
+        <view class="loading-dot"></view>
+      </view>
+      <text class="loading-text">正在分析图片...</text>
+      <text class="loading-subtext">获取文件大小并筛选需要压缩的图片</text>
+    </view>
+
+    <!-- 信息卡片 -->
+    <view class="card info-card" wx:elif="{{!isCompressing}}">
+      <view class="info-header">
+        <text class="info-title">待压缩图片</text>
+        <text class="refresh-btn" bindtap="refreshProducts">🔄 刷新</text>
+      </view>
+
+      <text class="info-count">{{totalCount}}<text class="info-unit"> 张</text></text>
+
+      <text class="info-desc" wx:if="{{totalCount === 0}}">没有大于 {{sizeThreshold}}KB 的图片需要压缩</text>
+      <text class="info-desc" wx:else>从 {{stats.totalImages}} 张图片中筛选出 {{totalCount}} 张需要压缩</text>
+
+      <!-- 统计网格 -->
+      <view class="stats-grid" wx:if="{{stats.totalImages > 0}}">
+        <view class="stat-item">
+          <view class="stat-icon">📷</view>
+          <text class="stat-num">{{stats.totalImages}}</text>
+          <text class="stat-label">总图片数</text>
+        </view>
+        <view class="stat-item highlight">
+          <view class="stat-icon">🗜️</view>
+          <text class="stat-num">{{totalCount}}</text>
+          <text class="stat-label">需压缩</text>
+        </view>
+        <view class="stat-item">
+          <view class="stat-icon">💾</view>
+          <text class="stat-num">{{stats.estimatedSavings}}</text>
+          <text class="stat-label">预计节省</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="card empty-card" wx:if="{{!isLoading && totalCount === 0 && !summary && !isCompressing}}">
+      <view class="empty-icon">✅</view>
+      <text class="empty-title">暂无需要压缩的图片</text>
+      <text class="empty-desc">当前所有图片均已优化，或小于设定的阈值</text>
+      <button class="refresh-btn-primary" bindtap="refreshProducts">重新扫描</button>
+    </view>
+
+    <!-- 进度区域 -->
+    <view class="card progress-section" wx:if="{{isCompressing || progress === 100}}">
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{progress}}%"></view>
+      </view>
+      <text class="progress-text">{{progress}}% - {{currentFile}}</text>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-section" wx:if="{{!isCompressing && progress !== 100 && totalCount > 0}}">
+      <button class="compress-btn" bindtap="startCompress">
+        <text class="btn-icon">🗜️</text>
+        <text class="btn-text">开始压缩 ({{totalCount}}张)</text>
+      </button>
+    </view>
+
+    <!-- 汇总卡片 -->
+    <view class="card summary-card" wx:if="{{summary}}">
+      <text class="summary-title">压缩完成</text>
+      <view class="summary-row">
+        <view class="summary-item">
+          <text class="summary-label">成功</text>
+          <text class="summary-value success">{{summary.success}}</text>
+        </view>
+        <view class="summary-item" wx:if="{{summary.skipped > 0}}">
+          <text class="summary-label">跳过</text>
+          <text class="summary-value skip">{{summary.skipped}}</text>
+        </view>
+        <view class="summary-item" wx:if="{{summary.failed > 0}}">
+          <text class="summary-label">失败</text>
+          <text class="summary-value error">{{summary.failed}}</text>
+        </view>
+      </view>
+      <view class="saved-info" wx:if="{{summary.totalSaved > 0}}">
+        <text class="saved-label">总共节省空间</text>
+        <text class="saved-value">{{formatBytes(summary.totalSaved)}}</text>
+      </view>
+    </view>
+
+    <!-- 结果列表 -->
+    <view class="card" wx:if="{{results.length > 0}}">
+      <text class="section-title">处理详情</text>
+      <view class="result-list">
+        <view class="result-item {{item.success ? (item.skipped ? 'skipped' : 'success') : 'failed'}}" wx:for="{{results}}" wx:key="fileID">
+          <view class="result-status-icon">{{item.success ? (item.skipped ? '⏭' : '✓') : '✗'}}</view>
+          <view class="result-content">
+            <text class="result-name">{{item.name || item.fileID}}</text>
+            <view class="result-details" wx:if="{{item.success}}">
+              <text class="detail-item" wx:if="{{!item.skipped}}">{{item.originalSize}} → {{item.compressedSize}}</text>
+              <text class="detail-item highlight" wx:if="{{!item.skipped}}">节省 {{item.compressionRatio}}</text>
+              <text class="detail-item skip-reason" wx:if="{{item.skipped}}">{{item.reason}}</text>
+            </view>
+            <view class="result-error" wx:if="{{!item.success}}">{{item.error}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 提示区域 -->
+    <view class="card" wx:if="{{!isCompressing}}">
+      <text class="section-title">压缩参数说明</text>
+      <view class="tips-list">
+        <view class="tip-item">
+          <view class="tip-icon">📐</view>
+          <text class="tip-text">最大尺寸限制为 800×800 像素，保持图片清晰度</text>
+        </view>
+        <view class="tip-item">
+          <view class="tip-icon">🎨</view>
+          <text class="tip-text">JPEG 图片使用 80% 质量，平衡画质与体积</text>
+        </view>
+        <view class="tip-item">
+          <view class="tip-icon">🖼️</view>
+          <text class="tip-text">PNG 图片使用最高压缩级别，保证透明通道</text>
+        </view>
+        <view class="tip-item">
+          <view class="tip-icon">🧠</view>
+          <text class="tip-text">智能跳过：压缩后文件更大时自动保留原图</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -90,13 +90,27 @@ Page({
   // 上传头像
   async uploadAvatar(filePath) {
     try {
-      wx.showLoading({ title: '上传中...' });
-      
+      wx.showLoading({ title: '压缩上传中...' });
+
+      // 压缩头像图片
+      let uploadPath = filePath;
+      try {
+        const compressedRes = await wx.compressImage({
+          src: filePath,
+          quality: 70, // 头像质量可以稍低
+          compressedWidth: 400 // 头像尺寸较小
+        });
+        uploadPath = compressedRes.tempFilePath;
+        console.log('头像压缩成功');
+      } catch (compressError) {
+        console.error('头像压缩失败，使用原图:', compressError);
+      }
+
       // 上传图片到云存储
       const cloudPath = `avatars/${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`;
       const { fileID } = await wx.cloud.uploadFile({
         cloudPath,
-        filePath
+        filePath: uploadPath
       });
 
       // 更新用户头像

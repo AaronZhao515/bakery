@@ -10,9 +10,12 @@
       mode="aspectFit"
     />
     <!-- 默认图标 -->
-    <view wx:else class="empty-icon">
-      <text class="icon-text">📦</text>
-    </view>
+    <image
+      wx:else
+      class="empty-icon-svg"
+      src="{{defaultIcon}}"
+      mode="aspectFit"
+    />
   </view>
 
   <!-- 文字区域 -->

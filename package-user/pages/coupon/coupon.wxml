@@ -1,16 +1,5 @@
-<!-- 优惠券中心 - 匹配Figma设计稿 -->
+<!-- 优惠券中心 - 统一风格 -->
 <view class="coupon-center-container">
-  <!-- 顶部导航栏 -->
-  <view class="header-bar">
-    <view class="header-content">
-      <view class="back-btn" bindtap="onBackTap">
-        <image class="back-icon" src="{{icons.chevronLeft}}" mode="aspectFit"/>
-      </view>
-      <text class="header-title">优惠券中心</text>
-      <view class="header-right"></view>
-    </view>
-  </view>
-
   <!-- 选择模式提示 -->
   <view class="select-mode-tips" wx:if="{{isSelectMode}}">
     <text class="tips-icon">👆</text>
@@ -61,7 +50,7 @@
              bindtap="{{isSelectMode && activeTab === 'unused' ? 'onSelectCouponForOrder' : ''}}"
              data-id="{{item._id}}">
         <!-- 左侧金额区 -->
-        <view class="coupon-left" style="--bg-color: {{item.bgColor || '#B08860'}}; --bg-color-dark: {{item.bgColorDark || '#9B7355'}};">
+        <view class="coupon-left {{activeTab === 'available' ? (item.received ? 'received' : 'available') : 'available'}}" style="{{activeTab === 'available' && item.received ? '' : 'background: linear-gradient(135deg, ' + (item.bgColor || '#B08860') + ' 0%, ' + (item.bgColorDark || '#8B5A3C') + ' 100%);'}}">
           <block wx:if="{{item.discountType === 'discount' || item.type === 1}}">
             <text class="coupon-value">{{item.displayAmount}}</text>
             <text class="coupon-symbol" style="margin-left: 4rpx;">折</text>
@@ -75,7 +64,9 @@
 
         <!-- 中间内容区 -->
         <view class="coupon-middle">
-          <text class="coupon-title">{{item.displayTitle}}</text>
+          <view class="coupon-title-row">
+            <text class="coupon-title">{{item.displayTitle}}</text>
+          </view>
           <text class="coupon-desc">{{item.displayDesc}}</text>
           <text class="coupon-time">有效期至 {{item.endTimeStr}}</text>
         </view>
@@ -92,23 +83,19 @@
 
           <!-- 未使用状态 -->
           <block wx:if="{{activeTab === 'unused'}}">
-            <view class="coupon-status-badge active">
-              <text>未使用</text>
-            </view>
+            <view class="coupon-status-badge active">未使用</view>
             <!-- 选择模式下显示"点击选择"，否则显示"去使用" -->
             <block wx:if="{{isSelectMode}}">
-              <text class="coupon-btn-text select" bindtap="onSelectCouponForOrder" data-id="{{item._id}}">点击选择</text>
+              <view class="coupon-btn-text select" bindtap="onSelectCouponForOrder" data-id="{{item._id}}">点击选择</view>
             </block>
             <block wx:else>
-              <text class="coupon-btn-text" bindtap="goToUse">去使用</text>
+              <view class="coupon-btn-text" bindtap="goToUse">去使用</view>
             </block>
           </block>
 
           <!-- 已使用/已过期状态 -->
           <block wx:if="{{activeTab === 'used'}}">
-            <view class="coupon-status-badge {{item.status === 1 ? 'used' : 'expired'}}">
-              <text>{{item.status === 1 ? '已使用' : '已过期'}}</text>
-            </view>
+            <view class="coupon-status-badge {{item.status === 1 ? 'used' : 'expired'}}">{{item.status === 1 ? '已使用' : '已过期'}}</view>
           </block>
         </view>
 

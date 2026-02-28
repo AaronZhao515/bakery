@@ -100,7 +100,26 @@ async function getList(openid) {
     let price = product ? product.price : 0
     let stock = product ? product.stock : 0
     let productName = product ? product.name : '商品已下架'
-    let productImage = product && product.images ? product.images[0] : ''
+    // 改进图片获取逻辑：优先使用 images[0]，其次是 coverImage/mainImage
+    let productImage = ''
+    if (product) {
+      if (product.images && product.images.length > 0 && product.images[0]) {
+        productImage = product.images[0]
+      } else if (product.coverImage) {
+        productImage = product.coverImage
+      } else if (product.mainImage) {
+        productImage = product.mainImage
+      }
+    }
+
+    // 调试日志：记录无图片的商品
+    if (!productImage && product) {
+      console.log(`[Cart Debug] 商品无图片: ${product.name} (ID: ${product._id})`, {
+        images: product.images,
+        coverImage: product.coverImage,
+        mainImage: product.mainImage
+      })
+    }
 
     // 如果有规格，获取规格价格
     if (item.specId && product && product.specs) {

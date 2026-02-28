@@ -52,7 +52,12 @@ Page({
     selectedProduct: null,
     selectedQuantity: 1,
     totalPrice: '0.00',
-    cartTotal: '0.00'
+    cartTotal: '0.00',
+
+    // Header visibility on scroll
+    headerHidden: false,
+    lastScrollTop: 0,
+    scrollTimer: null
   },
 
   onLoad(options) {
@@ -63,12 +68,48 @@ Page({
 
   onShow() {
     console.log('[预定] 页面显示');
+    // 检查登录状态，未登录则清空购物车显示
+    const isLogin = auth.isLogin();
+    if (!isLogin) {
+      this.setData({
+        cartItems: [],
+        cartCount: 0,
+        cartTotal: '0.00'
+      });
+      // 同时清空全局 store 中的购物车数据
+      const cartStore = app.store && app.store.cartStore;
+      if (cartStore) {
+        cartStore.set('items', []);
+        cartStore.set('totalPrice', 0);
+        cartStore.set('totalCount', 0);
+      }
+    } else {
+      // 已登录，刷新购物车数据
+      this.refreshCartList();
+    }
     // 加载订单类型
     this.loadOrderType();
-    // 刷新购物车数据
-    this.refreshCartList();
     // 设置自定义 tabBar 选中状态
     this.setTabBarSelected();
+
+    // 检查是否需要刷新商品数据（从商品编辑页返回）
+    const needRefresh = wx.getStorageSync('reserve_products_need_refresh');
+    if (needRefresh) {
+      console.log('[预定] 检测到商品更新，刷新商品列表');
+      this.loadProducts();
+      wx.removeStorageSync('reserve_products_need_refresh');
+    }
+  },
+
+  /**
+   * 下拉刷新
+   */
+  async onPullDownRefresh() {
+    console.log('[预定] 下拉刷新');
+    await this.loadProducts();
+    await this.refreshCartList();
+    wx.stopPullDownRefresh();
+    console.log('[预定] 下拉刷新完成');
   },
 
   /**
@@ -135,14 +176,19 @@ Page({
       }
 
       // Format products to match Figma design
-      const products = productList.map(item => ({
-        ...item,
-        _id: item._id || item.id,
-        name: item.name || '未命名商品',
-        price: item.price || 0,
-        image: item.image || (item.images && item.images[0]) || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png',
-        desc: item.description || item.desc || '精选原料 · 手工制作'
-      }));
+      const products = productList.map(item => {
+        // 云存储路径直接使用原路径（文件名已包含时间戳）
+        let imageUrl = item.image || (item.images && item.images[0]) || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png';
+
+        return {
+          ...item,
+          _id: item._id || item.id,
+          name: item.name || '未命名商品',
+          price: item.price || 0,
+          image: imageUrl,
+          desc: item.description || item.desc || '精选原料 · 手工制作'
+        };
+      });
 
       this.setData({
         products: products,
@@ -187,6 +233,18 @@ Page({
    * 刷新购物车列表
    */
   async refreshCartList() {
+    // 检查登录状态，未登录时不获取购物车数据
+    const isLogin = auth.isLogin();
+    if (!isLogin) {
+      console.log('[预定] 未登录，清空购物车显示');
+      this.setData({
+        cartItems: [],
+        cartCount: 0,
+        cartTotal: '0.00'
+      });
+      return;
+    }
+
     try {
       const result = await api.cart.getList();
       console.log('[预定] 刷新购物车结果:', result);
@@ -219,7 +277,22 @@ Page({
    */
   onSubTabChange(e) {
     const index = e.currentTarget.dataset.index;
-    this.setData({ activeSubTab: index });
+
+    // Navigate based on tab index
+    if (index === 1) {
+      // 充值 → VIP中心
+      wx.navigateTo({
+        url: '/package-user/pages/vip-center/vip-center'
+      });
+    } else if (index === 2) {
+      // 积分 → 积分明细
+      wx.navigateTo({
+        url: '/package-user/pages/points-history/points-history'
+      });
+    } else {
+      // 会员 → just switch tab visually
+      this.setData({ activeSubTab: index });
+    }
   },
 
   /**
@@ -448,6 +521,32 @@ Page({
   },
 
   /**
+   * 图片加载错误处理
+   */
+  onImageError(e) {
+    const index = e.currentTarget.dataset.index;
+    const { products } = this.data;
+    const defaultImage = 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png';
+
+    if (products[index] && products[index].image !== defaultImage) {
+      products[index].image = defaultImage;
+      this.setData({ products });
+    }
+  },
+
+  /**
+   * 弹窗图片加载错误处理
+   */
+  onModalImageError() {
+    const defaultImage = 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png';
+    if (this.data.selectedProduct && this.data.selectedProduct.image !== defaultImage) {
+      this.setData({
+        'selectedProduct.image': defaultImage
+      });
+    }
+  },
+
+  /**
    * 分享
    */
   onShareAppMessage() {
@@ -462,5 +561,53 @@ Page({
    */
   onModalTap() {
     // 阻止事件冒泡，防止点击弹窗内容时关闭弹窗
+  },
+
+  /**
+   * 监听页面滚动事件 - 控制表头显示/隐藏
+   * 使用 onPageScroll 生命周期函数
+   */
+  onPageScroll(e) {
+    const scrollTop = e.scrollTop;
+    const { lastScrollTop, scrollTimer, headerHidden } = this.data;
+
+    console.log('[滚动] scrollTop:', scrollTop, 'lastScrollTop:', lastScrollTop, 'headerHidden:', headerHidden);
+
+    // 清除之前的定时器
+    if (scrollTimer) {
+      clearTimeout(scrollTimer);
+    }
+
+    // 判断滚动方向
+    if (scrollTop > lastScrollTop && scrollTop > 50) {
+      // 向下滑动且滚动距离超过50px，隐藏表头
+      if (!headerHidden) {
+        console.log('[滚动] 向下滑动，隐藏表头');
+        this.setData({ headerHidden: true });
+      }
+    } else if (scrollTop < lastScrollTop) {
+      // 向上滑动，显示表头
+      if (headerHidden) {
+        console.log('[滚动] 向上滑动，显示表头');
+        this.setData({ headerHidden: false });
+      }
+    }
+
+    // 设置新的定时器，停止滚动500ms后显示表头
+    const newTimer = setTimeout(() => {
+      if (this.data.headerHidden) {
+        console.log('[滚动] 停止滚动，自动显示表头');
+        this.setData({
+          headerHidden: false,
+          scrollTimer: null
+        });
+      }
+    }, 500);
+
+    // 更新滚动位置
+    this.setData({
+      lastScrollTop: scrollTop,
+      scrollTimer: newTimer
+    });
   }
 });

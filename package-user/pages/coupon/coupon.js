@@ -6,7 +6,6 @@
 const app = getApp();
 const api = require('../../../utils/api');
 const util = require('../../../utils/util');
-const icons = require('../../../utils/icons');
 const auth = require('../../../utils/auth');
 
 Page({
@@ -28,10 +27,7 @@ Page({
     isSelectMode: false,
 
     // 订单金额（用于判断优惠券是否可用）
-    orderAmount: 0,
-
-    // Base64 icons
-    icons: icons
+    orderAmount: 0
   },
 
   onLoad(options) {
@@ -110,7 +106,7 @@ Page({
     let emptyText = '';
     switch (activeTab) {
       case 'available':
-        emptyText = '暂无可领取的优惠券';
+        emptyText = '暂无可领取的优惠券（含新人专属）';
         break;
       case 'unused':
         emptyText = '暂无未使用的优惠券';
@@ -150,15 +146,41 @@ Page({
       let coupons = [];
 
       if (activeTab === 'available') {
-        // 加载可领取的优惠券（排除新人专属，只显示限时优惠）
-        const result = await api.coupon.getList({ type: 'limited' });
-        console.log('[优惠券中心] 可领取优惠券:', result);
+        // 加载可领取的优惠券（包含新人专属和限时优惠，与VIP中心保持一致）
+        const [newcomerRes, limitedRes] = await Promise.all([
+          api.coupon.getList({ type: 'newcomer', pageSize: 10 }),
+          api.coupon.getList({ type: 'limited', pageSize: 10 })
+        ]);
+        console.log('[优惠券中心] 新人优惠券:', newcomerRes);
+        console.log('[优惠券中心] 限时优惠券:', limitedRes);
 
-        if (result && result.success && result.data) {
-          coupons = result.data.list || [];
-          // 格式化时间并检查是否已领取
-          coupons = await this.formatCoupons(coupons, true);
+        // 合并两种类型的优惠券
+        let allCoupons = [];
+        if (newcomerRes && newcomerRes.success && newcomerRes.data) {
+          const newcomerCoupons = newcomerRes.data.list || [];
+          // 标记为新人专属类型
+          newcomerCoupons.forEach(c => c.couponType = 'newcomer');
+          allCoupons = allCoupons.concat(newcomerCoupons);
         }
+        if (limitedRes && limitedRes.success && limitedRes.data) {
+          const limitedCoupons = limitedRes.data.list || [];
+          // 标记为限时优惠类型
+          limitedCoupons.forEach(c => c.couponType = 'limited');
+          allCoupons = allCoupons.concat(limitedCoupons);
+        }
+
+        // 去重（避免同一优惠券同时存在于两种类型中）
+        const seen = new Set();
+        coupons = allCoupons.filter(item => {
+          if (seen.has(item._id)) return false;
+          seen.add(item._id);
+          return true;
+        });
+
+        // 格式化时间并检查是否已领取
+        coupons = await this.formatCoupons(coupons, true);
+
+        console.log('[优惠券中心] 可领取优惠券总数:', coupons.length);
       } else {
         // 加载用户优惠券
         const status = activeTab === 'unused' ? 0 : undefined; // 0未使用, undefined查询所有
@@ -243,16 +265,18 @@ Page({
         endTimeStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
       }
 
-      // 判断是否已领取
-      const received = item.received || userCouponIds.includes(item._id);
+      // 判断是否已领取（优先使用 checkReceived 参数获取的 userCouponIds，忽略数据库中的 received 字段）
+      const received = checkReceived
+        ? userCouponIds.includes(item._id)
+        : (item.received || false);
 
-      // 使用数据库中的颜色配置，或使用默认值
-      const bgColor = item.amountColor || '#B08860';
-      const bgColorDark = item.iconColor || '#9B7355';
+      // 统一使用固定颜色，不读取数据库中的颜色配置
+      const bgColor = '#B08860';
+      const bgColorDark = '#8B5A3C';
 
-      // 确定优惠券显示值
+      // 确定优惠券显示值（兼容 minSpend 和 minAmount 两种字段名）
       const displayAmount = item.amount || 0;
-      const displayMinAmount = item.minAmount || 0;
+      const displayMinAmount = item.minAmount || item.minSpend || 0;
       const displayTitle = item.title || item.name || '优惠券';
       const displayDesc = item.desc || item.description || '全场通用';
       const discountType = item.discountType || (item.type === 1 ? 'discount' : 'amount');

@@ -26,7 +26,14 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-
+    // 检查管理员权限
+    const adminInfo = wx.getStorageSync('admin_info');
+    if (!adminInfo || !adminInfo.isAdmin) {
+      wx.redirectTo({
+        url: '/package-admin/pages/login/login'
+      });
+      return;
+    }
   },
 
   /**

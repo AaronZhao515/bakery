@@ -72,6 +72,12 @@ page {
   background: #9B7355;
 }
 
+.order-type-badge .badge-icon {
+  width: 24rpx;
+  height: 24rpx;
+  margin-right: 6rpx;
+}
+
 /* ========== 页面内容 ========== */
 .page-content {
   flex: 1;
@@ -107,7 +113,8 @@ page {
 }
 
 .info-icon {
-  font-size: 40rpx;
+  width: 48rpx;
+  height: 48rpx;
 }
 
 .info-title-wrap {

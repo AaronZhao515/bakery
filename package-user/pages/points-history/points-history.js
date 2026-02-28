@@ -14,6 +14,7 @@ const CATEGORY_META = {
   redeem: { icon: '🎫', color: '#B07AB0', bgColor: '#F8EEF8' },
   event: { icon: '⭐', color: '#C8883A', bgColor: '#FFF3E0' },
   signin: { icon: '✓', color: '#7A9E7E', bgColor: '#EEF6EF' },
+  charge: { icon: '💎', color: '#D4A96A', bgColor: '#FFF8E1' },  // 充值类型
   default: { icon: '📋', color: '#9B7355', bgColor: '#F5EDD8' }
 };
 
@@ -165,16 +166,24 @@ Page({
       const time = this.formatTime(dateObj);
 
       // 优先使用 desc 字段（如云函数返回的订单号），否则使用 subtitle
-      const subtitle = item.desc || item.subtitle || '';
+      const subtitle = item.desc || item.subtitle || item.reason || '';
+
+      // 处理 label：优先使用 label，否则根据类型生成
+      const label = item.label || (item.type === 'charge' ? '积分充值' : '积分变动');
+
+      // 处理类型：charge(充值) 视为 earn(获取)
+      const displayType = item.type === 'charge' ? 'earn' : item.type;
 
       return {
         ...item,
+        label: label,
         date: date,
         time: time,
         subtitle: subtitle,
         icon: meta.icon,
         iconColor: meta.color,
         bgColor: meta.bgColor,
+        type: displayType,  // 使用处理后的类型
         points: Math.abs(item.points)
       };
     });
@@ -205,8 +214,8 @@ Page({
     });
 
     return Array.from(map.entries()).map(([date, items]) => {
-      // 计算当天小计
-      const earnTotal = items.filter(t => t.type === 'earn').reduce((s, t) => s + t.points, 0);
+      // 计算当天小计 - charge(充值) 也视为 earn(获取)
+      const earnTotal = items.filter(t => t.type === 'earn' || t.type === 'charge').reduce((s, t) => s + t.points, 0);
       const spendTotal = items.filter(t => t.type === 'spend').reduce((s, t) => s + t.points, 0);
 
       let subtotal = '';
@@ -242,8 +251,9 @@ Page({
   calculateMonthStats(list) {
     const currentMonth = '2026-02';
 
+    // charge(充值) 也视为 earn(获取)
     const monthEarned = list
-      .filter(t => t.type === 'earn' && t.date.startsWith(currentMonth))
+      .filter(t => (t.type === 'earn' || t.type === 'charge') && t.date.startsWith(currentMonth))
       .reduce((s, t) => s + t.points, 0);
 
     const monthSpent = list

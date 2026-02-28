@@ -102,14 +102,25 @@ Component({
      * @param {Object} product - 原始商品数据
      */
     processProductData(product) {
+      // 处理图片URL
+      let imageUrl = product.coverImage || product.mainImage || '';
+      if (!imageUrl && product.images && product.images.length > 0) {
+        imageUrl = product.images[0];
+      }
+
+      // 如果没有图片，使用默认图片
+      if (!imageUrl) {
+        imageUrl = 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png';
+      }
+
       const processed = {
         ...product,
         // 格式化价格
         priceText: this.formatPrice(product.price),
         originalPriceText: product.originalPrice ? this.formatPrice(product.originalPrice) : '',
         // 计算折扣
-        discount: product.originalPrice 
-          ? Math.round((product.price / product.originalPrice) * 10) 
+        discount: product.originalPrice
+          ? Math.round((product.price / product.originalPrice) * 10)
           : null,
         // 格式化销量
         soldText: this.formatSold(product.soldCount || 0),
@@ -119,8 +130,8 @@ Component({
         isSoldOut: product.stock <= 0,
         // 是否新品
         isNew: this.checkIsNew(product.createTime),
-        // 图片URL
-        imageUrl: product.coverImage || product.mainImage || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png'
+        // 图片URL（已添加时间戳）
+        imageUrl: imageUrl
       };
 
       this.setData({ processedProduct: processed });

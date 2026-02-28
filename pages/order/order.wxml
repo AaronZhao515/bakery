@@ -1,13 +1,22 @@
 <!-- 订单页面 - 匹配Figma设计稿 -->
 <view class="orders-container">
   <!-- Fixed Header -->
-  <view class="orders-header">
+  <view class="orders-header {{headerHidden ? 'header-hidden' : ''}}">
     <view class="header-content">
-      <image class="header-icon" src="{{icons.order}}" mode="aspectFit"/>
-      <text class="header-title">预定订单</text>
+      <view class="header-left">
+        <image class="header-icon" src="{{icons.order}}" mode="aspectFit"/>
+        <text class="header-title">预定订单</text>
+      </view>
       <view class="order-count-badge" wx:if="{{orders.length > 0}}">
         <text>{{orders.length}} 笔订单</text>
       </view>
+      <view class="header-right"></view>
+    </view>
+
+    <!-- 当月提示 -->
+    <view class="month-tip">
+      <image class="month-tip-icon" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNGNUVERDgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIzIiB5PSI0IiB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHJ4PSIyIiByeT0iMiI+PC9yZWN0PjxsaW5lIHgxPSIxNiIgeTE9IjIiIHgyPSIxNiIgeTI9IjYiPjwvbGluZT48bGluZSB4MT0iOCIgeTE9IjIiIHgyPSI4IiB5Mj0iNiI+PC9saW5lPjxsaW5lIHgxPSIzIiB5MT0iMTAiIHgyPSIyMSIgeTI9IjEwIj48L2xpbmU+PC9zdmc+" mode="aspectFit"/>
+      <text class="month-tip-text">仅显示当月订单，历史订单请联系客服</text>
     </view>
 
     <!-- Status Tabs -->
@@ -25,7 +34,7 @@
   </view>
 
   <!-- Scrollable Content -->
-  <scroll-view class="orders-content" scroll-y enhanced show-scrollbar="{{false}}" bindscrolltolower="onReachBottom">
+  <view class="orders-content {{headerHidden ? 'content-expanded' : ''}}">
     <!-- Empty State -->
     <view class="empty-state" wx:if="{{orders.length === 0 && !isLoading && !hasError}}">
       <image class="empty-icon" src="{{icons.order}}" mode="aspectFit"/>
@@ -47,6 +56,12 @@
     <!-- Order List -->
     <view class="order-list" wx:if="{{orders.length > 0}}">
       <view class="order-card" wx:for="{{orders}}" wx:key="_id" bindtap="onOrderTap" data-id="{{item._id}}">
+        <!-- 不能取消时的提示（制作中/配送中）- 放在顶部 -->
+        <view class="cannot-cancel-tip" wx:if="{{!item.canCancel && item.cannotCancelReason}}">
+          <text class="tip-icon">ℹ️</text>
+          <text class="tip-text">{{item.cannotCancelReason}}</text>
+        </view>
+
         <!-- Card Header -->
         <view class="order-header">
           <view class="order-no-wrap">
@@ -92,6 +107,28 @@
             <text class="order-total">¥{{item.totalAmount || item.total}}</text>
           </view>
         </view>
+
+        <!-- Order Actions -->
+        <view class="order-actions" wx:if="{{item.showActions}}">
+          <!-- 取消按钮 -->
+          <view
+            class="action-btn {{item.canCancel ? '' : 'disabled'}}"
+            bindtap="{{item.canCancel ? 'onCancelOrder' : ''}}"
+            data-id="{{item._id}}"
+          >
+            <text>取消订单</text>
+          </view>
+
+          <!-- 支付按钮（待付款状态） -->
+          <view
+            class="action-btn primary"
+            wx:if="{{item.status === 0}}"
+            bindtap="onPayOrder"
+            data-id="{{item._id}}"
+          >
+            <text>立即支付</text>
+          </view>
+        </view>
       </view>
     </view>
 
@@ -103,5 +140,5 @@
 
     <!-- Bottom Spacer -->
     <view class="bottom-spacer"></view>
-  </scroll-view>
+  </view>
 </view>

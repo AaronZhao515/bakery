@@ -353,8 +353,8 @@ Page({
           name: item.name,
           spec: item.spec,
           price: item.price,
-          quantity: item.quantity,
-          imageUrl: item.imageUrl
+          quantity: item.quantity
+          // 不传递 imageUrl，订单中不存储图片
         })),
         deliveryType,
         address: deliveryType === 'delivery' ? address : null,

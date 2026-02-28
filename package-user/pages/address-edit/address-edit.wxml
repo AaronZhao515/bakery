@@ -58,7 +58,8 @@
         <text class="error-text" wx:if="{{errors.phone}}">⚠ {{errors.phone}}</text>
       </view>
 
-      <!-- 所在地区 -->
+      <!-- 所在地区 (已隐藏) -->
+      <!--
       <view class="form-item">
         <label class="form-label">
           所在地区 <text class="required">*</text>
@@ -72,6 +73,7 @@
         </view>
         <text class="error-text" wx:if="{{errors.province}}">⚠ {{errors.province}}</text>
       </view>
+      -->
 
       <!-- 详细地址 -->
       <view class="form-item">
@@ -108,90 +110,10 @@
     </view>
   </view>
 
-  <!-- 地区选择器（全屏） -->
+  <!-- 地区选择器（全屏）- 已隐藏 -->
+  <!--
   <view class="region-picker" wx:if="{{showRegionPicker}}">
-    <!-- 选择器头部 -->
-    <view class="picker-header">
-      <view class="picker-nav">
-        <view class="back-btn" bindtap="onCloseRegionPicker">
-          <image class="back-icon" src="{{icons.chevronLeft}}" mode="aspectFit"/>
-        </view>
-        <text class="picker-title">选择地区</text>
-        <view class="nav-placeholder"></view>
-      </view>
-
-      <!-- 步骤标签 -->
-      <view class="step-tabs">
-        <view
-          class="step-tab {{pickerStep === 'province' ? 'active' : ''}} {{pickerProvince ? '' : 'disabled'}}"
-          data-step="province"
-          bindtap="onSwitchStep"
-        >
-          <text class="step-label">省/直辖市</text>
-          <text class="step-value">{{pickerProvince || '请选择'}}</text>
-        </view>
-        <view
-          class="step-tab {{pickerStep === 'city' ? 'active' : ''}} {{pickerProvince ? '' : 'disabled'}}"
-          data-step="city"
-          bindtap="onSwitchStep"
-        >
-          <text class="step-label">城市</text>
-          <text class="step-value">{{pickerCity || '请选择'}}</text>
-        </view>
-        <view
-          class="step-tab {{pickerStep === 'district' ? 'active' : ''}} {{pickerCity ? '' : 'disabled'}}"
-          data-step="district"
-          bindtap="onSwitchStep"
-        >
-          <text class="step-label">区/县</text>
-          <text class="step-value">{{pickerDistrict || '请选择'}}</text>
-        </view>
-      </view>
-    </view>
-
-    <!-- 地区列表 -->
-    <scroll-view class="picker-body" scroll-y>
-      <!-- 省份列表 -->
-      <block wx:if="{{pickerStep === 'province'}}">
-        <view
-          class="region-item {{pickerProvince === item ? 'active' : ''}}"
-          wx:for="{{['上海市','北京市','广东省','浙江省','江苏省']}}"
-          wx:key="*this"
-          data-province="{{item}}"
-          bindtap="onSelectProvince"
-        >
-          <text class="region-name">{{item}}</text>
-          <text class="check-icon" wx:if="{{pickerProvince === item}}">✓</text>
-        </view>
-      </block>
-
-      <!-- 城市列表 -->
-      <block wx:if="{{pickerStep === 'city'}}">
-        <view
-          class="region-item {{pickerCity === item ? 'active' : ''}}"
-          wx:for="{{cities}}"
-          wx:key="*this"
-          data-city="{{item}}"
-          bindtap="onSelectCity"
-        >
-          <text class="region-name">{{item}}</text>
-          <text class="check-icon" wx:if="{{pickerCity === item}}">✓</text>
-        </view>
-      </block>
-
-      <!-- 区县列表 -->
-      <block wx:if="{{pickerStep === 'district'}}">
-        <view
-          class="region-item {{pickerDistrict === item ? 'active' : ''}}"
-          wx:for="{{districts}}"
-          wx:key="*this"
-          data-district="{{item}}"
-          bindtap="onSelectDistrict"
-        >
-          <text class="region-name">{{item}}</text>
-          <text class="check-icon" wx:if="{{pickerDistrict === item}}">✓</text>
-        </view>
-      </block>
-    </scroll-view>
+    ...
   </view>
+  -->
 </view>

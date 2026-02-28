@@ -107,13 +107,16 @@ Page({
 
           console.log('[购物车] 处理后ID:', cartId);
 
+          // 处理图片URL（云存储路径直接使用原路径）
+          let imageUrl = item.productImage || item.image || item.imageUrl;
+
           return {
             ...item,
             _id: cartId,
             cartId: cartId,
             productId: item.productId || cartId, // 确保有 productId
             name: item.productName || item.name,
-            imageUrl: item.productImage || item.image || item.imageUrl,
+            imageUrl: imageUrl,
             price: item.price || 0,
             quantity: item.quantity || 1,
             selected: item.selected !== false, // 默认选中
@@ -345,6 +348,21 @@ Page({
     wx.navigateTo({
       url: `/package-order/pages/order-confirm/order-confirm?type=${orderType}`
     });
+  },
+
+  /**
+   * 图片加载失败处理
+   */
+  onImageError(e) {
+    const index = e.currentTarget.dataset.index;
+    const { cartList } = this.data;
+    const defaultImage = 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png';
+
+    // 更新该商品的图片为默认图片
+    if (cartList[index] && cartList[index].imageUrl !== defaultImage) {
+      cartList[index].imageUrl = defaultImage;
+      this.setData({ cartList });
+    }
   },
 
   /**

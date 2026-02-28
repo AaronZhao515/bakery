@@ -47,7 +47,10 @@ Page({
       { icon: icons.mapPin, label: '收货地址', sub: '管理配送地址', bgColor: '#E3F2FD', path: '/package-user/pages/address/address' },
       { icon: icons.phone, label: '手机号', sub: '绑定手机号', bgColor: '#FFF8E1', path: '', action: 'bindPhone' },
       { icon: icons.feedback, label: '意见反馈', sub: '帮助我们改进', bgColor: '#FCE4EC', path: '/package-user/pages/feedback/feedback' }
-    ]
+    ],
+
+    // 管理员菜单（仅在用户是管理员时显示）
+    adminMenuItem: { icon: icons.setting, label: '管理后台', sub: '进入商家管理后台', bgColor: '#D4A574', path: '/package-admin/pages/login/login' }
   },
 
   onLoad(options) {
@@ -87,10 +90,17 @@ Page({
     console.log('[个人中心] 本地登录状态:', isLogin);
     console.log('[个人中心] 本地用户信息:', userInfo);
 
+    // 检查是否是管理员，如果是则添加管理员入口
+    let menuItems = this.data.menuItems;
+    if (userInfo?.isAdmin && !menuItems.find(item => item.label === '管理后台')) {
+      menuItems = [...menuItems, this.data.adminMenuItem];
+    }
+
     // 更新页面状态
     this.setData({
       isLogin,
-      userInfo: userInfo || null
+      userInfo: userInfo || null,
+      menuItems
     });
 
     if (isLogin) {
@@ -111,8 +121,16 @@ Page({
 
           // 更新页面状态（包括统计数据）
           const stats = result.data.stats || {};
+
+          // 检查是否是管理员，如果是则添加管理员入口
+          let menuItems = this.data.menuItems;
+          if (result.data.isAdmin && !menuItems.find(item => item.label === '管理后台')) {
+            menuItems = [...menuItems, this.data.adminMenuItem];
+          }
+
           this.setData({
             userInfo: result.data,
+            menuItems,
             'stats.couponCount': stats.couponCount || 0,
             'stats.points': result.data.points || 0,
             'stats.balance': result.data.balance || 0
@@ -565,13 +583,27 @@ Page({
    * 上传并更新头像
    */
   async uploadAndUpdateAvatar(filePath) {
-    wx.showLoading({ title: '上传中...' });
+    wx.showLoading({ title: '压缩上传中...' });
 
     try {
+      // 压缩头像图片
+      let uploadPath = filePath;
+      try {
+        const compressedRes = await wx.compressImage({
+          src: filePath,
+          quality: 70, // 头像质量可以稍低
+          compressedWidth: 400 // 头像尺寸较小
+        });
+        uploadPath = compressedRes.tempFilePath;
+        console.log('头像压缩成功');
+      } catch (compressError) {
+        console.error('头像压缩失败，使用原图:', compressError);
+      }
+
       const cloudPath = `avatars/${Date.now()}-${Math.random().toString(36).substr(2, 6)}.jpg`;
       const uploadResult = await wx.cloud.uploadFile({
         cloudPath: cloudPath,
-        filePath: filePath
+        filePath: uploadPath
       });
 
       const fileList = await wx.cloud.getTempFileURL({
@@ -722,7 +754,15 @@ Page({
           pendingDelivery: 0,
           pendingReceive: 0,
           pendingComment: 0
-        }
+        },
+        // 重置菜单（移除管理员入口）
+        menuItems: [
+          { icon: icons.order, label: '我的订单', sub: '查看全部订单', bgColor: '#E8F5E9', path: '/pages/order/order' },
+          { icon: icons.scissors, label: '优惠券', sub: '查看我的优惠券', bgColor: '#FFF3E0', path: '/package-user/pages/coupon/coupon' },
+          { icon: icons.mapPin, label: '收货地址', sub: '管理配送地址', bgColor: '#E3F2FD', path: '/package-user/pages/address/address' },
+          { icon: icons.phone, label: '手机号', sub: '绑定手机号', bgColor: '#FFF8E1', path: '', action: 'bindPhone' },
+          { icon: icons.feedback, label: '意见反馈', sub: '帮助我们改进', bgColor: '#FCE4EC', path: '/package-user/pages/feedback/feedback' }
+        ]
       });
 
       // 清除本地存储的其他用户相关数据

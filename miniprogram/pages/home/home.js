@@ -1,5 +1,14 @@
 // 首页逻辑
 const app = getApp()
+const icons = require('../../utils/icons.js')
+
+// 快捷入口图标映射
+const QUICK_ENTRY_ICONS = {
+  'member': icons.vipCard,      // 会员储值
+  'coupon': icons.scissors,     // 领券中心（剪刀图标代表优惠券）
+  'limited': icons.fire,        // 每日限量
+  'new': icons.star             // 新品推荐
+}
 
 Page({
   data: {
@@ -21,7 +30,9 @@ Page({
     loading: false,
     hasMore: true,
     page: 1,
-    pageSize: 10
+    pageSize: 10,
+    // Base64 图标
+    icons: icons
   },
 
   onLoad() {
@@ -144,15 +155,20 @@ Page({
       })
 
       if (result && result.code === 0) {
-        this.setData({ quickEntries: result.data })
+        // 将云函数返回的数据中的 emoji 替换为 SVG 图标
+        const quickEntries = result.data.map(item => ({
+          ...item,
+          icon: this.getQuickEntryIcon(item.name)
+        }))
+        this.setData({ quickEntries })
       } else {
         // 使用模拟数据
         this.setData({
           quickEntries: [
-            { id: 1, name: '会员储值', icon: '💳', bgColor: 'linear-gradient(135deg, #FFE0B2, #FFCC80)', link: '/pages/member/member' },
-            { id: 2, name: '领券中心', icon: '🎫', bgColor: 'linear-gradient(135deg, #FFCDD2, #EF9A9A)', link: '/pages/coupon/coupon' },
-            { id: 3, name: '每日限量', icon: '🔥', bgColor: 'linear-gradient(135deg, #FFCCBC, #FFAB91)', link: '/pages/category/category?type=limited' },
-            { id: 4, name: '新品推荐', icon: '✨', bgColor: 'linear-gradient(135deg, #C8E6C9, #A5D6A7)', link: '/pages/category/category?type=new' }
+            { id: 1, name: '会员储值', icon: icons.vipCard, bgColor: 'linear-gradient(135deg, #FFE0B2, #FFCC80)', link: '/pages/member/member' },
+            { id: 2, name: '领券中心', icon: icons.scissors, bgColor: 'linear-gradient(135deg, #FFCDD2, #EF9A9A)', link: '/pages/coupon/coupon' },
+            { id: 3, name: '每日限量', icon: icons.fire, bgColor: 'linear-gradient(135deg, #FFCCBC, #FFAB91)', link: '/pages/category/category?type=limited' },
+            { id: 4, name: '新品推荐', icon: icons.star, bgColor: 'linear-gradient(135deg, #C8E6C9, #A5D6A7)', link: '/pages/category/category?type=new' }
           ]
         })
       }
@@ -161,11 +177,20 @@ Page({
       // 使用模拟数据
       this.setData({
         quickEntries: [
-          { id: 1, name: '会员储值', icon: '💳', bgColor: 'linear-gradient(135deg, #FFE0B2, #FFCC80)' },
-          { id: 2, name: '领券中心', icon: '🎫', bgColor: 'linear-gradient(135deg, #FFCDD2, #EF9A9A)' }
+          { id: 1, name: '会员储值', icon: icons.vipCard, bgColor: 'linear-gradient(135deg, #FFE0B2, #FFCC80)' },
+          { id: 2, name: '领券中心', icon: icons.scissors, bgColor: 'linear-gradient(135deg, #FFCDD2, #EF9A9A)' }
         ]
       })
     }
+  },
+
+  // 根据名称获取快捷入口图标
+  getQuickEntryIcon(name) {
+    if (name.includes('会员')) return icons.vipCard
+    if (name.includes('券')) return icons.scissors
+    if (name.includes('限量')) return icons.fire
+    if (name.includes('新')) return icons.star
+    return icons.star
   },
 
   // 加载推荐商品

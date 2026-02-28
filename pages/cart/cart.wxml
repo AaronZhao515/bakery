@@ -37,7 +37,14 @@
       <view class="product-card" wx:for="{{cartList}}" wx:key="_id">
         <!-- 商品图片 -->
         <view class="product-image-wrap">
-          <image class="product-image" src="{{item.imageUrl || 'cloud://cloud1-5gh4dyhpb180b5fb.636c-cloud1-5gh4dyhpb180b5fb-1406006729/images/product-default.png'}}" mode="aspectFill" lazy-load/>
+          <image
+            class="product-image"
+            src="{{item.imageUrl}}"
+            mode="aspectFill"
+            lazy-load
+            binderror="onImageError"
+            data-index="{{index}}"
+          />
         </view>
 
         <!-- 商品信息 -->

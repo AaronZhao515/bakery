@@ -1,0 +1,351 @@
+<!-- 隐私政策页面 -->
+<view class="privacy-container">
+  <!-- 顶部标题区 -->
+  <view class="header-section">
+    <view class="header-title">隐私政策</view>
+    <view class="header-subtitle">暖心烘焙小程序</view>
+    <view class="update-date">更新日期：{{lastUpdated}}</view>
+  </view>
+
+  <!-- 简介 -->
+  <view class="content-section">
+    <view class="section-title">引言</view>
+    <view class="section-content">
+      <text class="paragraph">
+        暖心烘焙（以下简称"我们"）深知个人信息对您的重要性，我们会尽力保护您的个人信息安全。我们致力于维持您对我们的信任，恪守以下原则保护您的个人信息：权责一致原则、目的明确原则、选择同意原则、最小必要原则、确保安全原则、主体参与原则、公开透明原则等。同时，我们承诺，我们将按业界成熟的安全标准，采取相应的安全保护措施来保护您的个人信息。
+      </text>
+      <text class="paragraph">
+        请在使用我们的产品或服务前，仔细阅读并了解本《隐私政策》，以便您更好地了解我们如何处理您的个人信息。
+      </text>
+    </view>
+  </view>
+
+  <!-- 定义 -->
+  <view class="content-section">
+    <view class="section-title">一、定义</view>
+    <view class="section-content">
+      <view class="definition-item">
+        <text class="def-term">个人信息：</text>
+        <text class="def-content">指以电子或者其他方式记录的能够单独或者与其他信息结合识别特定自然人身份或者反映特定自然人活动情况的各种信息。</text>
+      </view>
+      <view class="definition-item">
+        <text class="def-term">个人敏感信息：</text>
+        <text class="def-content">包括身份证件号码、个人生物识别信息、银行账号、通信记录和内容、财产信息、征信信息、行踪轨迹、住宿信息、健康生理信息、交易信息、14岁以下（含）儿童的个人信息等。</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 信息收集 -->
+  <view class="content-section">
+    <view class="section-title">二、我们收集的信息</view>
+    <view class="section-content">
+      <text class="paragraph">
+        在您使用我们的服务过程中，我们会按照如下方式收集您在使用服务时主动提供或因为使用服务而产生的信息，用以向您提供服务、优化我们的服务以及保障您的账户安全：
+      </text>
+
+      <view class="subsection">
+        <view class="subsection-title">2.1 注册登录信息</view>
+        <view class="info-list">
+          <view class="info-item">
+            <text class="info-name">• 微信头像和昵称：</text>
+            <text class="info-desc">用于展示用户身份，当您使用微信登录时获取</text>
+          </view>
+          <view class="info-item">
+            <text class="info-name">• 手机号：</text>
+            <text class="info-desc">用于创建账户、订单配送联系、会员服务通知，是您的账户唯一标识</text>
+          </view>
+          <view class="info-item">
+            <text class="info-name">• OpenID：</text>
+            <text class="info-desc">微信分配的用户标识，用于关联您的微信账户</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="subsection">
+        <view class="subsection-title">2.2 订单相关信息</view>
+        <view class="info-list">
+          <view class="info-item">
+            <text class="info-name">• 收货地址：</text>
+            <text class="info-desc">包括姓名、手机号码、省市区、详细地址，用于商品配送</text>
+          </view>
+          <view class="info-item">
+            <text class="info-name">• 订单信息：</text>
+            <text class="info-desc">您购买的商品信息、金额、下单时间等</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="subsection">
+        <view class="subsection-title">2.3 会员服务信息</view>
+        <view class="info-list">
+          <view class="info-item">
+            <text class="info-name">• 会员积分：</text>
+            <text class="info-desc">记录您的消费积分和兑换记录</text>
+          </view>
+          <view class="info-item">
+            <text class="info-name">• 优惠券：</text>
+            <text class="info-desc">您领取和使用的优惠券信息</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="subsection">
+        <view class="subsection-title">2.4 设备信息</view>
+        <view class="info-list">
+          <view class="info-item">
+            <text class="info-name">• 设备型号、操作系统版本：</text>
+            <text class="info-desc">用于优化小程序的兼容性和体验</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 信息使用 -->
+  <view class="content-section">
+    <view class="section-title">三、我们如何使用信息</view>
+    <view class="section-content">
+      <text class="paragraph">我们严格遵守法律法规的规定以及与您的约定，将收集的信息用于以下用途：</text>
+
+      <view class="usage-list">
+        <view class="usage-item">
+          <view class="usage-number">1</view>
+          <view class="usage-content">
+            <text class="usage-title">提供产品或服务</text>
+            <text class="usage-desc">用于向您提供商品购买、订单配送、售后服务等核心业务功能</text>
+          </view>
+        </view>
+
+        <view class="usage-item">
+          <view class="usage-number">2</view>
+          <view class="usage-content">
+            <text class="usage-title">账户管理</text>
+            <text class="usage-desc">创建和维护您的账户，管理您的会员权益、积分和优惠券</text>
+          </view>
+        </view>
+
+        <view class="usage-item">
+          <view class="usage-number">3</view>
+          <view class="usage-content">
+            <text class="usage-title">订单配送</text>
+            <text class="usage-desc">将您的联系方式提供给物流配送方，以便完成商品配送</text>
+          </view>
+        </view>
+
+        <view class="usage-item">
+          <view class="usage-number">4</view>
+          <view class="usage-content">
+            <text class="usage-title">消息通知</text>
+            <text class="usage-desc">向您发送订单状态变更、会员权益变动、活动优惠等通知</text>
+          </view>
+        </view>
+
+        <view class="usage-item">
+          <view class="usage-number">5</view>
+          <view class="usage-content">
+            <text class="usage-title">客户服务</text>
+            <text class="usage-desc">处理您的咨询、投诉和售后需求</text>
+          </view>
+        </view>
+
+        <view class="usage-item">
+          <view class="usage-number">6</view>
+          <view class="usage-content">
+            <text class="usage-title">服务优化</text>
+            <text class="usage-desc">分析使用情况，改进我们的产品和服务质量</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 信息共享 -->
+  <view class="content-section">
+    <view class="section-title">四、信息共享与转让</view>
+    <view class="section-content">
+      <text class="paragraph highlight">
+        我们承诺，除以下情形外，未经您同意，我们不会与任何第三方共享或转让您的个人信息：
+      </text>
+
+      <view class="subsection">
+        <view class="subsection-title">4.1 物流服务提供商</view>
+        <text class="paragraph">
+          为实现商品配送，我们需要将您的收货信息（姓名、手机号、地址）提供给物流合作伙伴。我们仅会出于合法、正当、必要、特定、明确的目的共享您的个人信息，并且只会共享提供服务所必要的个人信息。
+        </text>
+      </view>
+
+      <view class="subsection">
+        <view class="subsection-title">4.2 支付服务提供商</view>
+        <text class="paragraph">
+          为完成支付交易，我们需要与微信支付共享交易信息，但我们不会分享您的敏感支付信息。
+        </text>
+      </view>
+
+      <view class="subsection">
+        <view class="subsection-title">4.3 法定情形</view>
+        <text class="paragraph">
+          根据法律法规规定、诉讼争议解决需要，或按行政、司法机关依法提出的要求，对外共享您的个人信息。
+        </text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 信息保护 -->
+  <view class="content-section">
+    <view class="section-title">五、信息保护与安全</view>
+    <view class="section-content">
+      <text class="paragraph">
+        我们非常重视个人信息安全，并采取一切合理可行的措施，保护您的个人信息：
+      </text>
+
+      <view class="security-list">
+        <view class="security-item">
+          <text class="security-icon">🔒</text>
+          <text class="security-text">数据加密存储，确保信息安全</text>
+        </view>
+        <view class="security-item">
+          <text class="security-icon">🛡️</text>
+          <text class="security-text">严格的访问控制和权限管理</text>
+        </view>
+        <view class="security-item">
+          <text class="security-icon">📋</text>
+          <text class="security-text">定期进行安全审计和风险评估</text>
+        </view>
+        <view class="security-item">
+          <text class="security-icon">⚡</text>
+          <text class="security-text">制定应急响应预案，应对安全事件</text>
+        </view>
+      </view>
+
+      <text class="paragraph">
+        请注意，互联网并非绝对安全的环境。我们强烈建议您妥善保管您的账户信息，使用复杂密码，并定期修改。
+      </text>
+    </view>
+  </view>
+
+  <!-- 您的权利 -->
+  <view class="content-section">
+    <view class="section-title">六、您的权利</view>
+    <view class="section-content">
+      <text class="paragraph">按照中国相关的法律、法规、标准，以及其他国家、地区的通行做法，我们保障您对自己的个人信息行使以下权利：</text>
+
+      <view class="right-list">
+        <view class="right-item">
+          <view class="right-title">访问权</view>
+          <text class="right-desc">您有权访问您的个人信息</text>
+        </view>
+        <view class="right-item">
+          <view class="right-title">更正权</view>
+          <text class="right-desc">您有权更正不准确的个人信息</text>
+        </view>
+        <view class="right-item">
+          <view class="right-title">删除权</view>
+          <text class="right-desc">在特定情形下，您有权要求我们删除您的个人信息</text>
+        </view>
+        <view class="right-item">
+          <view class="right-title">撤回同意权</view>
+          <text class="right-desc">您可以撤回之前授予的同意</text>
+        </view>
+        <view class="right-item">
+          <view class="right-title">注销账户权</view>
+          <text class="right-desc">您可以申请注销您的账户</text>
+        </view>
+      </view>
+
+      <text class="paragraph">
+        如需行使上述权利，请通过本政策文末的联系方式与我们联系。
+      </text>
+    </view>
+  </view>
+
+  <!-- 信息存储 -->
+  <view class="content-section">
+    <view class="section-title">七、信息存储与期限</view>
+    <view class="section-content">
+      <text class="paragraph">
+        我们将您的个人信息存储在中华人民共和国境内。我们仅在为实现本政策所述目的所必需的期限内保留您的个人信息，包括但不限于：
+      </text>
+      <view class="storage-list">
+        <view class="storage-item">
+          <text class="storage-label">账户信息：</text>
+          <text class="storage-value">在您使用我们的服务期间及注销后5年内</text>
+        </view>
+        <view class="storage-item">
+          <text class="storage-label">交易信息：</text>
+          <text class="storage-value">根据税务法规要求，保存10年</text>
+        </view>
+        <view class="storage-item">
+          <text class="storage-label">日志信息：</text>
+          <text class="storage-value">一般保存6个月</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 未成年人保护 -->
+  <view class="content-section">
+    <view class="section-title">八、未成年人保护</view>
+    <view class="section-content">
+      <text class="paragraph">
+        我们非常重视对未成年人个人信息的保护。根据相关法律法规的规定，若您是18周岁以下的未成年人，在使用我们的服务前，应事先取得您的家长或法定监护人的书面同意。
+      </text>
+      <text class="paragraph">
+        若您是未成年人的监护人，当您对您所监护的未成年人的个人信息有相关疑问时，请通过本政策中的联系方式与我们联系。
+      </text>
+    </view>
+  </view>
+
+  <!-- 政策更新 -->
+  <view class="content-section">
+    <view class="section-title">九、隐私政策更新</view>
+    <view class="section-content">
+      <text class="paragraph">
+        我们的隐私政策可能适时修订。未经您明确同意，我们不会削减您按照本隐私政策所应享有的权利。如该等变更会导致您在本政策项下权利的实质减损，我们将在变更生效前，通过在页面显著位置提示或向您发送电子邮件等方式通知您。
+      </text>
+      <text class="paragraph">
+        若您不同意修改后的隐私政策，您有权停止使用我们的服务。若您继续使用我们的服务，即视为您同意受经修订的隐私政策的约束。
+      </text>
+    </view>
+  </view>
+
+  <!-- 联系我们 -->
+  <view class="content-section contact-section">
+    <view class="section-title">十、联系我们</view>
+    <view class="section-content">
+      <text class="paragraph">
+        如果您对本隐私政策有任何疑问、意见或建议，或者您想要行使您的个人信息权利，请通过以下方式与我们联系：
+      </text>
+
+      <view class="contact-list">
+        <view class="contact-item" bindtap="copyEmail">
+          <text class="contact-label">电子邮箱：</text>
+          <text class="contact-value link">{{contactEmail}}</text>
+          <text class="copy-hint">(点击复制)</text>
+        </view>
+        <view class="contact-item" bindtap="makePhoneCall">
+          <text class="contact-label">客服电话：</text>
+          <text class="contact-value link">{{contactPhone}}</text>
+          <text class="copy-hint">(点击拨打)</text>
+        </view>
+        <view class="contact-item">
+          <text class="contact-label">联系地址：</text>
+          <text class="contact-value">上海市浦东新区XX路XX号暖心烘焙总部</text>
+        </view>
+        <view class="contact-item">
+          <text class="contact-label">工作时间：</text>
+          <text class="contact-value">周一至周五 9:00-18:00</text>
+        </view>
+      </view>
+
+      <text class="paragraph feedback-text">
+        我们将在收到您的反馈后15个工作日内回复。
+      </text>
+    </view>
+  </view>
+
+  <!-- 底部说明 -->
+  <view class="footer-section">
+    <text class="footer-text">感谢您信任并使用暖心烘焙小程序</text>
+    <text class="footer-copyright">© 2026 暖心烘焙 版权所有</text>
+  </view>
+</view>

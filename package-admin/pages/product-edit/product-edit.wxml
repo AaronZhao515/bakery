@@ -1,175 +1,226 @@
 <!-- 商品编辑页 -->
 <view class="product-edit-container">
-  <!-- 商品图片 -->
-  <view class="form-section">
-    <view class="section-title">商品图片 <text class="required">*</text></view>
-    <view class="image-upload-section">
-      <view class="image-list">
-        <view class="image-item" wx:for="{{product.images}}" wx:key="index">
-          <image src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}"></image>
-          <view class="delete-btn" catchtap="deleteImage" data-index="{{index}}">
-            <text class="iconfont icon-close"></text>
-          </view>
-          <view class="main-tag" wx:if="{{index === 0}}">主图</view>
-        </view>
-        <view class="upload-btn" bindtap="chooseImage" wx:if="{{product.images.length < 9}}">
-          <text class="iconfont icon-camera"></text>
-          <text class="upload-text">上传图片</text>
-          <text class="upload-tip">{{product.images.length}}/9</text>
-        </view>
-      </view>
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <view class="header-content">
+      <text class="page-title">{{isEdit ? '编辑商品' : '新增商品'}}</text>
+      <text class="page-subtitle">{{isEdit ? '修改商品信息' : '创建新商品'}}</text>
     </view>
   </view>
 
-  <!-- 基本信息 -->
-  <view class="form-section">
-    <view class="section-title">基本信息</view>
-    
-    <view class="form-item">
-      <view class="item-label">商品名称 <text class="required">*</text></view>
-      <input 
-        type="text" 
-        placeholder="请输入商品名称"
-        value="{{product.name}}"
-        bindinput="onNameInput"
-        maxlength="50"
-      />
+  <!-- 可滚动内容区 -->
+  <scroll-view class="scrollable-content" scroll-y>
+    <!-- 商品图片 -->
+    <view class="form-section">
+      <view class="section-title">商品图片 <text class="required">*</text></view>
+      <view class="image-upload-section">
+        <view class="image-list">
+          <view class="image-item" wx:for="{{product.images}}" wx:key="index">
+            <image src="{{item}}" mode="aspectFill" bindtap="previewImage" data-url="{{item}}"></image>
+            <view class="delete-btn" catchtap="deleteImage" data-index="{{index}}">
+              <text class="iconfont icon-close">✕</text>
+            </view>
+            <view class="main-tag" wx:if="{{index === 0}}">主图</view>
+          </view>
+          <view class="upload-btn" bindtap="chooseImage" wx:if="{{product.images.length < 9}}">
+            <text class="iconfont icon-camera">📷</text>
+            <text class="upload-text">上传图片</text>
+            <text class="upload-tip">{{product.images.length}}/9</text>
+          </view>
+        </view>
+      </view>
     </view>
 
-    <view class="form-item">
-      <view class="item-label">商品分类 <text class="required">*</text></view>
-      <picker bindchange="onCategoryChange" value="{{categoryIndex}}" range="{{categories}}" range-key="name">
-        <view class="picker-value {{product.categoryId ? '' : 'placeholder'}}">
+    <!-- 基本信息 -->
+    <view class="form-section">
+      <view class="section-title">基本信息</view>
+
+      <view class="form-item">
+        <view class="item-label">商品名称 <text class="required">*</text></view>
+        <input
+          type="text"
+          placeholder="请输入商品名称"
+          value="{{product.name}}"
+          bindinput="onNameInput"
+          maxlength="50"
+        />
+      </view>
+
+      <view class="form-item">
+        <view class="item-label">商品分类</view>
+        <view class="picker-value {{product.categoryId ? '' : 'placeholder'}}" bindtap="showCategoryPicker">
           {{product.categoryName || '请选择分类'}}
-          <text class="iconfont icon-right"></text>
+          <text class="iconfont icon-right">›</text>
         </view>
-      </picker>
-    </view>
+      </view>
 
-    <view class="form-item">
-      <view class="item-label">商品描述</view>
-      <textarea 
-        placeholder="请输入商品描述"
-        value="{{product.description}}"
-        bindinput="onDescInput"
-        maxlength="500"
-      />
-      <view class="char-count">{{product.description.length}}/500</view>
-    </view>
-  </view>
-
-  <!-- 价格设置 -->
-  <view class="form-section">
-    <view class="section-title">价格设置</view>
-    
-    <view class="form-item">
-      <view class="item-label">现价 <text class="required">*</text></view>
-      <view class="price-input">
-        <text class="currency">¥</text>
-        <input 
-          type="digit" 
-          placeholder="0.00"
-          value="{{product.price}}"
-          bindinput="onPriceInput"
+      <view class="form-item">
+        <view class="item-label">商品描述</view>
+        <textarea
+          placeholder="请输入商品描述"
+          value="{{product.description}}"
+          bindinput="onDescInput"
+          maxlength="500"
         />
+        <view class="char-count">{{product.description.length}}/500</view>
       </view>
     </view>
 
-    <view class="form-item">
-      <view class="item-label">原价</view>
-      <view class="price-input">
-        <text class="currency">¥</text>
-        <input 
-          type="digit" 
-          placeholder="0.00"
-          value="{{product.originalPrice}}"
-          bindinput="onOriginalPriceInput"
-        />
-      </view>
-    </view>
-  </view>
+    <!-- 价格设置 -->
+    <view class="form-section">
+      <view class="section-title">价格设置</view>
 
-  <!-- 库存设置 -->
-  <view class="form-section">
-    <view class="section-title">库存设置</view>
-    
-    <view class="form-item">
-      <view class="item-label">库存数量 <text class="required">*</text></view>
-      <input 
-        type="number" 
-        placeholder="请输入库存数量"
-        value="{{product.stock}}"
-        bindinput="onStockInput"
-      />
-    </view>
-
-    <view class="form-item">
-      <view class="item-label">库存预警值</view>
-      <input 
-        type="number" 
-        placeholder="低于此值会提醒补货"
-        value="{{product.warningStock}}"
-        bindinput="onWarningStockInput"
-      />
-    </view>
-  </view>
-
-  <!-- 规格设置 -->
-  <view class="form-section">
-    <view class="section-header">
-      <view class="section-title">规格设置</view>
-      <switch checked="{{product.hasSpecs}}" bindchange="toggleSpecs" color="#d4a574"/>
-    </view>
-    
-    <view class="specs-section" wx:if="{{product.hasSpecs}}">
-      <view class="spec-item" wx:for="{{product.specs}}" wx:key="index">
-        <view class="spec-header">
-          <input 
-            class="spec-name" 
-            placeholder="规格名称（如：大小）"
-            value="{{item.name}}"
-            bindinput="onSpecNameInput"
-            data-index="{{index}}"
+      <view class="form-item">
+        <view class="item-label">现价 <text class="required">*</text></view>
+        <view class="price-input">
+          <text class="currency">¥</text>
+          <input
+            type="digit"
+            placeholder="0.00"
+            value="{{product.price}}"
+            bindinput="onPriceInput"
           />
-          <text class="delete-spec" bindtap="deleteSpec" data-index="{{index}}">删除</text>
         </view>
-        <view class="spec-values">
-          <view class="spec-value-tag" wx:for="{{item.values}}" wx:for-item="value" wx:for-index="vIndex" wx:key="vIndex">
-            {{value}}
-            <text class="remove-value" bindtap="removeSpecValue" data-sindex="{{index}}" data-vindex="{{vIndex}}">×</text>
+      </view>
+
+      <view class="form-item">
+        <view class="item-label">原价</view>
+        <view class="price-input">
+          <text class="currency">¥</text>
+          <input
+            type="digit"
+            placeholder="0.00"
+            value="{{product.originalPrice}}"
+            bindinput="onOriginalPriceInput"
+          />
+        </view>
+      </view>
+    </view>
+
+    <!-- 库存设置 -->
+    <view class="form-section">
+      <view class="section-title">库存设置</view>
+
+      <view class="form-item">
+        <view class="item-label">库存数量 <text class="required">*</text></view>
+        <input
+          type="number"
+          placeholder="请输入库存数量"
+          value="{{product.stock}}"
+          bindinput="onStockInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <view class="item-label">库存预警值</view>
+        <input
+          type="number"
+          placeholder="低于此值会提醒补货"
+          value="{{product.warningStock}}"
+          bindinput="onWarningStockInput"
+        />
+      </view>
+    </view>
+
+    <!-- 规格设置 -->
+    <view class="form-section">
+      <view class="section-header">
+        <view class="section-title">规格设置</view>
+        <switch checked="{{product.hasSpecs}}" bindchange="toggleSpecs" color="#8B6347"/>
+      </view>
+
+      <view class="specs-section" wx:if="{{product.hasSpecs}}">
+        <view class="spec-item" wx:for="{{product.specs}}" wx:key="index">
+          <view class="spec-header">
+            <input
+              class="spec-name"
+              placeholder="规格名称（如：大小）"
+              value="{{item.name}}"
+              bindinput="onSpecNameInput"
+              data-index="{{index}}"
+            />
+            <text class="delete-spec" bindtap="deleteSpec" data-index="{{index}}">删除</text>
           </view>
-          <input 
-            class="add-value-input" 
-            placeholder="添加规格值"
-            confirm-type="done"
-            bindconfirm="addSpecValue"
-            data-index="{{index}}"
-          />
+          <view class="spec-values">
+            <view class="spec-value-tag" wx:for="{{item.values}}" wx:for-item="value" wx:for-index="vIndex" wx:key="vIndex">
+              {{value}}
+              <text class="remove-value" bindtap="removeSpecValue" data-sindex="{{index}}" data-vindex="{{vIndex}}">×</text>
+            </view>
+            <input
+              class="add-value-input"
+              placeholder="添加规格值"
+              confirm-type="done"
+              bindconfirm="addSpecValue"
+              data-index="{{index}}"
+            />
+          </view>
+        </view>
+        <view class="add-spec-btn" bindtap="addSpec">
+          <text class="iconfont icon-plus">+</text>
+          <text>添加规格</text>
         </view>
       </view>
-      <view class="add-spec-btn" bindtap="addSpec">
-        <text class="iconfont icon-plus"></text>
-        <text>添加规格</text>
+    </view>
+
+    <!-- 上架状态 -->
+    <view class="form-section">
+      <view class="form-item switch-item">
+        <view class="item-label">上架状态</view>
+        <switch checked="{{product.status === 'on'}}" bindchange="toggleStatus" color="#8B6347"/>
       </view>
     </view>
-  </view>
 
-  <!-- 上架状态 -->
-  <view class="form-section">
-    <view class="form-item switch-item">
-      <view class="item-label">上架状态</view>
-      <switch checked="{{product.status === 'on'}}" bindchange="toggleStatus" color="#d4a574"/>
-    </view>
-  </view>
+    <!-- 底部占位，确保最后的内容能被看到 -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
 
   <!-- 底部操作栏 -->
   <view class="bottom-bar">
+    <button class="cancel-btn" bindtap="goBack">取消</button>
     <button class="save-btn {{isSaving ? 'loading' : ''}}" bindtap="saveProduct">
       <text wx:if="{{!isSaving}}">{{isEdit ? '保存修改' : '发布商品'}}</text>
       <text wx:else>保存中...</text>
     </button>
   </view>
+</view>
 
-  <!-- 安全区域 -->
-  <view class="safe-area-bottom"></view>
+<!-- 分类选择弹窗 - 放在页面外部避免层级问题 -->
+<view class="category-modal-container" wx:if="{{showCategoryPicker}}" bindtap="hideCategoryPicker">
+  <view class="category-modal" catchtap="onModalTap">
+    <!-- Header -->
+    <view class="modal-header">
+      <text class="modal-title">选择分类</text>
+      <view class="modal-close" bindtap="hideCategoryPicker">
+        <text class="close-icon">×</text>
+      </view>
+    </view>
+
+    <!-- Category List -->
+    <scroll-view class="category-list" scroll-y>
+      <!-- 调试：显示分类数量 -->
+      <view style="padding: 20rpx; font-size: 24rpx; color: #999; text-align: center;">
+        共有 {{categories.length}} 个分类
+      </view>
+
+      <view class="category-item {{product.categoryId === item.id ? 'selected' : ''}}"
+            wx:for="{{categories}}"
+            wx:for-item="item"
+            wx:for-index="index"
+            wx:key="id"
+            bindtap="selectCategory"
+            data-index="{{index}}">
+        <text class="category-name">{{item.name}}</text>
+        <view class="category-check" wx:if="{{product.categoryId === item.id}}">
+          <text class="iconfont icon-check">✓</text>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view class="category-empty" wx:if="{{categories.length === 0}}">
+        <text class="empty-icon">📂</text>
+        <text class="empty-text">暂无分类数据</text>
+        <text style="font-size: 24rpx; color: #999; margin-top: 10rpx;">请检查 CloudBase 数据库</text>
+      </view>
+    </scroll-view>
+  </view>
 </view>

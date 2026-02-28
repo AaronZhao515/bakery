@@ -1,0 +1,590 @@
+<!-- 优惠券管理页 -->
+<view class="coupon-manage-container">
+  <!-- 顶部统计栏 -->
+  <view class="stats-bar">
+    <view class="stat-item">
+      <text class="stat-value">{{stats.total}}</text>
+      <text class="stat-label">全部优惠券</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{stats.active}}</text>
+      <text class="stat-label">进行中</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{stats.expired}}</text>
+      <text class="stat-label">已过期</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-value">{{stats.totalReceived}}</text>
+      <text class="stat-label">总领取</text>
+    </view>
+  </view>
+
+  <!-- 搜索和筛选 -->
+  <view class="filter-section">
+    <view class="search-box">
+      <view class="iconfont icon-search"></view>
+      <input
+        type="text"
+        placeholder="搜索优惠券名称"
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        confirm-type="search"
+        bindconfirm="onSearch"
+      />
+      <text class="clear-icon" wx:if="{{searchKeyword}}" bindtap="clearSearch">×</text>
+    </view>
+
+    <view class="status-tabs">
+      <view class="tab {{currentTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">
+        全部
+      </view>
+      <view class="tab {{currentTab === 'active' ? 'active' : ''}}" bindtap="switchTab" data-tab="active">
+        进行中
+      </view>
+      <view class="tab {{currentTab === 'pending' ? 'active' : ''}}" bindtap="switchTab" data-tab="pending">
+        未开始
+      </view>
+      <view class="tab {{currentTab === 'expired' ? 'active' : ''}}" bindtap="switchTab" data-tab="expired">
+        已结束
+      </view>
+    </view>
+  </view>
+
+  <!-- 优惠券列表 -->
+  <view class="coupon-list">
+    <view class="coupon-card {{item.status}}" wx:for="{{coupons}}" wx:key="_id">
+      <!-- 左侧彩色条 -->
+      <view class="coupon-color-bar"></view>
+
+      <!-- 图标区 -->
+      <view class="coupon-icon-wrapper" style="background: {{item.iconBg || '#FFF8E1'}};">
+        <view class="iconfont icon-gift" style="color: {{item.iconColor || '#D4A96A'}};"></view>
+      </view>
+
+      <!-- 内容区 -->
+      <view class="coupon-content">
+        <!-- 标题行 -->
+        <view class="coupon-title-row">
+          <text class="coupon-name">{{item.title || item.name}}</text>
+          <view class="coupon-tag" wx:if="{{item.tag}}" style="background: {{item.tagBg || '#FFF8E1'}}; color: {{item.tagColor || '#D4A96A'}};">{{item.tag}}</view>
+          <view class="status-tag {{item.status}}" wx:else>{{item.statusText}}</view>
+        </view>
+
+        <!-- 优惠金额 -->
+        <view class="coupon-discount" style="color: {{item.amountColor || '#D4A96A'}};">
+          <text wx:if="{{item.type === 'amount' || item.discountType === 'amount'}}">满{{item.minSpend || item.minAmount}}减{{item.value || item.amount}}</text>
+          <text wx:elif="{{item.type === 'discount' || item.discountType === 'discount'}}">{{item.value || item.amount}}折</text>
+          <text wx:else>{{item.value || item.amount}}{{item.type === 'amount' ? '元' : '折'}}</text>
+        </view>
+
+        <!-- 使用条件 -->
+        <view class="coupon-condition">
+          <text>{{item.desc || item.description}}</text>
+        </view>
+
+        <!-- 领取进度 -->
+        <view class="coupon-progress" wx:if="{{item.totalCount > 0}}">
+          <view class="progress-bar">
+            <view class="progress-fill" style="width: {{(item.receivedCount / item.totalCount) * 100}}%;"></view>
+          </view>
+          <view class="progress-info">
+            <text class="progress-text">已领 {{item.receivedCount || 0}} 人</text>
+            <text class="progress-text remaining" wx:if="{{item.totalCount - item.receivedCount > 0}}">剩余 {{item.totalCount - item.receivedCount}} 张</text>
+            <text class="progress-text remaining" wx:else>已领完</text>
+          </view>
+        </view>
+        <view class="coupon-status no-limit" wx:else>
+          <text wx:if="{{item.status === 'expired'}}">已结束 · 已领{{item.receivedCount || 0}}人</text>
+          <text wx:elif="{{item.status === 'pending'}}">未开始</text>
+          <text wx:else>已领取 {{item.receivedCount || 0}} 人 · 不限量</text>
+        </view>
+      </view>
+
+      <!-- 操作按钮区 -->
+      <view class="coupon-actions">
+        <view class="action-btn-small distribute" bindtap="openDistributeModal" data-id="{{item._id}}" wx:if="{{item.status !== 'expired'}}">
+          <view class="iconfont icon-distribute"></view>
+        </view>
+        <view class="action-btn-small edit" bindtap="editCoupon" data-id="{{item._id}}">
+          <view class="iconfont icon-edit"></view>
+        </view>
+        <view class="action-btn-small delete" bindtap="deleteCoupon" data-id="{{item._id}}">
+          <view class="iconfont icon-delete"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{coupons.length === 0 && !isLoading && page === 1}}">
+      <image class="empty-image" src="/images/empty-coupon.png" mode="aspectFit"></image>
+      <text class="empty-text">暂无优惠券</text>
+      <text class="empty-subtext">点击右下角按钮创建优惠券</text>
+    </view>
+
+    <!-- 加载更多 -->
+    <view class="load-more" wx:if="{{coupons.length > 0 && !isLoading}}">
+      <text wx:if="{{hasMore}}">上拉加载更多</text>
+      <text wx:else>没有更多优惠券了</text>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="loading-state" wx:if="{{isLoading && page === 1}}">
+      <text>加载中...</text>
+    </view>
+  </view>
+
+  <!-- 底部添加按钮 -->
+  <view class="add-btn-wrapper">
+    <view class="add-btn" bindtap="createCoupon" hover-class="add-btn-hover">
+      <view class="iconfont icon-plus"></view>
+      <text>新增优惠券</text>
+    </view>
+  </view>
+
+  <!-- 创建/编辑弹窗 -->
+  <view class="modal-container" wx:if="{{showModal}}">
+    <view class="modal-mask" bindtap="closeModal"></view>
+    <view class="modal-box">
+      <view class="modal-header">
+        <text class="modal-title">{{isEdit ? '编辑优惠券' : '创建优惠券'}}</text>
+        <view class="modal-close" bindtap="closeModal">
+          <text>×</text>
+        </view>
+      </view>
+
+      <scroll-view class="modal-scroll" scroll-y>
+        <view class="modal-form">
+          <!-- 优惠券类型 -->
+          <view class="form-item">
+            <view class="form-label">优惠券类型</view>
+            <view class="type-options">
+              <view class="type-option {{formData.type === 'amount' ? 'active' : ''}}" bindtap="selectType" data-type="amount">满减券</view>
+              <view class="type-option {{formData.type === 'discount' ? 'active' : ''}}" bindtap="selectType" data-type="discount">折扣券</view>
+            </view>
+          </view>
+
+          <!-- 优惠券名称 -->
+          <view class="form-item">
+            <view class="form-label">优惠券名称</view>
+            <input class="form-input" type="text" placeholder="请输入优惠券名称" value="{{formData.name}}" bindinput="onNameInput"/>
+          </view>
+
+          <!-- 优惠金额/折扣 -->
+          <view class="form-item">
+            <view class="form-label">{{formData.type === 'amount' ? '优惠金额' : '折扣力度'}}</view>
+            <view class="input-wrap">
+              <input class="form-input flex1" type="digit" placeholder="{{formData.type === 'amount' ? '请输入优惠金额' : '请输入折扣，如8.5'}}" value="{{formData.value}}" bindinput="onValueInput"/>
+              <text class="input-unit">{{formData.type === 'discount' ? '折' : '元'}}</text>
+            </view>
+          </view>
+
+          <!-- 最低消费 -->
+          <view class="form-item">
+            <view class="form-label">最低消费金额</view>
+            <view class="input-wrap">
+              <text class="input-unit left">¥</text>
+              <input class="form-input flex1" type="digit" placeholder="0表示无门槛" value="{{formData.minSpend}}" bindinput="onMinSpendInput"/>
+            </view>
+          </view>
+
+          <!-- 发放总量 -->
+          <view class="form-item">
+            <view class="form-label">发放总量</view>
+            <view class="input-wrap">
+              <input class="form-input flex1" type="number" placeholder="不填表示不限量" value="{{formData.totalCount}}" bindinput="onTotalCountInput"/>
+              <text class="input-unit">张</text>
+            </view>
+          </view>
+
+          <!-- 每人限领 -->
+          <view class="form-item">
+            <view class="form-label">每人限领</view>
+            <view class="limit-options">
+              <view class="limit-option {{formData.limitPerUser === 1 ? 'active' : ''}}" bindtap="selectLimit" data-limit="1">1张</view>
+              <view class="limit-option {{formData.limitPerUser === 2 ? 'active' : ''}}" bindtap="selectLimit" data-limit="2">2张</view>
+              <view class="limit-option {{formData.limitPerUser === 5 ? 'active' : ''}}" bindtap="selectLimit" data-limit="5">5张</view>
+              <view class="limit-option {{formData.limitPerUser === 0 ? 'active' : ''}}" bindtap="selectLimit" data-limit="0">不限</view>
+            </view>
+          </view>
+
+          <!-- 有效期 -->
+          <view class="form-item">
+            <view class="form-label">有效期</view>
+            <view class="date-range">
+              <picker mode="date" value="{{formData.startDate}}" bindchange="onStartDateChange">
+                <view class="date-picker">{{formData.startDate || '开始日期'}}</view>
+              </picker>
+              <text class="date-to">至</text>
+              <picker mode="date" value="{{formData.endDate}}" bindchange="onEndDateChange">
+                <view class="date-picker">{{formData.endDate || '结束日期'}}</view>
+              </picker>
+            </view>
+          </view>
+
+          <!-- 适用范围 -->
+          <view class="form-item">
+            <view class="form-label">适用范围</view>
+            <view class="scope-options">
+              <view class="scope-option {{formData.scope === 'all' ? 'active' : ''}}" bindtap="selectScope" data-scope="all">全店通用</view>
+              <view class="scope-option {{formData.scope === 'gift' ? 'active' : ''}}" bindtap="selectScope" data-scope="gift">专属礼包</view>
+              <view class="scope-option {{formData.scope === 'product' ? 'active' : ''}}" bindtap="selectScope" data-scope="product">指定商品</view>
+            </view>
+          </view>
+
+          <!-- 专属礼包提示 -->
+          <view class="form-item" wx:if="{{formData.scope === 'gift'}}">
+            <view class="form-tip gift-tip">
+              <text class="tip-icon">🎁</text>
+              <text class="tip-text">专属礼包优惠券只在用户会员中心的"专属礼包"区域显示</text>
+            </view>
+          </view>
+
+          <!-- 指定商品选择 -->
+          <view class="form-item" wx:if="{{formData.scope === 'product'}}">
+            <view class="form-label">适用商品</view>
+            <view class="product-select-area">
+              <view class="product-count" wx:if="{{formData.selectedProducts && formData.selectedProducts.length > 0}}">
+                已选择 {{formData.selectedProducts.length}} 件商品
+              </view>
+              <view class="product-empty" wx:else>
+                暂未选择商品
+              </view>
+              <!-- 已选商品图片列表 -->
+              <scroll-view class="selected-products-scroll" scroll-x wx:if="{{formData.selectedProducts && formData.selectedProducts.length > 0}}">
+                <view class="selected-product-item" wx:for="{{formData.selectedProducts}}" wx:key="_id">
+                  <image class="selected-product-img" src="{{item.images && item.images[0] ? item.images[0] : (item.image || '/images/empty-product.png')}}" mode="aspectFill"/>
+                  <text class="selected-product-name">{{item.name}}</text>
+                </view>
+              </scroll-view>
+              <view class="btn-select-product" bindtap="openProductSelector">
+                <text class="btn-text">{{formData.selectedProducts && formData.selectedProducts.length > 0 ? '修改商品' : '选择商品'}}</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 使用说明 -->
+          <view class="form-item">
+            <view class="form-label">使用说明</view>
+            <input class="form-input" type="text" placeholder="请输入优惠券使用说明" value="{{formData.description}}" bindinput="onDescriptionInput" maxlength="200"/>
+            <view class="input-count">{{formData.description.length || 0}}/200</view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="modal-footer">
+        <view class="btn-cancel" bindtap="closeModal">取消</view>
+        <view class="btn-confirm {{isSubmitting ? 'loading' : ''}}" bindtap="submitForm">
+          {{isSubmitting ? '处理中...' : (isEdit ? '保存修改' : '立即创建')}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 发放优惠券弹窗 -->
+  <view class="modal-mask" wx:if="{{showDistributeModal}}" bindtap="closeDistributeModal"></view>
+  <view class="modal-content-wrapper" wx:if="{{showDistributeModal}}">
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">发放优惠券</text>
+        <view class="modal-close" bindtap="closeDistributeModal">
+          <view class="iconfont icon-close"></view>
+        </view>
+      </view>
+
+      <view class="modal-body">
+        <!-- 优惠券信息 -->
+        <view class="selected-coupon-info" wx:if="{{distributeCoupon}}">
+          <text class="coupon-info-label">发放优惠券：</text>
+          <view class="coupon-info-card">
+            <text class="coupon-info-name">{{distributeCoupon.name}}</text>
+            <text class="coupon-info-detail">{{distributeCoupon.type === 'amount' ? '满减券 ¥' + distributeCoupon.value : '折扣券 ' + distributeCoupon.value + '折'}}</text>
+          </view>
+        </view>
+
+        <!-- 用户搜索 -->
+        <view class="form-group">
+          <text class="form-label">选择用户</text>
+          <view class="user-search-box" wx:if="{{!selectedUser}}">
+            <view class="iconfont icon-search"></view>
+            <input
+              type="text"
+              placeholder="输入昵称或手机号搜索用户"
+              value="{{userSearchKeyword}}"
+              bindinput="onUserSearchInput"
+            />
+          </view>
+
+          <!-- 搜索结果 -->
+          <view class="user-search-results" wx:if="{{userSearchResults.length > 0}}">
+            <view
+              class="user-result-item"
+              wx:for="{{userSearchResults}}"
+              wx:key="_id"
+              bindtap="selectUser"
+              data-id="{{item._id}}"
+            >
+              <image class="user-avatar" src="{{item.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"/>
+              <view class="user-info">
+                <text class="user-name">{{item.nickName}}</text>
+                <text class="user-phone" wx:if="{{item.phone}}">{{item.phone}}</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 已选用户 -->
+          <view class="selected-user-card" wx:if="{{selectedUser}}">
+            <image class="user-avatar" src="{{selectedUser.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"/>
+            <view class="user-info">
+              <text class="user-name">{{selectedUser.nickName}}</text>
+              <text class="user-phone" wx:if="{{selectedUser.phone}}">{{selectedUser.phone}}</text>
+            </view>
+            <text class="clear-user" bindtap="clearSelectedUser">更换</text>
+          </view>
+        </view>
+
+        <!-- 发放数量 -->
+        <view class="form-group">
+          <text class="form-label">发放数量</text>
+          <view class="count-selector">
+            <view class="count-btn {{distributeCount <= 1 ? 'disabled' : ''}}" bindtap="changeDistributeCount" data-delta="-1">-</view>
+            <input
+              type="number"
+              class="count-input"
+              value="{{distributeCount}}"
+              bindinput="onDistributeCountInput"
+            />
+            <view class="count-btn" bindtap="changeDistributeCount" data-delta="1">+</view>
+          </view>
+          <text class="form-hint" wx:if="{{distributeCoupon}}">
+            每人限领{{distributeCoupon.limitPerUser || '不限'}}张，剩余{{distributeCoupon.totalCount > 0 ? distributeCoupon.totalCount - distributeCoupon.receivedCount : '充足'}}
+          </text>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <view class="btn-cancel" bindtap="closeDistributeModal">取消</view>
+        <view class="btn-confirm {{isDistributing ? 'loading' : ''}}" bindtap="doDistribute">
+          <text wx:if="{{!isDistributing}}">确认发放</text>
+          <text wx:else>发放中...</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 发放记录弹窗 -->
+  <view class="modal-mask" wx:if="{{showRecordsModal}}" bindtap="closeRecordsModal"></view>
+  <view class="modal-content-wrapper" wx:if="{{showRecordsModal}}">
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">发放记录</text>
+        <view class="modal-close" bindtap="closeRecordsModal">
+          <view class="iconfont icon-close"></view>
+        </view>
+      </view>
+
+      <scroll-view class="modal-body records-list" scroll-y bindscrolltolower="loadMoreRecords">
+        <view class="record-item" wx:for="{{distributionRecords}}" wx:key="_id">
+          <image class="record-avatar" src="{{item.userAvatar || '/images/default-avatar.png'}}" mode="aspectFill"/>
+          <view class="record-info">
+            <text class="record-user">{{item.userName}}</text>
+            <text class="record-phone" wx:if="{{item.userPhone}}">{{item.userPhone}}</text>
+            <text class="record-time">{{item.createTime}}</text>
+          </view>
+          <view class="record-status {{item.status === 0 ? 'unused' : (item.status === 1 ? 'used' : 'expired')}}">
+            {{item.status === 0 ? '未使用' : (item.status === 1 ? '已使用' : '已过期')}}
+          </view>
+        </view>
+
+        <view class="records-empty" wx:if="{{distributionRecords.length === 0 && !isLoadingRecords}}">
+          <text>暂无发放记录</text>
+        </view>
+
+        <view class="records-loading" wx:if="{{isLoadingRecords}}">
+          <text>加载中...</text>
+        </view>
+
+        <view class="records-no-more" wx:if="{{distributionRecords.length > 0 && !recordsHasMore}}">
+          <text>没有更多记录了</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 回收优惠券弹窗 -->
+  <view class="modal-mask" wx:if="{{showRecallModal}}" bindtap="closeRecallModal"></view>
+  <view class="modal-content-wrapper" wx:if="{{showRecallModal}}">
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">回收优惠券</text>
+        <view class="modal-close" bindtap="closeRecallModal">
+          <view class="iconfont icon-close"></view>
+        </view>
+      </view>
+
+      <view class="modal-body">
+        <!-- 优惠券信息 -->
+        <view class="recall-info" wx:if="{{recallCoupon}}">
+          <text class="recall-info-title">回收优惠券：</text>
+          <view class="coupon-info-card">
+            <text class="coupon-info-name">{{recallCoupon.name}}</text>
+            <text class="coupon-info-detail">{{recallCoupon.type === 'amount' ? '满减券 ¥' + recallCoupon.value : '折扣券 ' + recallCoupon.value + '折'}}</text>
+          </view>
+          <view class="recall-info-item">
+            <text class="recall-info-label">未使用数量</text>
+            <text class="recall-info-value">{{recallCoupon.receivedCount - recallCoupon.usedCount}}张</text>
+          </view>
+        </view>
+
+        <!-- 可回收记录列表 -->
+        <view class="form-group" wx:if="{{recallableRecords.length > 0}}">
+          <text class="form-label">选择要回收的记录</text>
+          <scroll-view scroll-y class="user-search-results" style="max-height: 400rpx;">
+            <view
+              class="user-result-item"
+              wx:for="{{recallableRecords}}"
+              wx:key="_id"
+              bindtap="selectRecallRecord"
+              data-id="{{item._id}}"
+              style="background: {{recallRecord && recallRecord._id === item._id ? '#E8F5E9' : ''}}; border: {{recallRecord && recallRecord._id === item._id ? '2rpx solid #4caf50' : 'none'}};"
+            >
+              <image class="user-avatar" src="{{item.userAvatar || '/images/default-avatar.png'}}" mode="aspectFill"/>
+              <view class="user-info">
+                <text class="user-name">{{item.userName}}</text>
+                <text class="user-phone" wx:if="{{item.userPhone}}">{{item.userPhone}}</text>
+                <text class="record-time">发放时间：{{item.createTime}}</text>
+              </view>
+              <view class="record-status unused">未使用</view>
+            </view>
+          </scroll-view>
+        </view>
+
+        <view class="recall-warning" wx:if="{{!recallableRecords || recallableRecords.length === 0}}">
+          <text>暂无可回收的优惠券</text>
+        </view>
+
+        <view class="recall-warning" wx:if="{{recallRecord}}" style="margin-top: 20rpx;">
+          <text>⚠️ 回收后该用户将无法使用此优惠券</text>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <view class="btn-cancel" bindtap="closeRecallModal">取消</view>
+        <view class="btn-confirm {{isRecalling ? 'loading' : ''}}" bindtap="doRecall" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);" wx:if="{{recallableRecords.length > 0}}">
+          <text wx:if="{{!isRecalling}}">确认回收</text>
+          <text wx:else>回收中...</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 批量发放弹窗 -->
+  <view class="modal-mask" wx:if="{{showBatchDistributeModal}}" bindtap="closeBatchDistributeModal"></view>
+  <view class="modal-content-wrapper" wx:if="{{showBatchDistributeModal}}">
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">批量发放优惠券</text>
+        <view class="modal-close" bindtap="closeBatchDistributeModal">
+          <view class="iconfont icon-close"></view>
+        </view>
+      </view>
+
+      <view class="modal-body">
+        <!-- 优惠券信息 -->
+        <view class="selected-coupon-info" wx:if="{{distributeCoupon}}">
+          <text class="coupon-info-label">批量发放优惠券：</text>
+          <view class="coupon-info-card">
+            <text class="coupon-info-name">{{distributeCoupon.name}}</text>
+            <text class="coupon-info-detail">{{distributeCoupon.type === 'amount' ? '满减券 ¥' + distributeCoupon.value : '折扣券 ' + distributeCoupon.value + '折'}}</text>
+          </view>
+        </view>
+
+        <!-- 发放说明 -->
+        <view class="form-group">
+          <text class="form-label">发放说明</text>
+          <view class="recall-info" style="background: #E8F5E9; border: 2rpx solid #4caf50;">
+            <text style="font-size: 26rpx; color: #333; display: block; margin-bottom: 12rpx;">将自动发放给所有注册用户</text>
+            <text style="font-size: 24rpx; color: #666; display: block;">• 每人限领 {{distributeCoupon.limitPerUser || '不限'}} 张</text>
+            <text style="font-size: 24rpx; color: #666; display: block;" wx:if="{{distributeCoupon.totalCount > 0}}">• 剩余库存 {{distributeCoupon.totalCount - distributeCoupon.receivedCount}} 张</text>
+          </view>
+        </view>
+
+        <view class="recall-warning">
+          <text>⚠️ 请确认优惠券设置正确后再进行批量发放</text>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <view class="btn-cancel" bindtap="closeBatchDistributeModal">取消</view>
+        <view class="btn-confirm {{isDistributing ? 'loading' : ''}}" bindtap="doBatchDistribute">
+          <text wx:if="{{!isDistributing}}">确认批量发放</text>
+          <text wx:else>发放中...</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 商品选择弹窗 -->
+  <view class="modal-container product-selector-modal" wx:if="{{showProductSelector}}">
+    <view class="modal-mask" bindtap="closeProductSelector"></view>
+    <view class="modal-box product-selector-box">
+      <view class="modal-header">
+        <text class="modal-title">选择适用商品</text>
+        <view class="modal-close" bindtap="closeProductSelector">
+          <view class="iconfont icon-close"></view>
+        </view>
+      </view>
+
+      <view class="modal-scroll product-selector-scroll">
+        <!-- 搜索商品 -->
+        <view class="product-search-wrap">
+          <input class="product-search-input" type="text" placeholder="搜索商品名称" value="{{productSearchKeyword}}" bindinput="onProductSearchInput"/>
+          <view class="product-search-btn" bindtap="searchProducts">搜索</view>
+        </view>
+
+        <!-- 已选择提示 -->
+        <view class="selected-tip" wx:if="{{tempSelectedProducts.length > 0}}">
+          <text class="tip-text">已选择 {{tempSelectedProducts.length}} 件商品</text>
+          <text class="tip-action" bindtap="clearAllProducts">清空</text>
+        </view>
+
+        <!-- 商品列表 -->
+        <scroll-view class="product-list" scroll-y bindscrolltolower="loadMoreProducts">
+          <view
+            class="product-item {{item.selected ? 'selected' : ''}}"
+            wx:for="{{productList}}"
+            wx:key="_id"
+            bindtap="toggleProductSelect"
+            data-id="{{item._id}}"
+          >
+            <image class="product-image" src="{{item.image || (item.images && item.images[0]) || '/images/empty-product.png'}}" mode="aspectFill"/>
+            <view class="product-info">
+              <text class="product-name">{{item.name}}</text>
+              <text class="product-price">¥{{item.price}}</text>
+            </view>
+            <view class="product-checkbox">
+              <view class="checkbox-icon {{item.selected ? 'checked' : ''}}">
+                <text wx:if="{{item.selected}}">✓</text>
+              </view>
+            </view>
+          </view>
+
+          <view class="product-empty" wx:if="{{productList.length === 0 && !isLoadingProducts}}">
+            <text>暂无商品</text>
+          </view>
+
+          <view class="product-loading" wx:if="{{isLoadingProducts}}">
+            <text>加载中...</text>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view class="modal-footer">
+        <view class="btn-cancel" bindtap="closeProductSelector">取消</view>
+        <view class="btn-confirm" bindtap="confirmProductSelect">
+          确认选择({{tempSelectedProducts.length}})
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

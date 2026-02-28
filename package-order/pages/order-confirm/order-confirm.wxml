@@ -9,7 +9,8 @@
       </view>
       <text class="header-title">确认订单</text>
       <view class="order-type-badge {{orderType === 'pickup' ? 'pickup' : 'delivery'}}">
-        {{orderType === 'pickup' ? '🏪 预定自取' : '🚚 预定配送'}}
+        <image class="badge-icon" src="{{orderType === 'pickup' ? icons.storeFill : icons.truckFill}}" mode="aspectFit"/>
+        <text>{{orderType === 'pickup' ? '预定自取' : '预定配送'}}</text>
       </view>
     </view>
   </view>
@@ -21,7 +22,7 @@
     <view class="info-card">
       <view class="info-header">
         <view class="info-icon-wrap">
-          <text class="info-icon">{{orderType === 'pickup' ? '🏪' : '🚚'}}</text>
+          <image class="info-icon" src="{{orderType === 'pickup' ? icons.storeFill : icons.truckFill}}" mode="aspectFit" />
         </view>
         <view class="info-title-wrap">
           <text class="info-title">{{orderType === 'pickup' ? '到店自取' : '配送上门'}}</text>

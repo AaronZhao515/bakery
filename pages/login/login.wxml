@@ -1,4 +1,4 @@
-<!-- 登录页面 - 匹配 Figma 设计稿 -->
+<!-- 登录页面 - 使用微信2022新版头像昵称填写能力 -->
 <view class="login-page">
   <!-- 顶部装饰背景 -->
   <view class="header-bg">
@@ -14,52 +14,66 @@
     <text class="brand-slogan">用心烘焙每一份温暖</text>
   </view>
 
-  <!-- 登录卡片 -->
+  <!-- 登录卡片 - 新版轻量登录 -->
   <view class="login-card">
     <view class="card-header">
       <text class="welcome-title">欢迎回来</text>
-      <text class="welcome-subtitle">登录后享受更多会员权益</text>
+      <text class="welcome-subtitle">完善信息，享受会员权益</text>
     </view>
 
-    <!-- 已登录用户预览 -->
-    <view class="user-card" wx:if="{{userInfo.nickName}}">
-      <image class="user-avatar" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
-      <text class="user-name">{{userInfo.nickName}}</text>
-      <text class="user-tip">点击头像可更换</text>
+    <!-- 新版头像昵称填写区域 -->
+    <view class="profile-form">
+      <!-- 头像选择 - 使用新版 chooseAvatar -->
+      <button
+        class="avatar-wrapper"
+        open-type="chooseAvatar"
+        bind:chooseavatar="onChooseAvatar"
+      >
+        <image class="avatar-img" src="{{userInfo.avatarUrl || '/assets/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <view class="avatar-badge">
+          <text class="avatar-badge-icon">📷</text>
+        </view>
+        <text class="avatar-tip">{{userInfo.avatarUrl ? '点击更换头像' : '点击选择头像'}}</text>
+      </button>
+
+      <!-- 昵称输入 - 使用新版 nickname input -->
+      <view class="nickname-wrapper">
+        <text class="input-label">昵称</text>
+        <input
+          type="nickname"
+          class="nickname-input"
+          placeholder="请输入或选择微信昵称"
+          value="{{userInfo.nickName}}"
+          bind:change="onNickNameChange"
+          bind:nicknamereview="onNickNameReview"
+        />
+        <text class="input-hint">支持自动获取微信昵称</text>
+      </view>
     </view>
 
     <!-- 登录按钮组 -->
     <view class="login-actions">
-      <!-- 微信一键登录 -->
+      <!-- 手机号一键登录（推荐）-->
       <button
-        class="btn btn-primary btn-wechat"
-        bindtap="onWechatLogin"
+        class="btn btn-primary btn-phone"
+        open-type="getPhoneNumber"
+        bind:getphonenumber="onPhoneLogin"
         loading="{{isLoading}}"
         disabled="{{isLoading}}"
       >
-        <text class="btn-icon">💬</text>
+        <text class="btn-icon">📱</text>
         <text class="btn-text">微信一键登录</text>
       </button>
 
-      <!-- 获取头像（未登录时显示） -->
+      <!-- 传统登录方式（备用）-->
       <button
-        class="btn btn-secondary"
-        open-type="chooseAvatar"
-        bind:chooseavatar="onChooseAvatar"
-        wx:if="{{!userInfo.avatarUrl && !isLogin}}"
+        class="btn btn-link"
+        bindtap="onWechatLogin"
+        loading="{{isLoading}}"
+        disabled="{{isLoading}}"
+        wx:if="{{canUseOldLogin}}"
       >
-        <text class="btn-text">选择微信头像</text>
-      </button>
-
-      <!-- 绑定手机号 -->
-      <button
-        class="btn btn-secondary btn-phone"
-        open-type="getPhoneNumber"
-        bind:getphonenumber="onGetPhoneNumber"
-        wx:if="{{isLogin && !userInfo.phoneNumber}}"
-      >
-        <text class="btn-icon">📱</text>
-        <text class="btn-text">绑定手机号</text>
+        <text class="btn-text">使用传统方式登录</text>
       </button>
     </view>
 

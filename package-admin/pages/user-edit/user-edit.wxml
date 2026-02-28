@@ -1,0 +1,164 @@
+<!-- 用户编辑/添加页面 -->
+<view class="user-edit-container">
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <view class="header-content">
+      <text class="page-title">{{isEdit ? '编辑用户' : '添加用户'}}</text>
+      <text class="page-subtitle">{{isEdit ? '修改用户信息' : '创建新用户账号'}}</text>
+    </view>
+  </view>
+
+  <!-- 可滚动内容区 -->
+  <scroll-view class="scrollable-content" scroll-y>
+    <!-- 表单内容 -->
+    <view class="form-section">
+    <!-- 头像上传 -->
+    <view class="form-item avatar-item">
+      <text class="form-label">用户头像</text>
+      <view class="avatar-upload" bindtap="chooseAvatar">
+        <image wx:if="{{formData.avatarUrl}}" class="avatar-preview" src="{{formData.avatarUrl}}" mode="aspectFill"/>
+        <view wx:else class="avatar-placeholder">
+          <text class="avatar-icon">📷</text>
+          <text class="avatar-text">点击上传</text>
+        </view>
+        <view class="avatar-edit-badge">
+          <text>更换</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 昵称 -->
+    <view class="form-item">
+      <text class="form-label">
+        昵称
+        <text class="required">*</text>
+      </text>
+      <input
+        class="form-input"
+        type="text"
+        placeholder="请输入用户昵称"
+        value="{{formData.nickName}}"
+        bindinput="onInput"
+        data-field="nickName"
+      />
+    </view>
+
+    <!-- 手机号 -->
+    <view class="form-item">
+      <text class="form-label">
+        手机号
+        <text class="required">*</text>
+      </text>
+      <input
+        class="form-input"
+        type="number"
+        placeholder="请输入11位手机号"
+        value="{{formData.phone}}"
+        bindinput="onInput"
+        data-field="phone"
+        maxlength="11"
+      />
+    </view>
+
+    <!-- 会员等级 -->
+    <view class="form-item">
+      <text class="form-label">会员等级</text>
+      <picker mode="selector" range="{{memberLevels}}" range-key="name" value="{{formData.memberLevel}}" bindchange="onMemberLevelChange">
+        <view class="form-picker">
+          <text class="picker-text">{{memberLevels[formData.memberLevel].name}}</text>
+          <text class="picker-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 积分 -->
+    <view class="form-item">
+      <text class="form-label">积分</text>
+      <input
+        class="form-input"
+        type="number"
+        placeholder="请输入积分"
+        value="{{formData.points}}"
+        bindinput="onNumberInput"
+        data-field="points"
+      />
+    </view>
+
+    <!-- 余额 -->
+    <view class="form-item">
+      <text class="form-label">余额 (¥)</text>
+      <input
+        class="form-input"
+        type="digit"
+        placeholder="请输入余额"
+        value="{{formData.balance}}"
+        bindinput="onNumberInput"
+        data-field="balance"
+      />
+    </view>
+
+    <!-- 管理员开关 -->
+    <view class="form-item switch-item">
+      <view class="switch-info">
+        <text class="form-label">设为管理员</text>
+        <text class="switch-hint">开启后该用户拥有管理权限</text>
+      </view>
+      <switch
+        class="admin-switch"
+        checked="{{formData.isAdmin}}"
+        bindchange="onSwitchChange"
+        color="#8B6347"
+      />
+    </view>
+
+    <!-- 用户状态（仅编辑时显示） -->
+    <view class="form-item switch-item" wx:if="{{isEdit}}">
+      <view class="switch-info">
+        <text class="form-label">用户状态</text>
+        <text class="switch-hint">{{formData.status === 'active' ? '用户可正常登录和使用' : '用户已被禁用，无法登录'}}</text>
+      </view>
+      <view class="status-toggle {{formData.status === 'active' ? 'active' : 'disabled'}}" bindtap="toggleUserStatus">
+        <text class="status-text">{{formData.status === 'active' ? '正常' : '已禁用'}}</text>
+        <switch checked="{{formData.status === 'active'}}" color="#8B6347" disabled/>
+      </view>
+    </view>
+
+    <!-- 禁用/启用按钮（仅编辑时显示） -->
+    <view class="form-item delete-item" wx:if="{{isEdit}}">
+      <view class="delete-btn {{formData.status === 'disabled' ? 'enable' : 'disable'}}" bindtap="toggleUserStatus">
+        <text class="delete-icon">{{formData.status === 'disabled' ? '✓' : '✕'}}</text>
+        <text class="delete-text">{{formData.status === 'disabled' ? '启用该用户' : '禁用该用户'}}</text>
+      </view>
+    </view>
+  </view>
+
+    <!-- 底部占位 -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
+
+  <!-- 底部按钮 -->
+  <view class="footer">
+    <button class="footer-btn secondary" bindtap="goBack">取消</button>
+    <button class="footer-btn primary" bindtap="saveUser">保存</button>
+  </view>
+
+  <!-- 启用被禁用用户确认弹窗 -->
+  <view class="confirm-modal {{showEnableConfirm ? 'show' : ''}}" wx:if="{{showEnableConfirm}}">
+    <view class="modal-mask" bindtap="hideEnableConfirm"></view>
+    <view class="modal-content">
+      <view class="confirm-header">
+        <view class="confirm-icon" style="background: #E8F5E9; color: #4CAF50;">💡</view>
+        <text class="confirm-title">用户已存在</text>
+      </view>
+      <view class="confirm-body">
+        <text class="confirm-text">手机号 {{pendingFormData.phone}} 已被注册</text>
+        <text class="confirm-subtext">用户「{{enableConfirmData.nickName || '未命名用户'}}」当前处于<text style="color: #E57373; font-weight: 600;">禁用状态</text></text>
+        <text class="confirm-hint">是否启用该用户并更新信息？</text>
+      </view>
+      <view class="confirm-footer">
+        <button class="confirm-btn secondary" bindtap="hideEnableConfirm">取消</button>
+        <button class="confirm-btn primary" bindtap="confirmEnableUser">启用并更新</button>
+      </view>
+    </view>
+  </view>
+</view>

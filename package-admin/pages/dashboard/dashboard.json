@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "小赵面食 - 管理后台",
+  "navigationBarBackgroundColor": "#8B6347",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#FDF8F3"
+}

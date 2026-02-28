@@ -1,2 +1,218 @@
-<!--package-admin/pages/statistics/statistics.wxml-->
-<text>package-admin/pages/statistics/statistics.wxml</text>
+<!-- 数据统计页面 -->
+<view class="statistics-container">
+  <!-- 加载错误状态 -->
+  <view class="load-error" wx:if="{{loadError}}">
+    <text class="empty-icon">⚠️</text>
+    <text class="empty-text">加载失败</text>
+    <text class="empty-subtext">请检查网络后重试</text>
+    <button class="retry-btn" bindtap="retryLoad">重新加载</button>
+  </view>
+
+  <!-- 正常内容 -->
+  <block wx:if="{{!loadError}}">
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <text class="page-title">销售数据统计</text>
+    <text class="page-subtitle">多维度经营数据分析</text>
+  </view>
+
+  <!-- 顶部汇总卡片 -->
+  <view class="summary-cards">
+    <view class="summary-card today">
+      <view class="card-icon">📊</view>
+      <view class="card-content">
+        <text class="card-label">今日销售</text>
+        <text class="card-value">¥{{statistics.today.salesAmount}}</text>
+        <text class="card-compare {{statistics.today.salesAmount >= statistics.yesterday.salesAmount ? 'up' : 'down'}}">
+          较昨日 {{statistics.today.salesAmount >= statistics.yesterday.salesAmount ? '+' : ''}}{{todayComparePercent}}%
+        </text>
+      </view>
+    </view>
+
+    <view class="summary-card week">
+      <view class="card-icon">📈</view>
+      <view class="card-content">
+        <text class="card-label">本周销售</text>
+        <text class="card-value">¥{{statistics.week.salesAmount}}</text>
+        <text class="card-compare">{{statistics.week.orderCount}} 单</text>
+      </view>
+    </view>
+
+    <view class="summary-card month">
+      <view class="card-icon">📅</view>
+      <view class="card-content">
+        <text class="card-label">本月销售</text>
+        <text class="card-value">¥{{statistics.month.salesAmount}}</text>
+        <text class="card-compare">{{statistics.month.orderCount}} 单</text>
+      </view>
+    </view>
+
+    <view class="summary-card year">
+      <view class="card-icon">🏆</view>
+      <view class="card-content">
+        <text class="card-label">年度销售</text>
+        <text class="card-value">¥{{statistics.year.salesAmount}}</text>
+        <text class="card-compare">{{statistics.year.orderCount}} 单</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 趋势分析 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">销售趋势</text>
+      <view class="period-tabs">
+        <view class="tab {{trendPeriod === 'week' ? 'active' : ''}}" bindtap="switchTrendPeriod" data-period="week">本周</view>
+        <view class="tab {{trendPeriod === 'month' ? 'active' : ''}}" bindtap="switchTrendPeriod" data-period="month">本月</view>
+        <view class="tab {{trendPeriod === 'year' ? 'active' : ''}}" bindtap="switchTrendPeriod" data-period="year">全年</view>
+      </view>
+    </view>
+
+    <!-- 趋势图表区域 -->
+    <view class="chart-container">
+      <view class="chart-placeholder" wx:if="{{hasTrendData}}">
+        <view class="trend-bars">
+          <view class="trend-bar-item" wx:for="{{trendData}}" wx:key="index">
+            <view class="bar-wrapper">
+              <view class="bar" style="height: {{item.percent}}%; background: {{item.color}};"></view>
+            </view>
+            <text class="bar-label">{{item.label}}</text>
+            <text class="bar-value">¥{{item.value}}</text>
+          </view>
+        </view>
+      </view>
+      <!-- 空状态 -->
+      <view class="empty-state" wx:if="{{!hasTrendData && !isLoading}}">
+        <text class="empty-icon">📊</text>
+        <text class="empty-text">暂无趋势数据</text>
+        <text class="empty-subtext">该时段暂未有销售记录</text>
+      </view>
+    </view>
+
+    <!-- 趋势统计 -->
+    <view class="trend-stats">
+      <view class="trend-stat-item">
+        <text class="stat-label">最高销售额</text>
+        <text class="stat-value">¥{{trendStats.maxAmount}}</text>
+      </view>
+      <view class="trend-stat-item">
+        <text class="stat-label">平均销售额</text>
+        <text class="stat-value">¥{{trendStats.avgAmount}}</text>
+      </view>
+      <view class="trend-stat-item">
+        <text class="stat-label">总订单数</text>
+        <text class="stat-value">{{trendStats.totalOrders}} 单</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 时段分析 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">时段分析</text>
+      <text class="section-subtitle">今日各时段销售分布</text>
+    </view>
+
+    <view class="time-analysis" wx:if="{{hasTimeData}}">
+      <view class="time-slot" wx:for="{{timeSlots}}" wx:key="time">
+        <view class="time-label">{{item.time}}</view>
+        <view class="time-bar-wrapper">
+          <view class="time-bar" style="width: {{item.percent}}%;"></view>
+        </view>
+        <view class="time-value">¥{{item.amount}}</view>
+        <view class="time-orders">{{item.orders}}单</view>
+      </view>
+    </view>
+    <!-- 空状态 -->
+    <view class="empty-state small" wx:if="{{!hasTimeData && !isLoading}}">
+      <text class="empty-text">今日暂无时段时间分布数据</text>
+    </view>
+  </view>
+
+  <!-- 商品销售排行 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">热销商品 TOP10</text>
+      <view class="rank-tabs">
+        <view class="tab {{rankPeriod === 'today' ? 'active' : ''}}" bindtap="switchRankPeriod" data-period="today">今日</view>
+        <view class="tab {{rankPeriod === 'week' ? 'active' : ''}}" bindtap="switchRankPeriod" data-period="week">本周</view>
+        <view class="tab {{rankPeriod === 'month' ? 'active' : ''}}" bindtap="switchRankPeriod" data-period="month">本月</view>
+      </view>
+    </view>
+
+    <view class="product-rank-list" wx:if="{{hasRankingData}}">
+      <view class="rank-header">
+        <text class="col-rank">排名</text>
+        <text class="col-product">商品</text>
+        <text class="col-sales">销量</text>
+        <text class="col-amount">销售额</text>
+      </view>
+      <view class="rank-item {{index < 3 ? 'top' + (index + 1) : ''}}" wx:for="{{productRanking}}" wx:key="productId">
+        <view class="col-rank">
+          <text class="rank-num">{{index + 1}}</text>
+        </view>
+        <view class="col-product">
+          <image class="product-thumb" src="{{item.image || '/images/default-product.png'}}" mode="aspectFill"></image>
+          <text class="product-name">{{item.name}}</text>
+        </view>
+        <text class="col-sales">{{item.salesCount}}</text>
+        <text class="col-amount">¥{{item.salesAmount}}</text>
+      </view>
+    </view>
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{!hasRankingData && !isLoading}}">
+      <text class="empty-icon">🏆</text>
+      <text class="empty-text">暂无商品销售数据</text>
+      <text class="empty-subtext">{{rankPeriod === 'today' ? '今日暂未有商品销售' : rankPeriod === 'week' ? '本周暂未有商品销售' : '本月暂未有商品销售'}}</text>
+    </view>
+  </view>
+
+  <!-- 数据洞察 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">数据洞察</text>
+    </view>
+
+    <view class="insights-cards">
+      <view class="insight-card">
+        <view class="insight-icon">💡</view>
+        <view class="insight-content">
+          <text class="insight-title">客单价分析</text>
+          <text class="insight-value">¥{{insights.avgOrderAmount}}</text>
+          <text class="insight-desc">平均每单金额</text>
+        </view>
+      </view>
+
+      <view class="insight-card">
+        <view class="insight-icon">🎯</view>
+        <view class="insight-content">
+          <text class="insight-title">转化率</text>
+          <text class="insight-value">{{insights.conversionRate}}%</text>
+          <text class="insight-desc">浏览到下单比例</text>
+        </view>
+      </view>
+
+      <view class="insight-card">
+        <view class="insight-icon">⏰</view>
+        <view class="insight-content">
+          <text class="insight-title">高峰时段</text>
+          <text class="insight-value">{{insights.peakHour}}</text>
+          <text class="insight-desc">订单最多时段</text>
+        </view>
+      </view>
+
+      <view class="insight-card">
+        <view class="insight-icon">🔄</view>
+        <view class="insight-content">
+          <text class="insight-title">复购率</text>
+          <text class="insight-value">{{insights.repurchaseRate}}%</text>
+          <text class="insight-desc">回头客占比</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部安全区域 -->
+  <view class="safe-area-bottom"></view>
+  </block>
+</view>

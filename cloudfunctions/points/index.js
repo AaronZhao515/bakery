@@ -48,8 +48,32 @@ exports.main = async (event, context) => {
 async function getList(openid, data) {
   const { type, page = 1, pageSize = 20 } = data;
 
+  // 先获取用户的 _id（后台充值可能使用 _id 作为 userId）
+  let userDocId = null;
+  try {
+    const userResult = await db.collection('users')
+      .where({ _openid: openid })
+      .limit(1)
+      .get();
+    if (userResult.data.length > 0 && userResult.data[0]._id) {
+      userDocId = userResult.data[0]._id;
+    }
+  } catch (e) {
+    console.log('[Points/getList] 获取用户ID失败:', e.message);
+  }
+
+  // 构建查询条件 - 同时匹配 openid 或 userId
+  // 支持新旧两种数据结构：
+  // 新数据：有 openid 字段存储 _openid
+  // 旧数据：userId 字段可能是 _openid 或 _id
   const where = {
-    userId: openid
+    $or: [
+      { openid: openid },           // 新格式：匹配 openid 字段
+      { userId: openid },           // 旧格式：userId 存储的是 openid
+      ...(userDocId ? [
+        { userId: userDocId }       // userId 存储的是 _id
+      ] : [])
+    ]
   };
 
   // 根据类型筛选
@@ -57,7 +81,7 @@ async function getList(openid, data) {
     where.type = type;
   }
 
-  console.log('[Points/getList] 查询条件:', where);
+  console.log('[Points/getList] 查询条件:', where, '当前用户openid:', openid, '用户_docId:', userDocId);
 
   // 查询总数
   const countResult = await db.collection('pointsHistory')
@@ -111,8 +135,23 @@ async function add(openid, data) {
 
   const now = db.serverDate();
 
+  // 获取用户的 _id
+  let userDocId = null;
+  try {
+    const userResult = await db.collection('users')
+      .where({ _openid: openid })
+      .limit(1)
+      .get();
+    if (userResult.data.length > 0 && userResult.data[0]._id) {
+      userDocId = userResult.data[0]._id;
+    }
+  } catch (e) {
+    console.log('[Points/add] 获取用户_docId失败:', e.message);
+  }
+
   const record = {
-    userId: openid,
+    userId: userDocId || openid,  // 优先使用 _id，获取不到则用 openid
+    openid: openid,               // 同时存储 openid
     label,
     desc: desc || '',
     points,
@@ -128,7 +167,7 @@ async function add(openid, data) {
     data: record
   });
 
-  console.log('[Points/add] 添加记录:', result._id);
+  console.log('[Points/add] 添加记录:', result._id, 'userId:', record.userId, 'openid:', record.openid);
 
   return {
     code: 0,

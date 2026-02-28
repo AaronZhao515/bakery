@@ -35,7 +35,8 @@
     <view class="stock-item {{item.stock <= item.warningStock ? 'warning' : ''}}" 
           wx:for="{{stockList}}" 
           wx:key="id">
-      <image class="product-image" src="{{item.image || '/images/default-product.png'}}" mode="aspectFill"></image>
+      <image class="product-image" src="{{item.image}}" mode="aspectFill" wx:if="{{item.image}}"></image>
+      <view class="product-image placeholder" wx:else></view>
       
       <view class="stock-info">
         <view class="product-name">{{item.name}}</view>
@@ -51,20 +52,20 @@
       </view>
 
       <view class="stock-actions">
-        <view class="action-btn in" bindtap="showStockModal" data-type="in" data-id="{{item.id}}" data-name="{{item.name}}">
+        <button class="action-btn in" bindtap="showStockModal" data-type="in" data-id="{{item.id}}" data-name="{{item.name}}" plain>
           <text class="iconfont icon-in"></text>
           <text>入库</text>
-        </view>
-        <view class="action-btn out" bindtap="showStockModal" data-type="out" data-id="{{item.id}}" data-name="{{item.name}}">
+        </button>
+        <button class="action-btn out {{item.stock <= 0 ? 'disabled' : ''}}" bindtap="showStockModal" data-type="out" data-id="{{item.id}}" data-name="{{item.name}}" plain disabled="{{item.stock <= 0}}">
           <text class="iconfont icon-out"></text>
           <text>出库</text>
-        </view>
+        </button>
       </view>
     </view>
 
     <!-- 空状态 -->
     <view class="empty-state" wx:if="{{stockList.length === 0 && !isLoading}}">
-      <image class="empty-image" src="/images/empty-stock.png" mode="aspectFit"></image>
+      <view class="empty-icon">📦</view>
       <text class="empty-text">{{currentTab === 'warning' ? '暂无库存预警商品' : '暂无库存数据'}}</text>
     </view>
   </view>
@@ -121,24 +122,31 @@
 </view>
 
 <!-- 库存调整弹窗 -->
-<view class="stock-modal {{showModal ? 'show' : ''}}">
-  <view class="modal-mask" bindtap="hideModal"></view>
-  <view class="modal-content">
-    <view class="modal-header">
-      <text class="modal-title">{{modalType === 'in' ? '商品入库' : '商品出库'}}</text>
-      <text class="close-btn" bindtap="hideModal">×</text>
-    </view>
-    
-    <view class="modal-body">
-      <view class="product-info">
-        <text class="label">商品名称</text>
-        <text class="value">{{modalProductName}}</text>
+<view class="stock-modal-container" hidden="{{!showModal}}" bindtap="hideModal">
+  <view class="stock-modal" catchtap="onModalTap">
+    <!-- Header -->
+    <view class="stock-modal-header">
+      <text class="stock-modal-title">{{modalType === 'in' ? '商品入库' : '商品出库'}}</text>
+      <view class="stock-modal-close" bindtap="hideModal">
+        <text class="close-icon">×</text>
       </view>
+    </view>
 
+    <!-- Product Info -->
+    <view class="stock-modal-product">
+      <text class="product-label">商品名称</text>
+      <text class="product-value">{{modalProductName}}</text>
+    </view>
+
+    <view class="stock-modal-divider"></view>
+
+    <!-- Form -->
+    <view class="stock-modal-body">
       <view class="form-item">
-        <text class="label">{{modalType === 'in' ? '入库数量' : '出库数量'}} <text class="required">*</text></text>
-        <input 
-          type="number" 
+        <text class="form-label">{{modalType === 'in' ? '入库数量' : '出库数量'}} <text class="required">*</text></text>
+        <input
+          class="form-input"
+          type="number"
           placeholder="请输入数量"
           value="{{modalQuantity}}"
           bindinput="onQuantityInput"
@@ -146,7 +154,7 @@
       </view>
 
       <view class="form-item">
-        <text class="label">操作类型</text>
+        <text class="form-label">操作类型</text>
         <picker bindchange="onOperationTypeChange" value="{{operationTypeIndex}}" range="{{operationTypes}}" range-key="name">
           <view class="picker-value">
             {{operationTypes[operationTypeIndex].name}}
@@ -156,8 +164,9 @@
       </view>
 
       <view class="form-item">
-        <text class="label">备注</text>
-        <textarea 
+        <text class="form-label">备注</text>
+        <textarea
+          class="form-textarea"
           placeholder="请输入备注信息（选填）"
           value="{{modalRemark}}"
           bindinput="onRemarkInput"
@@ -166,9 +175,10 @@
       </view>
     </view>
 
-    <view class="modal-footer">
-      <button class="cancel-btn" bindtap="hideModal">取消</button>
-      <button class="confirm-btn {{modalType === 'in' ? 'in' : 'out'}}" bindtap="confirmStockOperation">
+    <!-- Footer -->
+    <view class="stock-modal-footer">
+      <button class="cancel-btn" bindtap="hideModal" plain>取消</button>
+      <button class="confirm-btn {{modalType === 'in' ? 'in' : 'out'}}" bindtap="confirmStockOperation" plain>
         确认{{modalType === 'in' ? '入库' : '出库'}}
       </button>
     </view>

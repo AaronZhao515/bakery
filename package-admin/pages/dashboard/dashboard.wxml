@@ -1,2 +1,239 @@
-<!--package-admin/pages/dashboard/dashboard.wxml-->
-<text>package-admin/pages/dashboard/dashboard.wxml</text>
+<!-- Admin 仪表板 -->
+<view class="dashboard-container">
+  <!-- 顶部欢迎栏 -->
+  <view class="header-section">
+    <view class="user-welcome">
+      <image class="avatar" src="{{adminInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <view class="welcome-text">
+        <text class="greeting">欢迎回来，{{adminInfo.nickName || '管理员'}}</text>
+        <text class="date">{{currentDate}}</text>
+      </view>
+    </view>
+    <view class="header-actions">
+      <view class="action-btn" bindtap="refreshData">
+        <text class="iconfont icon-refresh"></text>
+      </view>
+      <view class="action-btn" bindtap="goToSettings">
+        <text class="iconfont icon-setting"></text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据概览卡片 -->
+  <view class="stats-section">
+    <view class="stats-grid">
+      <!-- 今日销售额 -->
+      <view class="stat-card primary" bindtap="goToSalesStatistics">
+        <view class="stat-icon">
+          <text class="iconfont icon-money"></text>
+        </view>
+        <view class="stat-content">
+          <text class="stat-value">¥{{statistics.today.salesAmount}}</text>
+          <text class="stat-label">今日销售额</text>
+          <view class="stat-trend {{statistics.today.salesAmount >= statistics.yesterday.salesAmount ? 'up' : 'down'}}">
+            <text class="iconfont {{statistics.today.salesAmount >= statistics.yesterday.salesAmount ? 'icon-up' : 'icon-down'}}"></text>
+            <text>{{trendPercent}}%</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 今日订单 -->
+      <view class="stat-card secondary" bindtap="goToTodayOrders">
+        <view class="stat-icon">
+          <text class="iconfont icon-order"></text>
+        </view>
+        <view class="stat-content">
+          <text class="stat-value">{{statistics.today.orderCount}}</text>
+          <text class="stat-label">今日订单</text>
+        </view>
+      </view>
+
+      <!-- 待处理订单 -->
+      <view class="stat-card warning" bindtap="goToPendingOrders">
+        <view class="stat-badge" wx:if="{{statistics.pendingOrderCount > 0}}">{{statistics.pendingOrderCount}}</view>
+        <view class="stat-icon">
+          <text class="iconfont icon-pending"></text>
+        </view>
+        <view class="stat-content">
+          <text class="stat-value">{{statistics.pendingOrderCount}}</text>
+          <text class="stat-label">待处理订单</text>
+        </view>
+      </view>
+
+      <!-- 库存预警 -->
+      <view class="stat-card danger" bindtap="goToStockWarning">
+        <view class="stat-badge" wx:if="{{statistics.stockWarningCount > 0}}">{{statistics.stockWarningCount}}</view>
+        <view class="stat-icon">
+          <text class="iconfont icon-warning"></text>
+        </view>
+        <view class="stat-content">
+          <text class="stat-value">{{statistics.stockWarningCount}}</text>
+          <text class="stat-label">库存预警</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 周期统计 -->
+    <view class="period-stats">
+      <view class="period-item">
+        <text class="period-label">昨日销售额</text>
+        <text class="period-value">¥{{statistics.yesterday.salesAmount}}</text>
+      </view>
+      <view class="period-divider"></view>
+      <view class="period-item">
+        <text class="period-label">本周销售额</text>
+        <text class="period-value">¥{{statistics.week.salesAmount}}</text>
+      </view>
+      <view class="period-divider"></view>
+      <view class="period-item">
+        <text class="period-label">本月销售额</text>
+        <text class="period-value">¥{{statistics.month.salesAmount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能导航菜单 -->
+  <view class="menu-section">
+    <view class="section-title">功能管理</view>
+    <view class="menu-grid">
+      <view class="menu-item" bindtap="goToProductManage">
+        <view class="menu-icon-wrap">
+          <image class="menu-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOEI2MzQ3IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIgMTJoMjAiPjwvcGF0aD48cGF0aCBkPSJNMjAgMTJ2NmEyIDIgMCAwIDEtMiAySDZhMiAyIDAgMCAxLTItMnYtNiI+PC9wYXRoPjxwYXRoIGQ9Ik0xMiAyYTQgNCAwIDAgMSA0IDR2Nkg4VjZhNCA0IDAgMCAxIDQtNHoiPjwvcGF0aD48L3N2Zz4=" mode="aspectFit"/>
+        </view>
+        <text class="menu-label">商品管理</text>
+        <text class="menu-desc">{{statistics.productCount}}个商品</text>
+      </view>
+
+      <view class="menu-item" bindtap="goToOrderManage">
+        <view class="menu-icon-wrap">
+          <image class="menu-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjNEE5MEQ5IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTE0IDJINmEyIDIgMCAwIDAtMiAydjE2YTIgMiAwIDAgMCAyIDJoMTJhMiAyIDAgMCAwIDItMlY4eiI+PC9wYXRoPjxwb2x5bGluZSBwb2ludHM9IjE0IDIgMTQgOCAyMCA4Ij48L3BvbHlsaW5lPjxsaW5lIHgxPSIxNiIgeTE9IjEzIiB4Mj0iOCIgeTI9IjEzIj48L2xpbmU+PGxpbmUgeDE9IjE2IiB5MT0iMTciIHgyPSI4IiB5Mj0iMTciPjwvbGluZT48cG9seWxpbmUgcG9pbnRzPSIxMCA5IDkgOSA4IDkiPjwvcG9seWxpbmU+PC9zdmc+" mode="aspectFit"/>
+        </view>
+        <text class="menu-label">订单管理</text>
+        <text class="menu-desc">处理订单</text>
+      </view>
+
+      <view class="menu-item" bindtap="goToCouponManage">
+        <view class="menu-icon-wrap">
+          <image class="menu-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRjVBNjIzIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIgOVY1YTIgMiAwIDAgMSAyLTJoMTZhMiAyIDAgMCAxIDIgMnY0Ij48L3BhdGg+PHBhdGggZD0iTTIgMTV2NGEyIDIgMCAwIDAgMiAyaDE2YTIgMiAwIDAgMCAyLTJ2LTQiPjwvcGF0aD48cGF0aCBkPSJNMTIgMnYyMCI+PC9wYXRoPjwvc3ZnPg==" mode="aspectFit"/>
+        </view>
+        <text class="menu-label">优惠券</text>
+        <text class="menu-desc">发放与管理</text>
+      </view>
+
+      <view class="menu-item" bindtap="goToPointsManage">
+        <view class="menu-icon-wrap">
+          <image class="menu-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOUI1OUI2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiPjwvY2lyY2xlPjxwYXRoIGQ9Ik0xMiA2djEyIj48L3BhdGg+PHBhdGggZD0iTTggMTBoOCI+PC9wYXRoPjxwYXRoIGQ9Ik04IDE0aDgiPjwvcGF0aD48L3N2Zz4=" mode="aspectFit"/>
+        </view>
+        <text class="menu-label">积分充值</text>
+        <text class="menu-desc">用户积分管理</text>
+      </view>
+
+      <view class="menu-item" bindtap="goToDeliveryManage">
+        <view class="menu-icon-wrap">
+          <image class="menu-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMUFCQzlDIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHJlY3QgeD0iMiIgeT0iNSIgd2lkdGg9IjE1IiBoZWlnaHQ9IjE0IiByeD0iMiI+PC9yZWN0PjxwYXRoIGQ9Ik0xNyA5aDRhMiAyIDAgMCAxIDIgMnY2YTIgMiAwIDAgMS0yIDJoLTIiPjwvcGF0aD48Y2lyY2xlIGN4PSI3IiBjeT0iMTkiIHI9IjIiPjwvY2lyY2xlPjxjaXJjbGUgY3g9IjE3IiBjeT0iMTkiIHI9IjIiPjwvY2lyY2xlPjwvc3ZnPg==" mode="aspectFit"/>
+        </view>
+        <text class="menu-label">配送管理</text>
+        <text class="menu-desc">打包与配送</text>
+      </view>
+
+      <view class="menu-item" bindtap="goToStatistics">
+        <view class="menu-icon-wrap">
+          <image class="menu-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzQ0OTVFIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PGxpbmUgeDE9IjE4IiB5MT0iMjAiIHgyPSIxOCIgeTI9IjEwIj48L2xpbmU+PGxpbmUgeDE9IjEyIiB5MT0iMjAiIHgyPSIxMiIgeTI9IjQiPjwvbGluZT48bGluZSB4MT0iNiIgeTE9IjIwIiB4Mj0iNiIgeTI9IjE0Ij48L2xpbmU+PC9zdmc+" mode="aspectFit"/>
+        </view>
+        <text class="menu-label">数据统计</text>
+        <text class="menu-desc">经营分析</text>
+      </view>
+
+      <view class="menu-item" bindtap="goToStockManage">
+        <view class="menu-icon-wrap">
+          <image class="menu-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRTY3RTIyIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTIxIDhhMiAyIDAgMCAwLTEtMS43M2wtNy00YTIgMiAwIDAgMC0yIDBsLTcgNEEyIDIgMCAwIDAgMyA4djhhMiAyIDAgMCAwIDEgMS43M2w3IDRhMiAyIDAgMCAwIDIgMGw3LTRBMiAyIDAgMCAwIDIxIDE2WiI+PC9wYXRoPjxwYXRoIGQ9Im0zLjMgNyA4LjcgNSA4LjctNSI+PC9wYXRoPjxwYXRoIGQ9Ik0xMiAyMlYxMiI+PC9wYXRoPjwvc3ZnPg==" mode="aspectFit"/>
+        </view>
+        <text class="menu-label">库存管理</text>
+        <text class="menu-desc">库存盘点</text>
+      </view>
+
+      <view class="menu-item" bindtap="goToUserManage">
+        <view class="menu-icon-wrap">
+          <image class="menu-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzQ5OERCIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTE3IDIxdi0yYTQgNCAwIDAgMC00LTRINWE0IDQgMCAwIDAtNCA0djIiPjwvcGF0aD48Y2lyY2xlIGN4PSI5IiBjeT0iNyIgcj0iNCI+PC9jaXJjbGU+PHBhdGggZD0iTTIzIDIxdi0yYTQgNCAwIDAgMC0zLTMuODciPjwvcGF0aD48cGF0aCBkPSJNMTYgMy4xM2E0IDQgMCAwIDEgMCA3Ljc1Ij48L3BhdGg+PC9zdmc+" mode="aspectFit"/>
+        </view>
+        <text class="menu-label">用户管理</text>
+        <text class="menu-desc">{{statistics.userCount}}位用户</text>
+      </view>
+
+      <view class="menu-item" bindtap="goToImageTools">
+        <view class="menu-icon-wrap">
+          <image class="menu-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOEI2MzQ3IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHJlY3QgeD0iMyIgeT0iMyIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE4IiByeD0iMiIgcnk9IjIiPjwvcmVjdD48Y2lyY2xlIGN4PSI4LjUiIGN5PSI4LjUiIHI9IjEuNSI+PC9jaXJjbGU+PHBhdGggZD0iTTIxIDE1bC01LTUgTTE4IDhsLTcgN2wtNC00LTYgNiI+PC9wYXRoPjwvc3ZnPg==" mode="aspectFit"/>
+        </view>
+        <text class="menu-label">图片工具</text>
+        <text class="menu-desc">压缩产品图片</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="quick-actions">
+    <view class="section-title">快捷操作</view>
+    <view class="quick-grid">
+      <view class="quick-item" bindtap="quickAddProduct">
+        <view class="quick-icon-wrap">
+          <image class="quick-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOEI2MzQ3IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiPjwvY2lyY2xlPjxsaW5lIHgxPSIxMiIgeTE9IjgiIHgyPSIxMiIgeTI9IjE2Ij48L2xpbmU+PGxpbmUgeDE9IjgiIHkxPSIxMiIgeDI9IjE2IiB5Mj0iMTIiPjwvbGluZT48L3N2Zz4=" mode="aspectFit"/>
+        </view>
+        <text class="quick-label">新增商品</text>
+        <text class="quick-desc">快速添加</text>
+      </view>
+
+      <view class="quick-item" bindtap="quickCreateCoupon">
+        <view class="quick-icon-wrap">
+          <image class="quick-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRjVBNjIzIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTE0IDJINmEyIDIgMCAwIDAtMiAydjE2YTIgMiAwIDAgMCAyIDJoMTJhMiAyIDAgMCAwIDItMlY4eiI+PC9wYXRoPjxwb2x5bGluZSBwb2ludHM9IjE0IDIgMTQgOCAyMCA4Ij48L3BvbHlsaW5lPjxwYXRoIGQ9Ik0xMiAxM2w0IDQtNCA0Ij48L3BhdGg+PC9zdmc+" mode="aspectFit"/>
+        </view>
+        <text class="quick-label">发放优惠券</text>
+        <text class="quick-desc">创建活动</text>
+      </view>
+
+      <view class="quick-item" bindtap="quickChargePoints">
+        <view class="quick-icon-wrap">
+          <image class="quick-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOUI1OUI2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiPjwvY2lyY2xlPjxwYXRoIGQ9Ik0xMiA2djEyIj48L3BhdGg+PHBhdGggZD0iTTggMTJoOCI+PC9wYXRoPjxwYXRoIGQ9Ik04IDE0aDgiPjwvcGF0aD48L3N2Zz4=" mode="aspectFit"/>
+        </view>
+        <text class="quick-label">积分充值</text>
+        <text class="quick-desc">用户积分</text>
+      </view>
+
+      <view class="quick-item" bindtap="goToStockWarning">
+        <view class="quick-icon-wrap">
+          <image class="quick-icon-svg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRTY3RTIyIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEwLjI5IDMuODZMMTcgOGEyIDIgMCAwIDEgMS43MyAybC0uNTUgOC4zM2EyIDIgMCAwIDEtMS45MiAxLjg0SDYuODdhMiAyIDAgMCAxLTEuOTItMS44NEw0LjQgMTBhMiAyIDAgMCAxIDEuNzMtMkwxMiAzLjg2YTIgMiAwIDAgMSAxLjI5IDB6Ij48L3BhdGg+PHBhdGggZD0iTTEyIDl2NCI+PC9wYXRoPjxwYXRoIGQ9Ik0xMiAxN2guMDEiPjwvcGF0aD48L3N2Zz4=" mode="aspectFit"/>
+        </view>
+        <text class="quick-label">库存预警</text>
+        <text class="quick-desc">查看补货</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近订单 -->
+  <view class="recent-orders">
+    <view class="section-header">
+      <text class="section-title">最近订单</text>
+      <text class="view-all" bindtap="goToOrderManage">查看全部</text>
+    </view>
+    <view class="order-list">
+      <view class="order-item" wx:for="{{recentOrders}}" wx:key="_id" bindtap="viewOrderDetail" data-id="{{item._id}}">
+        <view class="order-header">
+          <text class="order-no">{{item.orderNo}}</text>
+          <view class="order-status {{item.status}}">{{item.statusText}}</view>
+        </view>
+        <view class="order-body">
+          <image class="product-thumb" src="{{item.products[0].image || '/images/default-product.png'}}" mode="aspectFill"></image>
+          <view class="order-info">
+            <text class="product-name">{{item.products[0].name}} {{item.products.length > 1 ? '等' + item.products.length + '件商品' : ''}}</text>
+            <text class="order-time">{{item.createTime}}</text>
+          </view>
+          <view class="order-amount">
+            <text class="amount">¥{{item.payAmount}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="empty-state" wx:if="{{recentOrders.length === 0}}">
+        <text>暂无订单</text>
+      </view>
+    </view>
+  </view>
+</view>

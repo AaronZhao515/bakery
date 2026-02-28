@@ -1,0 +1,199 @@
+<!-- Admin 订单详情页 -->
+<view class="order-detail-container">
+  <!-- 页面头部 -->
+  <view class="page-header">
+    <view class="header-content">
+      <view class="back-btn" bindtap="onBack">
+        <text class="iconfont icon-back"></text>
+      </view>
+      <text class="header-title">订单详情</text>
+      <view class="header-right"></view>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading-wrap" wx:if="{{isLoading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 页面内容 -->
+  <scroll-view class="page-content" scroll-y wx:if="{{!isLoading && order}}">
+    <!-- 订单状态卡片 -->
+    <view class="status-card">
+      <view class="status-header {{order.statusClass}}">
+        <view class="status-icon-wrap">
+          <text class="status-icon">{{order.statusIcon}}</text>
+        </view>
+        <view class="status-info">
+          <text class="status-text">{{order.statusText}}</text>
+          <text class="status-desc">{{order.statusDesc}}</text>
+        </view>
+      </view>
+
+      <!-- 状态流程 -->
+      <view class="status-flow" wx:if="{{order.status >= 0}}">
+        <view class="flow-item {{order.status >= 1 ? 'active' : ''}}">
+          <view class="flow-dot"></view>
+          <text class="flow-text">已支付</text>
+        </view>
+        <view class="flow-line {{order.status >= 2 ? 'active' : ''}}"></view>
+        <view class="flow-item {{order.status >= 2 ? 'active' : ''}}">
+          <view class="flow-dot"></view>
+          <text class="flow-text">制作中</text>
+        </view>
+        <view class="flow-line {{order.status >= 3 ? 'active' : ''}}"></view>
+        <view class="flow-item {{order.status >= 3 ? 'active' : ''}}">
+          <view class="flow-dot"></view>
+          <text class="flow-text">配送中</text>
+        </view>
+        <view class="flow-line {{order.status >= 4 ? 'active' : ''}}"></view>
+        <view class="flow-item {{order.status >= 4 ? 'active' : ''}}">
+          <view class="flow-dot"></view>
+          <text class="flow-text">已完成</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 用户信息卡片 -->
+    <view class="info-card" wx:if="{{order.userInfo}}">
+      <view class="card-title">客户信息</view>
+      <view class="user-info">
+        <image class="user-avatar" src="{{order.userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+        <view class="user-detail">
+          <text class="user-name">{{order.userInfo.nickName || '未知用户'}}</text>
+          <text class="user-phone" wx:if="{{order.userInfo.phone}}">{{order.userInfo.phone}}</text>
+        </view>
+        <view class="contact-btn" bindtap="contactCustomer">
+          <text class="iconfont icon-phone"></text>
+          <text>联系</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 配送信息卡片 -->
+    <view class="info-card">
+      <view class="card-title">{{order.deliveryType === 1 ? '配送信息' : '自取信息'}}</view>
+      <view class="delivery-content">
+        <view class="info-row">
+          <text class="info-label">配送方式</text>
+          <text class="info-value">{{order.deliveryType === 1 ? '配送到家' : '到店自取'}}</text>
+        </view>
+        <view class="info-row" wx:if="{{order.deliveryType === 1 && order.address}}">
+          <text class="info-label">收货人</text>
+          <text class="info-value">{{order.address.name}} {{order.address.phone}}</text>
+        </view>
+        <view class="info-row" wx:if="{{order.deliveryType === 1 && order.address}}">
+          <text class="info-label">收货地址</text>
+          <text class="info-value">{{order.address.fullAddress || order.address.address}}</text>
+        </view>
+        <view class="info-row" wx:if="{{order.deliveryType === 0}}">
+          <text class="info-label">取餐时间</text>
+          <text class="info-value">{{order.pickupTime || '尽快取餐'}}</text>
+        </view>
+        <view class="info-row" wx:if="{{order.deliveryType === 0}}">
+          <text class="info-label">取餐地址</text>
+          <text class="info-value">小赵面食（暖心路123号）</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 商品列表卡片 -->
+    <view class="products-card">
+      <view class="card-title">商品信息</view>
+      <view class="product-list">
+        <view class="product-item" wx:for="{{order.products}}" wx:key="index">
+          <image class="product-image" src="{{item.image || '/images/default-product.png'}}" mode="aspectFill"></image>
+          <view class="product-info">
+            <text class="product-name">{{item.name}}</text>
+            <text class="product-spec" wx:if="{{item.spec}}">{{item.spec}}</text>
+            <view class="product-bottom">
+              <text class="product-price">¥{{item.price}}</text>
+              <text class="product-qty">x{{item.quantity}}</text>
+            </view>
+          </view>
+          <text class="product-total">¥{{item.totalPrice}}</text>
+        </view>
+      </view>
+      <view class="subtotal-row">
+        <text class="subtotal-label">共 {{order.totalQuantity || order.products.length}} 件商品</text>
+        <text class="subtotal-price">¥{{order.totalAmount}}</text>
+      </view>
+    </view>
+
+    <!-- 价格明细卡片 -->
+    <view class="price-card">
+      <view class="price-row">
+        <text class="price-label">商品总额</text>
+        <text class="price-value">¥{{order.totalAmount}}</text>
+      </view>
+      <view class="price-row" wx:if="{{order.deliveryFee > 0}}">
+        <text class="price-label">配送费</text>
+        <text class="price-value">¥{{order.deliveryFee}}</text>
+      </view>
+      <view class="price-row" wx:if="{{order.discountAmount > 0}}">
+        <text class="price-label">优惠金额</text>
+        <text class="price-value discount">-¥{{order.discountAmount}}</text>
+      </view>
+      <view class="price-row total">
+        <text class="price-label">实付金额</text>
+        <text class="price-value total">¥{{order.payAmount}}</text>
+      </view>
+    </view>
+
+    <!-- 订单信息卡片 -->
+    <view class="info-card">
+      <view class="card-title">订单信息</view>
+      <view class="info-row">
+        <text class="info-label">订单编号</text>
+        <view class="info-value-wrap">
+          <text class="info-value">{{order.orderNo}}</text>
+          <text class="copy-btn" bindtap="copyOrderNo">复制</text>
+        </view>
+      </view>
+      <view class="info-row">
+        <text class="info-label">下单时间</text>
+        <text class="info-value">{{order.createTimeStr}}</text>
+      </view>
+      <view class="info-row" wx:if="{{order.payTimeStr}}">
+        <text class="info-label">支付时间</text>
+        <text class="info-value">{{order.payTimeStr}}</text>
+      </view>
+      <view class="info-row" wx:if="{{order.payType}}">
+        <text class="info-label">支付方式</text>
+        <text class="info-value">{{order.payTypeText}}</text>
+      </view>
+      <view class="info-row" wx:if="{{order.remark}}">
+        <text class="info-label">订单备注</text>
+        <text class="info-value">{{order.remark}}</text>
+      </view>
+    </view>
+
+    <!-- 操作记录 -->
+    <view class="info-card" wx:if="{{order.remarks && order.remarks.length > 0}}">
+      <view class="card-title">处理记录</view>
+      <view class="remark-list">
+        <view class="remark-item" wx:for="{{order.remarks}}" wx:key="index">
+          <view class="remark-header">
+            <text class="remark-action">{{item.action}}</text>
+            <text class="remark-time">{{item.time}}</text>
+          </view>
+          <text class="remark-content" wx:if="{{item.content}}">{{item.content}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部间距 -->
+    <view class="bottom-spacer"></view>
+  </scroll-view>
+
+  <!-- 底部操作栏 -->
+  <view class="action-bar" wx:if="{{!isLoading && order}}">
+    <view class="action-content">
+      <button class="action-btn secondary" bindtap="onBack">返回</button>
+      <button class="action-btn primary" bindtap="processOrder" wx:if="{{order.status === 1 || order.status === 2 || order.status === 3}}">处理订单</button>
+      <button class="action-btn danger" bindtap="cancelOrder" wx:if="{{order.status <= 1}}">取消订单</button>
+    </view>
+  </view>
+</view>
+

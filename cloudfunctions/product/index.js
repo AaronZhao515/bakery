@@ -66,8 +66,10 @@ async function getList(data) {
   const finalPageSize = limit || pageSize
 
   // 构建查询条件
-  const where = {
-    status: status
+  // status 为 null 时查询所有状态（用于订单中获取产品图片，包括下架商品）
+  const where = {}
+  if (status !== null) {
+    where.status = status
   }
 
   if (categoryId) {

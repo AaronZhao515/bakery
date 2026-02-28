@@ -34,5 +34,25 @@
   "banners": {
     "read": true,
     "write": "auth != null && auth.isAdmin == true"
+  },
+  "pointsRecords": {
+    "read": "doc.userId == auth.openid || (auth != null && auth.isAdmin == true)",
+    "write": "auth != null && auth.isAdmin == true"
+  },
+  "pointHistory": {
+    "read": "doc.userId == auth.openid || (auth != null && auth.isAdmin == true)",
+    "write": "auth != null && auth.isAdmin == true"
+  },
+  "adminLogs": {
+    "read": "auth != null && auth.isAdmin == true",
+    "write": "auth != null && auth.isAdmin == true"
+  },
+  "deliverymen": {
+    "read": "auth != null && auth.isAdmin == true",
+    "write": "auth != null && auth.isAdmin == true"
+  },
+  "shopSettings": {
+    "read": true,
+    "write": "auth != null && auth.isAdmin == true"
   }
 }
